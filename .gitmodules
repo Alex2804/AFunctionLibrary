@@ -1,0 +1,3 @@
+[submodule "libs/APluginLibrary"]
+	path = libs/APluginLibrary
+	url = https://github.com/Alex2804/APluginLibrary

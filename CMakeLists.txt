@@ -3,6 +3,8 @@ project(AFunctionLibrary VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
+add_subdirectory(libs/APluginLibrary)
+
 set(HEADERS
         include/AFunctionLibrary/function.h)
 set(SOURCES
@@ -10,8 +12,8 @@ set(SOURCES
 
 add_library(AFunctionLibrary STATIC ${HEADERS} ${SOURCES})
 target_include_directories(AFunctionLibrary PUBLIC include)
+target_link_libraries(AFunctionLibrary APluginLibrary)
 
-set(AFunctionLibraryTest TRUE)
 if(${AFunctionLibraryTest})
     add_subdirectory(tests)
 endif()
