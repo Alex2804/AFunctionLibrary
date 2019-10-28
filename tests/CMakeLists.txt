@@ -35,6 +35,9 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
-add_executable(AFunctionLibraryTest src/function_test.cpp)
+set(SOURCES
+        src/function_test.cpp src/node_test.cpp src/syntaxtree_test.cpp)
+
+add_executable(AFunctionLibraryTest ${SOURCES})
 target_link_libraries(AFunctionLibraryTest AFunctionLibrary gtest_main)
 add_test(NAME AFunctionLibraryTest COMMAND AFunctionLibraryTest)
