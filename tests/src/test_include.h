@@ -11,6 +11,10 @@ namespace afl
         {
             int x;
             int y;
+
+            inline bool operator==(const Token& other) {
+                return x == other.x && y == other.y;
+            }
         };
         inline std::ostream &operator<<(std::ostream &os, const Token &t)
         {

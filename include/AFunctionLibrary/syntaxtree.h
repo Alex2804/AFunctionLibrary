@@ -1,6 +1,8 @@
 #ifndef AFUNCTIONLIBRARY_SYNTAXTREE_H
 #define AFUNCTIONLIBRARY_SYNTAXTREE_H
 
+#include "AFunctionLibrary/afunctionlibrary_export.h"
+
 #include <vector>
 #include <string>
 #include <memory>
@@ -8,13 +10,10 @@
 #include <sstream>
 #include <type_traits>
 
-#include "AFunctionLibrary/afunctionlibrary_export.h"
-
 namespace afl
 {
     template<typename T>
     class AFUNCTIONLIBRARY_EXPORT Node;
-
 
     template<typename T>
     class AFUNCTIONLIBRARY_EXPORT SyntaxTree
@@ -30,7 +29,7 @@ namespace afl
         SyntaxTree<T>& operator=(const SyntaxTree<T>& other);
         SyntaxTree<T>& operator=(SyntaxTree<T>&& other) noexcept;
 
-        std::string toString();
+        std::string toString() const;
 
         Node<T>* root;
     };
@@ -49,7 +48,7 @@ namespace afl
         Node<T>& operator=(const Node<T>& other);
         Node<T>& operator=(Node<T>&& other) noexcept;
 
-        std::string toString();
+        std::string toString() const;
 
         T value;
         std::vector<Node<T>*> children;

@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 
-#include "syntaxtree.h"
+#include "AFunctionLibrary/syntaxtree.h"
 
 namespace afl
 {
@@ -21,6 +21,7 @@ namespace afl
         Formatted,
         Optimized
     };
+
     enum class AFUNCTIONLIBRARY_EXPORT SyntaxTreeFormatState
     {
         Formatted,
@@ -40,8 +41,8 @@ namespace afl
         Function& operator=(Function&& other) noexcept;
 
         void setRawFunctionString(std::string s);
-        std::string getFunctionString(const FunctionFormatState& ffs = FunctionFormatState::Raw);
         bool format(const FunctionFormatState& ffs);
+        std::string getFunctionString(const FunctionFormatState& ffs = FunctionFormatState::Raw);
 
         bool createSyntaxTree(const SyntaxTreeFormatState& stfs);
 

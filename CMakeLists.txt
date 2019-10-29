@@ -7,10 +7,12 @@ add_subdirectory(libs/APluginLibrary)
 
 set(HEADERS
         include/AFunctionLibrary/function.h
-        include/AFunctionLibrary/syntaxtree.h)
+        include/AFunctionLibrary/syntaxtree.h
+        include/AFunctionLibrary/token.h)
 set(SOURCES
         src/function.cpp
-        src/syntaxtree.cpp include/AFunctionLibrary/implementation/syntaxtree.tpp)
+        src/syntaxtree.cpp include/AFunctionLibrary/implementation/syntaxtree.tpp
+        include/AFunctionLibrary/implementation/token.tpp)
 
 add_library(AFunctionLibrary STATIC ${HEADERS} ${SOURCES})
 include(GenerateExportHeader)

@@ -77,7 +77,7 @@ afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(SyntaxTree<T> &&other) noexcep
 }
 
 template<typename T>
-std::string afl::SyntaxTree<T>::toString()
+std::string afl::SyntaxTree<T>::toString() const
 {
     return root == nullptr ? "" : root->toString();
 }
@@ -152,7 +152,7 @@ afl::Node<T> &afl::Node<T>::operator=(Node<T> &&other) noexcept
 }
 
 template<typename T>
-std::string afl::Node<T>::toString()
+std::string afl::Node<T>::toString() const
 {
     const char* chars[] = {"\u007c", "\u251c", "\u250c", "\u2500", "\u253c", "\u252c", "\u2524", "\u2510", "\u2534"};
     std::vector<std::string> lines = detail::toStringHelper(this, chars).first;

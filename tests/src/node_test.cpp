@@ -1,21 +1,76 @@
 #include "gtest/gtest.h"
 
+#include <sstream>
+
 #include "test_include.h"
+
+GTEST_TEST(Node_Test, toString_ostreamOperator)
+{
+    auto tokenNode = new afl::Node<afl::test::Token>({5, 6});
+    tokenNode->value = afl::test::Token({5, 6});
+    ASSERT_EQ(tokenNode->toString(), "(5, 6)");
+    std::stringstream stringstream;
+    stringstream << *tokenNode;
+    ASSERT_EQ(stringstream.str(), "(5, 6)");
+    delete tokenNode;
+
+    auto intNode = new afl::Node<int>(42);
+    intNode->value = 42;
+    ASSERT_EQ(intNode->toString(), "42");
+    stringstream = std::stringstream();
+    stringstream << *intNode;
+    ASSERT_EQ(stringstream.str(), "42");
+    delete intNode;
+
+    auto tokenNode1 = new afl::Node<afl::test::Token>({321, 123});
+    auto tokenNode2 = new afl::Node<afl::test::Token>({227, 953});
+    std::vector<afl::Node<afl::test::Token>*> tokenChildren = {tokenNode1, tokenNode2};
+    tokenNode = new afl::Node<afl::test::Token>({5123, 690});
+    tokenNode->value = afl::test::Token({5, 6});
+    tokenNode->children = tokenChildren;
+    ASSERT_EQ(tokenNode->toString(), "        (5, 6)         \n     \xE2\x94\x8C\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\xB4\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x90    \n(321, 123)   (227, 953)");
+    stringstream = std::stringstream();
+    stringstream << *tokenNode;
+    ASSERT_EQ(stringstream.str(), "        (5, 6)         \n     \xE2\x94\x8C\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\xB4\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x80\xE2\x94\x90    \n(321, 123)   (227, 953)");
+    delete tokenNode;
+
+    auto intNode1 = new afl::Node<int>(321);
+    auto intNode2 = new afl::Node<int>(227);
+    std::vector<afl::Node<int>*> intChildren = {intNode1, intNode2};
+    intNode = new afl::Node<int>(432);
+    intNode->value = 432;
+    intNode->children = intChildren;
+    ASSERT_EQ(intNode->toString(), "   432   \n \xE2\x94\x8C\xE2\x94\x80\xE2\x94\x80\xE2\x94\xB4\xE2\x94\x80\xE2\x94\x80\xE2\x94\x90 \n321   227");
+    stringstream = std::stringstream();
+    stringstream << *intNode;
+    ASSERT_EQ(stringstream.str(), "   432   \n \xE2\x94\x8C\xE2\x94\x80\xE2\x94\x80\xE2\x94\xB4\xE2\x94\x80\xE2\x94\x80\xE2\x94\x90 \n321   227");
+    delete intNode;
+}
 
 GTEST_TEST(Node_Test, constructors)
 {
     auto tokenNode = new afl::Node<afl::test::Token>({5, 6});
-    auto intNode = new afl::Node<int>(42);
+    ASSERT_TRUE(tokenNode->value == afl::test::Token({5, 6}));
+    ASSERT_EQ(tokenNode->children.size(), 0);
     ASSERT_EQ(tokenNode->toString(), "(5, 6)");
-    ASSERT_EQ(intNode->toString(), "42");
     delete tokenNode;
+
+    auto intNode = new afl::Node<int>(42);
+    ASSERT_EQ(intNode->value, 42);
+    ASSERT_EQ(tokenNode->children.size(), 0);
+    ASSERT_EQ(intNode->toString(), "42");
     delete intNode;
 
     tokenNode = afl::test::createTokenNode(42, 5, 6, 4);
-    intNode = afl::test::createIntNode(42, -1, 1, 4);
+    ASSERT_TRUE(tokenNode->value == afl::test::Token({42, -42}));
+    ASSERT_EQ(tokenNode->children.size(), 2);
     ASSERT_EQ(tokenNode->toString(), afl::test::expectedToken);
-    ASSERT_EQ(intNode->toString(), afl::test::expectedInt);
     delete tokenNode;
+
+    intNode = afl::test::createIntNode(42, -1, 1, 4);
+    ASSERT_EQ(intNode->value, 42);
+    ASSERT_EQ(intNode->children.size(), 3);
+    ASSERT_EQ(intNode->toString(), afl::test::expectedInt);
     delete intNode;
 }
 
