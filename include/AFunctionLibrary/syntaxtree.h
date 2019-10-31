@@ -5,10 +5,8 @@
 
 #include <vector>
 #include <string>
-#include <memory>
-#include <utility>
-#include <sstream>
-#include <type_traits>
+
+#include "AFunctionLibrary/utility.h"
 
 namespace afl
 {
@@ -34,6 +32,9 @@ namespace afl
         Node<T>* root;
     };
 
+    template<typename T>
+    std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& s);
+
 
     template<typename T>
     class AFUNCTIONLIBRARY_EXPORT Node
@@ -54,13 +55,8 @@ namespace afl
         std::vector<Node<T>*> children;
     };
 
-
-    template<typename T>
-    std::string stringify(T t);
     template<typename T>
     std::ostream& operator<<(std::ostream& os, const Node<T>& n);
-    template<typename T>
-    std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& s);
 }
 
 #include "implementation/syntaxtree.tpp"

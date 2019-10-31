@@ -7,23 +7,6 @@ namespace afl
     {
         template<typename T>
         inline std::pair<std::vector<std::string>, size_t> toStringHelper(const Node <T> *node, const char *chars[]);
-
-
-        template<template<class...> class Z, class, class...>
-        struct can_apply : std::false_type {};
-        template<template<class...> class Z, class...Ts>
-        struct can_apply<Z, std::void_t<Z<Ts...>>, Ts...> : std::true_type {};
-
-        template<class T>
-        using to_string_t = decltype(std::to_string(std::declval<T>()));
-        template<class T>
-        using has_to_string = can_apply<to_string_t, void, T>;
-
-
-        template<typename T>
-        std::string stringify(T t, std::true_type);
-        template<typename T>
-        std::string stringify(T t, std::false_type);
     }
 }
 
@@ -97,8 +80,7 @@ afl::Node<T>::Node(T value)
 {}
 template<typename T>
 afl::Node<T>::Node(T value, std::vector<Node<T>*> children)
-    : value(std::move(value))
-    , children(std::move(children))
+    : value(std::move(value)), children(std::move(children))
 {}
 template<typename T>
 afl::Node<T>::Node(const Node<T> &other)
@@ -171,23 +153,6 @@ std::ostream& afl::operator<<(std::ostream& os, const Node<T>& n)
 {
     os << n.toString();
     return os;
-}
-
-
-// ==================================================== stringify =================================================== //
-
-
-template<typename T>
-std::string afl::detail::stringify(T t, std::true_type /*can to string*/){
-    return std::to_string(t);
-}
-template<typename T>
-std::string afl::detail::stringify(T t, std::false_type /*cannot to string*/){
-    return static_cast<std::ostringstream&>(std::ostringstream() << t).str();
-}
-template<typename T>
-std::string afl::stringify(T t){
-    return afl::detail::stringify(t, detail::has_to_string<T>{});
 }
 
 

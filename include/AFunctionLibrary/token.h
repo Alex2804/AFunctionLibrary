@@ -3,10 +3,6 @@
 
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
-#include <string>
-#include <vector>
-#include <memory>
-
 namespace afl
 {
     enum class AFUNCTIONLIBRARY_EXPORT TokenType
@@ -28,7 +24,7 @@ namespace afl
     };
 
     template<typename T>
-    class Token
+    class AFUNCTIONLIBRARY_EXPORT Token
     {
     public:
         Token();

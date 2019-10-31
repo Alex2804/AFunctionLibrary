@@ -4,9 +4,9 @@
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
 #include <string>
-#include <memory>
 
 #include "AFunctionLibrary/syntaxtree.h"
+#include "AFunctionLibrary/token.h"
 
 namespace afl
 {
@@ -45,11 +45,12 @@ namespace afl
         std::string getFunctionString(const FunctionFormatState& ffs = FunctionFormatState::Raw);
 
         bool createSyntaxTree(const SyntaxTreeFormatState& stfs);
+        SyntaxTree<Token<std::string>> getSyntaxTree(const SyntaxTreeFormatState& stfs = SyntaxTreeFormatState::Formatted);
 
         double* calculate(double* values, int count, bool createNew = true);
 
     private:
-        std::unique_ptr<detail::FunctionPrivate> d_ptr;
+        detail::FunctionPrivate* d_ptr;
     };
 }
 

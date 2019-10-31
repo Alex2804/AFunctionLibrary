@@ -1,4 +1,4 @@
-#include "AFunctionLibrary/syntaxtree.h"
+#include "AFunctionLibrary/utility.h"
 
 template<>
 std::string afl::stringify(char t)
