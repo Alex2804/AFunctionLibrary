@@ -4,7 +4,7 @@
 
 #include "test_include.h"
 
-GTEST_TEST(Node_Test, toString_ostreamOperator)
+GTEST_TEST(Node_Test, toString_ostream_operator)
 {
     auto tokenNode = new afl::Node<afl::test::Token>({5, 6});
     tokenNode->value = afl::test::Token({5, 6});

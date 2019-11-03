@@ -4,35 +4,47 @@
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
 #include <string>
+#include <memory>
+#include <vector>
 
 #include "AFunctionLibrary/syntaxtree.h"
 #include "AFunctionLibrary/token.h"
 
 namespace afl
 {
-    namespace detail
-    {
-        struct AFUNCTIONLIBRARY_NO_EXPORT FunctionPrivate;
-    }
+    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<std::string>>> getTokens(const std::vector<std::string>& stringTokens);
+    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<std::string>>> parseTokens(const std::string& string);
 
-    enum class AFUNCTIONLIBRARY_EXPORT FunctionFormatState
+    template<typename T>
+    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<T>>> shuntingYard(const std::vector<std::shared_ptr<Token<T>>>& tokens);
+
+    template<typename T>
+    AFUNCTIONLIBRARY_EXPORT SyntaxTree<std::shared_ptr<Token<T>>> generateSyntaxTree(const std::vector<std::shared_ptr<Token<T>>>& tokens);
+    AFUNCTIONLIBRARY_EXPORT SyntaxTree<std::shared_ptr<Token<std::string>>> generateSyntaxTree(const std::string& string);
+
+    enum class FunctionFormatState
     {
         Raw,
         Formatted,
         Optimized
     };
 
-    enum class AFUNCTIONLIBRARY_EXPORT SyntaxTreeFormatState
+    enum class SyntaxTreeFormatState
     {
         Formatted,
         Optimized
     };
 
+    namespace detail
+    {
+        struct AFUNCTIONLIBRARY_NO_EXPORT FunctionPrivate;
+    }
+
     class AFUNCTIONLIBRARY_EXPORT Function
     {
     public:
         Function();
-        explicit Function(std::string s);
+        explicit Function(std::string string);
         Function(const Function& other);
         Function(Function&& other) noexcept;
         virtual ~Function();
@@ -40,12 +52,12 @@ namespace afl
         Function& operator=(const Function& other);
         Function& operator=(Function&& other) noexcept;
 
-        void setRawFunctionString(std::string s);
-        bool format(const FunctionFormatState& ffs);
-        std::string getFunctionString(const FunctionFormatState& ffs = FunctionFormatState::Raw);
+        void setRawFunctionString(std::string string);
+        bool format(const FunctionFormatState& formatState);
+        std::string getFunctionString(const FunctionFormatState& formatState = FunctionFormatState::Raw);
 
-        bool createSyntaxTree(const SyntaxTreeFormatState& stfs);
-        SyntaxTree<Token<std::string>> getSyntaxTree(const SyntaxTreeFormatState& stfs = SyntaxTreeFormatState::Formatted);
+        bool createSyntaxTree(const SyntaxTreeFormatState& formatState);
+        SyntaxTree<Token<std::string>> getSyntaxTree(const SyntaxTreeFormatState& formatState = SyntaxTreeFormatState::Formatted);
 
         double* calculate(double* values, int count, bool createNew = true);
 

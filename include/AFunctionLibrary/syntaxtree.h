@@ -33,7 +33,7 @@ namespace afl
     };
 
     template<typename T>
-    std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& s);
+    std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& tree);
 
 
     template<typename T>
@@ -56,7 +56,7 @@ namespace afl
     };
 
     template<typename T>
-    std::ostream& operator<<(std::ostream& os, const Node<T>& n);
+    std::ostream& operator<<(std::ostream& os, const Node<T>& node);
 }
 
 #include "implementation/syntaxtree.tpp"

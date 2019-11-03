@@ -9,12 +9,14 @@ set(HEADERS
         include/AFunctionLibrary/function.h
         include/AFunctionLibrary/syntaxtree.h
         include/AFunctionLibrary/token.h
-        include/AFunctionLibrary/utility.h)
+        include/AFunctionLibrary/utility.h
+        src/private/stringtokenmanager.h)
 set(SOURCES
         src/function.cpp
         include/AFunctionLibrary/implementation/syntaxtree.tpp
         include/AFunctionLibrary/implementation/token.tpp
-        src/utility.cpp include/AFunctionLibrary/implementation/utility.tpp)
+        src/utility.cpp include/AFunctionLibrary/implementation/utility.tpp
+        src/private/stringtokenmanager.cpp)
 
 add_library(AFunctionLibrary STATIC ${HEADERS} ${SOURCES})
 include(GenerateExportHeader)

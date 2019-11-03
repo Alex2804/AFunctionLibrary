@@ -65,9 +65,9 @@ std::string afl::SyntaxTree<T>::toString() const
     return root == nullptr ? "" : root->toString();
 }
 template<typename T>
-std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& s)
+std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 {
-    os << s.toString();
+    os << tree.toString();
     return os;
 }
 
@@ -149,9 +149,9 @@ std::string afl::Node<T>::toString() const
     return string;
 }
 template<typename T>
-std::ostream& afl::operator<<(std::ostream& os, const Node<T>& n)
+std::ostream& afl::operator<<(std::ostream& os, const Node<T>& node)
 {
-    os << n.toString();
+    os << node.toString();
     return os;
 }
 
