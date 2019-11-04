@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/Alex2804/APluginLibrary
+	branch = master
+	commit = 076165c064aba0fe1d53dfc6ef860b1e26a1032f
+	parent = 8c115df6aa4dc7f0c476c1c9d2f652241284b9c6
+	method = merge
+	cmdver = 0.4.0
