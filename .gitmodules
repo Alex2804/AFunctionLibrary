@@ -1,6 +1,0 @@
-[submodule "libs/APluginLibrary"]
-	path = libs/APluginLibrary
-	url = https://github.com/Alex2804/APluginLibrary
-[submodule "libs/libtcc"]
-	path = libs/libtcc
-	url = https://github.com/Alex2804/libtcc-cmake

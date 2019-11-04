@@ -7,8 +7,7 @@
 #include <memory>
 #include <string>
 #include <mutex>
-
-#include "APluginLibrary/pluginmanager.h"
+#include <vector>
 
 #include "AFunctionLibrary/token.h"
 
@@ -19,15 +18,24 @@ namespace afl
         class AFUNCTIONLIBRARY_NO_EXPORT StringTokenManager
         {
         public:
-            static std::shared_ptr<Token<std::string>> getToken(std::string value, bool createIfNotExist = false);
-            static void removeToken(const std::string& value);
-            static void addToken(std::unique_ptr<Token<std::string>> token);
+            StringTokenManager() = default;
+            StringTokenManager(const StringTokenManager& other) = default;
+            StringTokenManager(StringTokenManager&& other) = default;
+            ~StringTokenManager() = default;
 
-            static std::unordered_map<std::string, std::shared_ptr<Token<std::string>>> getTokens();
+            StringTokenManager& operator=(const StringTokenManager& other) = default;
+            StringTokenManager& operator=(StringTokenManager&& other) = default;
+
+            std::shared_ptr<Token<std::string>> getToken(std::string value, bool createIfNotExist = false);
+            static std::unique_ptr<Token<std::string>> createToken(std::string value);
+
+            void addToken(std::unique_ptr<Token<std::string>> token);
+            void removeToken(const std::string& value);
+
+            std::unordered_map<std::string, std::shared_ptr<Token<std::string>>> getTokens() const;
 
         private:
-            static std::unordered_map<std::string, std::shared_ptr<Token<std::string>>> tokens;
-            static std::mutex mutex;
+            std::unordered_map<std::string, std::shared_ptr<Token<std::string>>> tokens;
         };
     }
 }
