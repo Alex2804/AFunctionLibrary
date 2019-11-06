@@ -1,5 +1,5 @@
-#ifndef APLUGINLIBRARY_FEATUREMANAGER_H
-#define APLUGINLIBRARY_FEATUREMANAGER_H
+#ifndef APLUGINSDK_FEATUREMANAGER_H
+#define APLUGINSDK_FEATUREMANAGER_H
 
 #include <vector>
 
@@ -16,7 +16,7 @@ namespace apl
             ~FeatureManager();
 
             static PluginFeatureInfo *registerFeature(const char *featureGroup, const char *featureName,
-                                                      const char *returnType, const char *argumentList,
+                                                      const char *returnType, const char *parameterList,
                                                       void *functionPointer);
             static size_t getFeatureCount();
             static const PluginFeatureInfo *getFeatureInfo(size_t i);
@@ -39,4 +39,4 @@ namespace apl
 # include "featuremanager.cpp"
 #endif
 
-#endif //APLUGINLIBRARY_FEATUREMANAGER_H
+#endif //APLUGINSDK_FEATUREMANAGER_H
