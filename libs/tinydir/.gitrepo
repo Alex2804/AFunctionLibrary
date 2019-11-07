@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/cxong/tinydir
+	branch = master
+	commit = 5d907978e1e6f2a3b0ad8d51fa186d6fda863ea6
+	parent = 3206831196ba86a82ce8e23492a972ef3abdfd5d
+	method = merge
+	cmdver = 0.4.0
