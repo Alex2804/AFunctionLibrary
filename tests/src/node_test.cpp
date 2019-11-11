@@ -57,7 +57,7 @@ GTEST_TEST(Node_Test, constructors)
 
     auto intNode = new afl::Node<int>(42);
     ASSERT_EQ(intNode->value, 42);
-    ASSERT_EQ(tokenNode->children.size(), 0);
+    ASSERT_EQ(intNode->children.size(), 0);
     ASSERT_EQ(intNode->toString(), "42");
     delete intNode;
 

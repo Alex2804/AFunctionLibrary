@@ -36,7 +36,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 set(SOURCES
-        src/function_test.cpp src/node_test.cpp src/syntaxtree_test.cpp src/token_test.cpp src/stringtokenmanager_test.cpp)
+        src/function_test.cpp src/node_test.cpp src/syntaxtree_test.cpp src/token_test.cpp src/utility_test.cpp)
 
 add_executable(AFunctionLibraryTest ${SOURCES})
 target_link_libraries(AFunctionLibraryTest AFunctionLibrary gtest_main)
