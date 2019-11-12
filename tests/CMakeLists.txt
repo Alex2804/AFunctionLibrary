@@ -35,8 +35,10 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
+file(COPY res/extensions DESTINATION ${CMAKE_BINARY_DIR})
+
 set(SOURCES
-        src/function_test.cpp src/node_test.cpp src/syntaxtree_test.cpp src/token_test.cpp src/utility_test.cpp)
+        src/node_test.cpp src/syntaxtree_test.cpp src/token_test.cpp src/utility_test.cpp src/resourceparser_test.cpp)
 
 add_executable(AFunctionLibraryTest ${SOURCES})
 target_link_libraries(AFunctionLibraryTest AFunctionLibrary gtest_main)

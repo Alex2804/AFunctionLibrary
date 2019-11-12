@@ -4,22 +4,7 @@
 
 #include "AFunctionLibrary/utility.h"
 
-namespace afl
-{
-    namespace test
-    {
-        struct Date
-        {
-            int day, month, year;
-        };
-
-        std::ostream& operator<<(std::ostream& os, const Date& dt)
-        {
-            os << dt.day << '.' << dt.month << '.' << dt.year;
-            return os;
-        }
-    }
-}
+#include "test_include.h"
 
 GTEST_TEST(Utility_Test, stringify_templateSpecializations)
 {
@@ -66,9 +51,9 @@ GTEST_TEST(Utility_Test, stringify_toStringSupport)
 }
 GTEST_TEST(Utility_Test, stringify_ostreamOperator)
 {
-    ASSERT_EQ(afl::stringify<afl::test::Date>({18, 3, 1998}), "18.3.1998");
-    ASSERT_EQ(afl::stringify<afl::test::Date>({6, 6, 2000}), "6.6.2000");
-    ASSERT_EQ(afl::stringify<afl::test::Date>({3, 6, 2005}), "3.6.2005");
+    ASSERT_EQ(afl::stringify<afl::test::Token>({18, 3}), "(18, 3)");
+    ASSERT_EQ(afl::stringify<afl::test::Token>({6, 6}), "(6, 6)");
+    ASSERT_EQ(afl::stringify<afl::test::Token>({3, 6}), "(3, 6)");
 }
 
 GTEST_TEST(Utility_Test, splitAtSpaces)

@@ -1,0 +1,42 @@
+<extension>
+    <token>
+        <!-- Operators (test inheritance) -->
+        <token>
+            <type>operator</type>
+            <token>
+                <associativity>left</associativity>
+                <token>
+                    <precedence>1</precedence>
+                    <values>
+                        +
+                        -
+                    </values>
+                </token>
+                <token values="* /">
+                    <precedence>2</precedence>
+                </token>
+            </token>
+            <token associativity="right" values="^" precedence="2"> <!-- precedence and associativity of header should be relevant and 2 lines below should be ignored -->
+                <precedence>2230</precedence>
+                <associativity>none</associativity>
+            </token>
+        </token>
+        <!-- Functions -->
+        <token>
+            <this_should_be_ignored>some sort of creative text</this_should_be_ignored>
+            <type>function</type>
+            <precedence>235</precedence> <!-- This line should be overwritten by the line below -->
+            <precedence>-1</precedence>
+            <token>
+                <parameter_count>1</parameter_count>
+                <token>
+                    <alias>absolute</alias> <!-- aliases without extra type should get interpreted as string -->
+                    <alias type="string">absolute absolute2</alias> <!-- "absolute" should be the same as the line above and must be ignored -->
+                    <alias type="regex">.*absolute.*</alias>
+                    <alias type="weired_type">stupid_absolute</alias> <!-- unknown types should get ignored -->
+                    <value>abs</value>
+                </token>
+            </token>
+        </token>
+    </token>
+</extension>

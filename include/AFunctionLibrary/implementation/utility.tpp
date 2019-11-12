@@ -32,6 +32,12 @@ template<typename T>
 std::string afl::detail::stringify(T t, std::false_type /*cannot to string*/){
     return static_cast<std::ostringstream&>(std::ostringstream() << t).str();
 }
+/**
+ * Converts @p t into an string with either std::to_string if possible or the ostream operator (operator<<)
+ * @tparam T The type of @p t
+ * @param t The value which should be converted to a string
+ * @return @p t converted to a string
+ */
 template<typename T>
 std::string afl::stringify(T t){
     return afl::detail::stringify(t, detail::has_to_string<T>{});

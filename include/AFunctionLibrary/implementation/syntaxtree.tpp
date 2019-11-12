@@ -77,6 +77,7 @@ std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 template<typename T>
 afl::Node<T>::Node(T value)
         : value(std::move(value))
+        , children(std::vector<Node<T>*>())
 {}
 template<typename T>
 afl::Node<T>::Node(T value, std::vector<Node<T>*> children)

@@ -3,26 +3,10 @@
 
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
+#include "AFunctionLibrary/implementation/cstringtoken.h"
+
 namespace afl
 {
-    enum class AFUNCTIONLIBRARY_EXPORT TokenType
-    {
-        Constant,
-        Number,
-        Operator,
-        Function,
-        BracketOpen,
-        BracketClose,
-        ArgumentDelimiter
-    };
-
-    enum class AFUNCTIONLIBRARY_EXPORT TokenAssociativity
-    {
-        None,
-        Left,
-        Right
-    };
-
     template<typename T>
     class AFUNCTIONLIBRARY_EXPORT Token
     {
@@ -42,8 +26,8 @@ namespace afl
 
         T value;
         TokenType type;
-        int precedence;
-        int parameterCount;
+        size_t precedence;
+        size_t parameterCount;
         TokenAssociativity associativity;
     };
 }
