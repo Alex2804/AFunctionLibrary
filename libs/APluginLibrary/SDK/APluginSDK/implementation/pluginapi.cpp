@@ -2,6 +2,15 @@
 # include "../pluginapi.h"
 #endif
 
+void* apl::detail::allocatePluginMemory(size_t bytes)
+{
+    return malloc(bytes);
+}
+void apl::detail::freePluginMemory(void *ptr)
+{
+    free(ptr);
+}
+
 size_t apl::detail::getPluginFeatureCount()
 {
     return apl::detail::FeatureManager::getFeatureCount();
