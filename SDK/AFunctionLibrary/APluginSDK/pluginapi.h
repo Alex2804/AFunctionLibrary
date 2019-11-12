@@ -1,5 +1,7 @@
-#ifndef APLUGINLIBRARY_PLUGINAPI_H
-#define APLUGINLIBRARY_PLUGINAPI_H
+#ifndef APLUGINSDK_PLUGINAPI_H
+#define APLUGINSDK_PLUGINAPI_H
+
+#include <malloc.h>
 
 #include "implementation/featuremanager.h"
 #include "implementation/macros.h"
@@ -10,13 +12,16 @@ namespace apl
     {
         extern "C"
         {
-            APLUGINLIBRARY_EXPORT size_t getPluginFeatureCount();
-            APLUGINLIBRARY_EXPORT const apl::PluginFeatureInfo* getPluginFeatureInfo(size_t index);
-            APLUGINLIBRARY_EXPORT const apl::PluginFeatureInfo * const* getPluginFeatureInfos();
+            APLUGINSDK_EXPORT void* allocatePluginMemory(size_t size);
+            APLUGINSDK_EXPORT void freePluginMemory(void* ptr);
 
-            APLUGINLIBRARY_EXPORT size_t getPluginClassCount();
-            APLUGINLIBRARY_EXPORT const apl::PluginClassInfo* getPluginClassInfo(size_t index);
-            APLUGINLIBRARY_EXPORT const apl::PluginClassInfo* const* getPluginClassInfos();
+            APLUGINSDK_EXPORT size_t getPluginFeatureCount();
+            APLUGINSDK_EXPORT const apl::PluginFeatureInfo* getPluginFeatureInfo(size_t index);
+            APLUGINSDK_EXPORT const apl::PluginFeatureInfo * const* getPluginFeatureInfos();
+
+            APLUGINSDK_EXPORT size_t getPluginClassCount();
+            APLUGINSDK_EXPORT const apl::PluginClassInfo* getPluginClassInfo(size_t index);
+            APLUGINSDK_EXPORT const apl::PluginClassInfo* const* getPluginClassInfos();
         }
     }
 }
@@ -69,4 +74,4 @@ namespace apl
 # include "implementation/pluginapi.cpp"
 #endif
 
-#endif //APLUGINLIBRARY_PLUGINAPI_H
+#endif //APLUGINSDK_PLUGINAPI_H

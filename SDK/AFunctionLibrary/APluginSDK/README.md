@@ -18,7 +18,7 @@ For each registered feature there is one PluginFeatureInfo object in the plugin.
 
 Features can be registered with the following macro:
 
-    A_PLUGIN_REGISTER_FEATURE(returnType, featureGroup, featureName, [argumentList]...)
+    A_PLUGIN_REGISTER_FEATURE(returnType, featureGroup, featureName, [parameterList]...)
     {
         // function body
     }
@@ -27,7 +27,7 @@ for example:
 
     #include "APluginLibrary/pluginapi.h" // this must be included
     
-    A_PLUGIN_REGISTER_FEATURE(int, group1, feature1, int x1, double y, const char\* x2)
+    A_PLUGIN_REGISTER_FEATURE(int, group1, feature1, int x1, double y, const char* x2)
     {
         std::cout << x2 << std::end;
         return x1 + y;
