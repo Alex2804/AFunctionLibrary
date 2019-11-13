@@ -11,6 +11,7 @@ set(HEADERS
         include/AFunctionLibrary/syntaxtree.h
         include/AFunctionLibrary/token.h
         include/AFunctionLibrary/utility.h
+        src/private/resourcemanager.h
         src/private/resourceparser.h
         src/private/tokenextras.h)
 set(SOURCES
@@ -18,9 +19,12 @@ set(SOURCES
         include/AFunctionLibrary/implementation/syntaxtree.tpp
         include/AFunctionLibrary/implementation/token.tpp
         src/utility.cpp include/AFunctionLibrary/implementation/utility.tpp
+        src/private/resourcemanager.cpp
         src/private/resourceparser.cpp)
 
 set(SDK_HEADERS
+        SDK/AFunctionLibrary/implementation/definitions.h
+        SDK/AFunctionLibrary/implementation/macros.h
         SDK/AFunctionLibrary/implementation/cstringtoken.h)
 set(SDK_SOURCES)
 

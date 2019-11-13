@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_set>
 
 #include "pugixml.hpp"
 
@@ -25,9 +26,11 @@ namespace afl
         template<typename T>
         void parseTokenField(const pugi::xml_node& node, const std::string& fieldName, const T& fieldValue,
                              TokenBundle<std::string>& bundle,
-                             std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens);
+                             std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens,
+                             std::unordered_set<std::string>& valueSet);
         void parseTokensRecursive(const pugi::xml_node& node, TokenBundle<std::string> bundle,
-                                  std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens);
+                                  std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens,
+                                  std::unordered_set<std::string>& valueSet);
     }
 }
 

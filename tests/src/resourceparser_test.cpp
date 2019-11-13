@@ -52,9 +52,9 @@ void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::Token
             {"^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right},
             {"abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None}
     };
-    afl::detail::TokenAliasType stringAlias = afl::detail::TokenAliasType::String, regexAlias = afl::detail::TokenAliasType::Regex;
+    afl::TokenAliasType stringAlias = afl::TokenAliasType::String, regexAlias = afl::TokenAliasType::Regex;
     //                     count, types, aliases.size(), aliases
-    std::vector<std::tuple<size_t, std::vector<afl::detail::TokenAliasType>, std::vector<size_t>, std::vector<std::vector<std::string>>>> aliases = {
+    std::vector<std::tuple<size_t, std::vector<afl::TokenAliasType>, std::vector<size_t>, std::vector<std::vector<std::string>>>> aliases = {
             {0, {}, {}, {{}}},
             {0, {}, {}, {{}}},
             {0, {}, {}, {{}}},
@@ -85,22 +85,23 @@ void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::Token
 
 GTEST_TEST(ResourceParser_Test, parseTokensRecursive)
 {
-    std::string path = "../extensions/test/tokenSample.xml";
+    std::string path = "res/extensions/test/tokenSample.xml";
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(path.c_str());
     ASSERT_TRUE(result);
     std::vector<std::shared_ptr<afl::detail::TokenWrapper<std::string>>> tokensVector;
     afl::detail::TokenBundle<std::string> defaultBundle;
     defaultBundle.token = afl::Token<std::string>("", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
-    defaultBundle.aliases = std::vector<afl::detail::TokenAliases>();
-    afl::detail::parseTokensRecursive(doc.first_child().first_child(), defaultBundle, tokensVector);
+    defaultBundle.aliases = std::vector<afl::TokenAliases<std::string>>();
+    std::unordered_set<std::string> valueSet;
+    afl::detail::parseTokensRecursive(doc.first_child().first_child(), defaultBundle, tokensVector, valueSet);
     testTokenParsingResult(tokensVector);
 }
 
 
 GTEST_TEST(ResourceParser_Test, parseExtensionRecursive_Tokens)
 {
-    std::string path = "../extensions/test/tokenSample.xml";
+    std::string path = "res/extensions/test/tokenSample.xml";
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(path.c_str());
     ASSERT_TRUE(result);

@@ -1,14 +1,10 @@
 #ifndef AFUNCTIONLIBRARY_CSTRINGTOKEN_H
 #define AFUNCTIONLIBRARY_CSTRINGTOKEN_H
 
+#include "definitions.h"
+
 namespace afl
 {
-#define AFL_CREATE_TOKEN_FEATURE_GROUP_NAME afl_create_token
-    constexpr const char* kCreateTokenFeatureGroupName = "afl_create_token";
-
-#define AFL_CREATE_TOKEN_DEFAULT_FEATURE_NAME afl_create_token
-    constexpr const char* kCreateTokenDefaultFeatureName = "afl_create_token";
-
     extern "C"
     {
         enum class TokenType
@@ -27,7 +23,6 @@ namespace afl
             Left,
             Right
         };
-
         struct CStringToken
         {
             const char* string;
@@ -35,6 +30,18 @@ namespace afl
             int precedence;
             int parameterCount;
             TokenAssociativity associativity;
+        };
+
+        enum class TokenAliasType
+        {
+            String,
+            Regex
+        };
+        struct CStringTokenAliases
+        {
+            TokenAliasType type;
+            char** aliases;
+            size_t aliasesCount;
         };
     }
 }

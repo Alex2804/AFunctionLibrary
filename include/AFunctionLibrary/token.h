@@ -3,6 +3,8 @@
 
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
+#include <set>
+
 #include "AFunctionLibrary/implementation/cstringtoken.h"
 
 namespace afl
@@ -29,6 +31,13 @@ namespace afl
         size_t precedence;
         size_t parameterCount;
         TokenAssociativity associativity;
+    };
+
+    template<typename T>
+    struct AFUNCTIONLIBRARY_EXPORT TokenAliases
+    {
+        TokenAliasType type;
+        std::set<T> aliases;
     };
 }
 

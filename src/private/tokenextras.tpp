@@ -5,7 +5,7 @@
 #include "tokenextras.h"
 
 template<typename T>
-afl::detail::TokenWrapper<T>::TokenWrapper(std::shared_ptr<const Token <T>> token, std::vector<TokenAliases> aliases)
+afl::detail::TokenWrapper<T>::TokenWrapper(std::shared_ptr<const Token<T>> token, std::vector<TokenAliases<T>> aliases)
     : token(std::move(token)), aliases(std::move(aliases))
 {}
 
