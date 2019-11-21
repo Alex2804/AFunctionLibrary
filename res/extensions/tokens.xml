@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension>
+    <!-- Operators -->
+    <token>
+        <type>operator</type>
+        <token>
+            <associativity>left</associativity>
+            <token values="+ -">
+                <precedence>1</precedence>
+            </token>
+            <token>
+                <precedence>2</precedence>
+                <value>*</value>
+                <token value="/">
+                    <alias>:</alias>
+                </token>
+            </token>
+        </token>
+        <token values="^">
+            <precedence>2</precedence>
+            <associativity>right</associativity>
+        </token>
+    </token>
+    <!-- Functions -->
+    <token>
+        <type>function</type>
+        <precedence>-1</precedence>
+        <token>
+            <parameter_count>1</parameter_count>
+            <token value="abs">
+                <alias>absolute</alias>
+            </token>
+            <token value="log10"></token>
+            <token value="ln"></token>
+            <token value="sin">
+                <alias>sine</alias>
+            </token>
+            <token value="cos">
+                <alias>cosine</alias>
+            </token>
+            <token value="tan">
+                <alias>tangent</alias>
+            </token>
+            <token value="asin">
+                <alias>arcsine</alias>
+            </token>
+            <token value="acos">
+                <alias>arccosine</alias>
+            </token>
+            <token value="atan">
+                <alias>arctangent</alias>
+            </token>
+        </token>
+        <token>
+            <parameter_count>2</parameter_count>
+            <token value="pow">
+                <alias>power</alias>
+            </token>
+            <token value="mod">
+                <alias>modulo</alias>
+            </token>
+            <token value="log">
+                <alias>logarithm</alias>
+            </token>
+        </token>
+    </token>
+    <!-- Brackets -->
+    <token value="(">
+        <type>bracket_open</type>
+        <aliases>[ {</aliases>
+    </token>
+    <token value=")">
+        <type>bracket_close</type>
+        <aliases>] }</aliases>
+    </token>
+    <!-- Argument Delimiters -->
+    <token value=";">
+        <type>argument_delimiter</type>
+    </token>
+</extension>
