@@ -5,16 +5,18 @@ namespace afl
 {
     namespace detail
     {
+        template<typename... Ts> struct make_void { typedef void type;};
+        template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+
         template<template<class...> class Z, class, class...>
         struct can_apply : std::false_type {};
         template<template<class...> class Z, class...Ts>
-        struct can_apply<Z, std::void_t<Z<Ts...>>, Ts...> : std::true_type {};
+        struct can_apply<Z, void_t<Z<Ts...>>, Ts...> : std::true_type {};
 
         template<class T>
         using to_string_t = decltype(std::to_string(std::declval<T>()));
         template<class T>
         using has_to_string = can_apply<to_string_t, void, T>;
-
 
         template<typename T>
         std::string stringify(T t, std::true_type);
@@ -25,12 +27,12 @@ namespace afl
 
 
 template<typename T>
-std::string afl::detail::stringify(T t, std::true_type /*can to string*/){
+std::string afl::detail::stringify(T t, std::true_type /* can to_string */){
     return std::to_string(t);
 }
 template<typename T>
-std::string afl::detail::stringify(T t, std::false_type /*cannot to string*/){
-    return static_cast<std::ostringstream&>(std::ostringstream() << t).str();
+std::string afl::detail::stringify(T t, std::false_type /* cannot to_string */){
+    return static_cast<const std::ostringstream&>(std::ostringstream() << t).str();
 }
 /**
  * Converts @p t into an string with either std::to_string if possible or the ostream operator (operator<<)
