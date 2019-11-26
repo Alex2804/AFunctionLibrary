@@ -25,12 +25,15 @@ namespace afl
             TokenWrapper(std::shared_ptr<const Token<T>> token, std::vector<TokenAliases<T>> aliases);
             explicit TokenWrapper(TokenBundle<T> bundle);
 
+            bool operator==(const TokenWrapper<T>& other) const;
+            bool operator!=(const TokenWrapper<T>& other) const;
+
             std::shared_ptr<const Token<T>> token;
             std::vector<TokenAliases<T>> aliases;
         };
     }
 }
 
-#include "tokenextras.tpp"
+#include "implementation/tokenextras.tpp"
 
 #endif //AFUNCTIONLIBRARY_TOKENEXTRAS_H

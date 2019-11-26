@@ -7,20 +7,26 @@ add_subdirectory(libs/APluginLibrary)
 add_subdirectory(libs/pugixml)
 
 set(HEADERS
-        include/AFunctionLibrary/function.h
+        include/AFunctionLibrary/function.h src/private/functionprivate.h
         include/AFunctionLibrary/syntaxtree.h
         include/AFunctionLibrary/token.h
         include/AFunctionLibrary/utility.h
-        src/private/resourcemanager.h
         src/private/resourceparser.h
-        src/private/tokenextras.h)
+        src/private/resourcemanager.h
+        src/private/tokenmanager.h
+        src/private/tokenextras.h
+        src/private/functionformatter.h
+        src/private/syntaxtreehandler.h)
 set(SOURCES
-        src/function.cpp
+        src/function.cpp src/private/src/functionprivate.cpp
         include/AFunctionLibrary/implementation/syntaxtree.tpp
         include/AFunctionLibrary/implementation/token.tpp
         src/utility.cpp include/AFunctionLibrary/implementation/utility.tpp
-        src/private/resourcemanager.cpp
-        src/private/resourceparser.cpp)
+        src/private/src/resourceparser.cpp
+        src/private/src/resourcemanager.cpp
+        src/private/src/tokenmanager.cpp
+        src/private/src/functionformatter.cpp
+        src/private/src/syntaxtreehandler.cpp)
 
 set(SDK_HEADERS
         SDK/AFunctionLibrary/implementation/definitions.h
@@ -35,6 +41,8 @@ set(PUBLIC_INCLUDE_DIRECTORIES
 set(PRIVATE_INCLUDE_DIRECTORIES
         libs/tinydir)
 
+file(COPY res/extensions DESTINATION ${CMAKE_BINARY_DIR})
+
 add_library(AFunctionLibrary STATIC ${HEADERS} ${SOURCES} ${SDK_HEADERS} ${SDK_SOURCES})
 include(GenerateExportHeader)
 generate_export_header(AFunctionLibrary
@@ -44,6 +52,10 @@ target_include_directories(AFunctionLibrary
         PRIVATE ${PRIVATE_INCLUDE_DIRECTORIES})
 target_link_libraries(AFunctionLibrary APluginLibrary pugixml)
 
+set(AFunctionLibraryTest TRUE)
 if(${AFunctionLibraryTest})
     add_subdirectory(tests)
 endif()
+
+add_subdirectory(res/plugins)
+add_dependencies(AFunctionLibrary AFunctionLibraryDefaultPlugin)

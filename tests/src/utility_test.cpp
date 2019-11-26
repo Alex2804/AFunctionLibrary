@@ -74,3 +74,17 @@ GTEST_TEST(Utility_Test, trimString)
     ASSERT_EQ(afl::trimString("This is no\nstring to trim!!!"), "This is no\nstring to trim!!!");
     ASSERT_EQ(afl::trimString("   f   testing bounds!   e   "), "f   testing bounds!   e");
 }
+
+GTEST_TEST(Utility_Test, replaceString)
+{
+    ASSERT_EQ(afl::replaceString("", "+", "-"), "");
+    ASSERT_EQ(afl::replaceString("+", "+", "-"), "-");
+    ASSERT_EQ(afl::replaceString("++", "+", "-"), "--");
+    ASSERT_EQ(afl::replaceString("adsklfjasdf+lkajsdf+ laksjdf +    klöjasd + +++", "+", "-"), "adsklfjasdf-lkajsdf- laksjdf -    klöjasd - ---");
+    ASSERT_EQ(afl::replaceString("Hello Test lloll", "ll", "$"), "He$o Test $o$");
+    ASSERT_EQ(afl::replaceString("Hello Test lloll", "l", "..."), "He......o Test ......o......");
+
+    ASSERT_EQ(afl::replaceString("Hello Test", {"ll", "T", "t"}, "!"), "He!o !es!");
+
+    ASSERT_EQ(afl::replaceString("Hello Test", {{{"ll", "T", "t"}, "!"}, {{"o", "e"}, "O.K."}}), "HO.K.!O.K. !O.K.s!");
+}

@@ -22,6 +22,9 @@ namespace afl
         Token<T>& operator=(const Token<T>& other) = default;
         Token<T>& operator=(Token<T>&& other) noexcept = default;
 
+        bool operator==(const Token<T>& other) const;
+        bool operator!=(const Token<T>& other) const;
+
         bool requirePrecedence();
         bool requireAssociativity();
         bool requireParameterCount();
@@ -36,6 +39,9 @@ namespace afl
     template<typename T>
     struct AFUNCTIONLIBRARY_EXPORT TokenAliases
     {
+        bool operator==(const TokenAliases& other) const;
+        bool operator!=(const TokenAliases& other) const;
+
         TokenAliasType type;
         std::set<T> aliases;
     };

@@ -16,53 +16,78 @@ namespace afl
 
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree()
-    : root(nullptr)
+    : m_root(nullptr)
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(T value)
-    : root(new Node<T>(std::move(value)))
+    : m_root(new Node<T>(std::move(value)))
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(Node<T>* root)
-    : root(root)
+    : m_root(root)
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(const SyntaxTree<T> &other)
-    : root(new Node<T>(*other.root))
+    : m_root(new Node<T>(*other.m_root))
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(SyntaxTree<T> &&other) noexcept
-    : root(nullptr)
+    : m_root(nullptr)
 {
     using std::swap;
-    swap(root, other.root);
+    swap(m_root, other.m_root);
 }
 template<typename T>
 afl::SyntaxTree<T>::~SyntaxTree()
 {
-    delete root;
+    delete m_root;
 }
 
 template<typename T>
 afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(const SyntaxTree<T> &other)
 {
-    auto tmpRoot = new Node<T>(*other.root);
-    delete root;
-    root = tmpRoot;
+    auto tmpRoot = new Node<T>(*other.m_root);
+    delete m_root;
+    m_root = tmpRoot;
     return *this;
 }
 template<typename T>
 afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(SyntaxTree<T> &&other) noexcept
 {
     using std::swap;
-    swap(root, other.root);
+    swap(m_root, other.m_root);
     return *this;
+}
+
+template<typename T>
+bool afl::SyntaxTree<T>::empty() const
+{
+    return m_root == nullptr;
+}
+template<typename T>
+void afl::SyntaxTree<T>::clear()
+{
+    delete m_root;
+    m_root = nullptr;
+}
+
+template<typename T>
+const afl::Node<T>* afl::SyntaxTree<T>::root() const
+{
+    return m_root;
+}
+template<typename T>
+void afl::SyntaxTree<T>::setRoot(afl::Node<T> *root, bool deleteOld)
+{
+    if(deleteOld)
+        clear();
+    m_root = root;
 }
 
 template<typename T>
 std::string afl::SyntaxTree<T>::toString() const
 {
-    return root == nullptr ? "" : root->toString();
+    return empty() ? "" : m_root->toString();
 }
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
@@ -76,33 +101,33 @@ std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 
 template<typename T>
 afl::Node<T>::Node(T value)
-        : value(std::move(value))
-        , children(std::vector<Node<T>*>())
+        : m_value(std::move(value))
+        , m_children(std::vector<Node < T> * > ())
 {}
 template<typename T>
 afl::Node<T>::Node(T value, std::vector<Node<T>*> children)
-    : value(std::move(value)), children(std::move(children))
+    : m_value(std::move(value)), m_children(std::move(children))
 {}
 template<typename T>
 afl::Node<T>::Node(const Node<T> &other)
-        : value(other.value)
+        : m_value(other.m_value)
 {
-    children.reserve(other.children.size());
-    for(const Node<T>* child : other.children) {
-        children.push_back(new Node<T>(*child));
+    m_children.reserve(other.m_children.size());
+    for(const Node<T>* child : other.m_children) {
+        m_children.push_back(new Node<T>(*child));
     }
 }
 template<typename T>
 afl::Node<T>::Node(Node<T> &&other) noexcept
 {
     using std::swap;
-    swap(value, other.value);
-    swap(children, other.children);
+    swap(m_value, other.m_value);
+    swap(m_children, other.m_children);
 }
 template<typename T>
 afl::Node<T>::~Node()
 {
-    for(Node<T>* child : children) {
+    for(Node<T>* child : m_children) {
         delete child;
     }
 }
@@ -111,15 +136,15 @@ template<typename T>
 afl::Node<T> &afl::Node<T>::operator=(const Node<T> &other)
 {
     // copy value
-    value = other.value;
+    m_value = other.m_value;
     // copy children
     std::vector<Node<T>*> tmpChildren;
-    tmpChildren.reserve(other.children.size());
-    for(const Node<T>* child : other.children) {
+    tmpChildren.reserve(other.m_children.size());
+    for(const Node<T>* child : other.m_children) {
         tmpChildren.push_back(new Node<T>(*child));
     }
     using std::swap;
-    swap(children, tmpChildren);
+    swap(m_children, tmpChildren);
     for(Node<T>* child : tmpChildren) {
         delete child;
     }
@@ -129,8 +154,8 @@ template<typename T>
 afl::Node<T> &afl::Node<T>::operator=(Node<T> &&other) noexcept
 {
     using std::swap;
-    swap(value, other.value);
-    swap(children, other.children);
+    swap(m_value, other.m_value);
+    swap(m_children, other.m_children);
     return *this;
 }
 
@@ -170,15 +195,15 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
     std::vector<size_t> widths, positions;
     std::string string, prependString, appendString, spacer(3, ' ');
     std::stringstream stringstream;
-    stringstream << node->value;
-    std::string value = afl::stringify(node->value);
+    stringstream << node->m_value;
+    std::string value = afl::stringify(node->m_value);
 
-    int nodeCount = node->children.size();
+    int nodeCount = node->m_children.size();
     if(nodeCount > 0) {
         pairs.reserve(nodeCount);
         widths.reserve(nodeCount);
         for (int i = 0; i < nodeCount; i++) {
-            pair = toStringHelper(node->children.at(i), chars);
+            pair = toStringHelper(node->m_children.at(i), chars);
             if (!pair.first.empty() && !pair.first.front().empty()) {
                 lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount; // std::max(lineCount, pair.first.size());
                 pairs.push_back(pair);

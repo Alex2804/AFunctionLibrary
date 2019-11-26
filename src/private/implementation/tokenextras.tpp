@@ -17,4 +17,15 @@ afl::detail::TokenWrapper<T>::TokenWrapper(afl::detail::TokenBundle<T> bundle)
 
 }
 
+template<typename T>
+bool afl::detail::TokenWrapper<T>::operator==(const afl::detail::TokenWrapper<T> &other) const
+{
+    return *token == *other.token && aliases == other.aliases;
+}
+template<typename T>
+bool afl::detail::TokenWrapper<T>::operator!=(const afl::detail::TokenWrapper<T> &other) const
+{
+    return !operator==(other);
+}
+
 #endif //AFUNCTIONLIBRARY_TOKENEXTRAS_TPP

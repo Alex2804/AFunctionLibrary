@@ -15,19 +15,28 @@
 
 #include "tokenextras.h"
 #include "resourceparser.h"
+#include "tokenmanager.h"
 
 namespace afl
 {
     namespace detail
     {
-        typedef CStringToken*(*createTokenPluginFunction)(const char*);
-        typedef CStringTokenAliases*(*createTokenAliasesPluginFunction)(const char*, afl::TokenAliasType);
-
         enum class ResourceType
         {
             Plugin,
             Extension
         };
+
+        typedef void(*ResourceManagerCallbackFunction)(const std::string& path, ResourceType type);
+        enum class ResourceManagerCallbackType
+        {
+            Load,
+            Unload,
+            Load_Unload
+        };
+
+        AFUNCTIONLIBRARY_NO_EXPORT std::string getFullPathName(std::string path, afl::detail::ResourceType type);
+        AFUNCTIONLIBRARY_NO_EXPORT std::vector<std::string> getDirectoryFiles(const std::string& path, const std::string& fileExtension, bool recursive);
 
         class AFUNCTIONLIBRARY_NO_EXPORT ResourceManager
         {
@@ -40,26 +49,20 @@ namespace afl
             ResourceManager& operator=(const ResourceManager& other);
             ResourceManager& operator=(ResourceManager&& other) noexcept;
 
-            bool load(ResourceType type, const std::string& path);
-            size_t loadDirectory(ResourceType type, const std::string& path, bool recursive);
-            void unload(ResourceType type, std::string path);
+            bool load(std::string path, ResourceType type);
+            size_t loadDirectory(const std::string& path, ResourceType type, bool recursive);
+            void unload(const std::string& path, ResourceType type);
 
-            apl::PluginManager& getPluginManager();
+            void addCallbackFunction(ResourceManagerCallbackFunction function, ResourceManagerCallbackType type);
+            void removeCallbackFunction(ResourceManagerCallbackFunction function, ResourceManagerCallbackType type);
 
-            std::shared_ptr<const TokenWrapper<std::string>> getToken(const std::string& value, bool createIfNotExist = true);
-            std::vector<std::shared_ptr<const TokenWrapper<std::string>>> getTokens();
-
-        protected:
-            bool readExtension(std::string path);
-            std::shared_ptr<const TokenWrapper<std::string>> createToken(const std::string& value);
-
-            void updatePluginFunctions();
+            const apl::PluginManager* getPluginManager() const;
+            TokenManager* getTokenManager();
 
         private:
-            std::unordered_map<std::string, std::pair<std::shared_ptr<TokenWrapper<std::string>>, size_t>> tokens;
-            std::unordered_map<std::string, std::set<std::string>> pathTokenRefs;
-            apl::PluginManager pluginManager;
-            std::unordered_map<const apl::Plugin*, std::pair<std::vector<createTokenPluginFunction>, std::vector<createTokenAliasesPluginFunction>>> pluginFunctions;
+            apl::PluginManager* m_pluginManager;
+            TokenManager* m_tokenManager;
+            std::vector<ResourceManagerCallbackFunction> loadCallbackFunctions, unloadCallbackFunctions;
         };
     }
 }

@@ -12,6 +12,10 @@ namespace afl
 
     std::vector<std::string> splitAtSpaces(std::string string);
     std::string trimString(std::string string);
+
+    std::string replaceString(std::string string, const std::string& toReplace, const std::string& replacement);
+    std::string replaceString(std::string string, const std::vector<std::string>& keys, const std::string& replacement);
+    std::string replaceString(std::string string, const std::vector<std::pair<std::vector<std::string>, std::string>>& keysReplacementPairs);
 }
 
 #include "implementation/utility.tpp"

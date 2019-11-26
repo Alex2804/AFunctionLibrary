@@ -43,7 +43,8 @@ set(SOURCES
         src/token_test.cpp
         src/utility_test.cpp
         src/resourceparser_test.cpp
-        src/resourcemanager_test.cpp)
+        src/resourcemanager_test.cpp
+        src/functionformatter_test.cpp src/tokenmanager_test.cpp)
 
 add_executable(AFunctionLibraryTest ${SOURCES})
 target_link_libraries(AFunctionLibraryTest AFunctionLibrary gtest_main)

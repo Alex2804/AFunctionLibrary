@@ -24,8 +24,8 @@ GTEST_TEST(SyntaxTree_Test, constructors)
     intSyntaxTree = new afl::SyntaxTree<int>(intNode);
     ASSERT_EQ(tokenSyntaxTree->toString(), "(5, 6)");
     ASSERT_EQ(intSyntaxTree->toString(), "42");
-    ASSERT_EQ(tokenSyntaxTree->root, tokenNode);
-    ASSERT_EQ(intSyntaxTree->root, intNode);
+    ASSERT_EQ(tokenSyntaxTree->root(), tokenNode);
+    ASSERT_EQ(intSyntaxTree->root(), intNode);
     delete tokenSyntaxTree;
     delete intSyntaxTree;
 

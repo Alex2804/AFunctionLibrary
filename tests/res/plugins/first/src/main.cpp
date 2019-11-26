@@ -16,6 +16,20 @@ AFL_REGISTER_CREATE_TOKEN_FEATURE(just_for_testing, tokenValue)
     return nullptr;
 }
 
+AFL_REGISTER_CREATE_TOKEN_FEATURE(just_for_an_other_test, tokenValue)
+{
+    if(std::strlen(tokenValue) == 1 && ((tokenValue[0] >= 'a' && tokenValue[0] <= 'z') || (tokenValue[0] >= 'A' && tokenValue[0] <= 'Z'))) {
+        auto token = static_cast<afl::CStringToken*>(apl::allocateMemory(sizeof(afl::CStringToken)));
+        token->string = tokenValue;
+        token->type = afl::TokenType::Constant;
+        token->precedence = 0;
+        token->parameterCount = 0;
+        token->associativity = afl::TokenAssociativity::None;
+        return token;
+    }
+    return nullptr;
+}
+
 AFL_REGISTER_CREATE_TOKEN_ALIASES_FEATURE(just_for_testing, value, type)
 {
     if(type == afl::TokenAliasType::String) {

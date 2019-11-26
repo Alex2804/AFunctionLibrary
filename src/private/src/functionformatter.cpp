@@ -78,37 +78,80 @@ namespace
 }
 
 afl::detail::FunctionFormatter::FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager)
-    : m_resourceManager(std::move(resourceManager))
+    : function(nullptr), m_resourceManager(std::move(resourceManager))
 {
-    reloadResources();
+    reloadTokens();
+    registerCallbackFunction();
+}
+afl::detail::FunctionFormatter::FunctionFormatter(const FunctionFormatter& other)
+    : function(nullptr)
+    , m_resourceManager(other.m_resourceManager) , m_formatFunctions(other.m_formatFunctions)
+    , m_uniqueTokens(other.m_uniqueTokens) , m_notUniqueTokens(other.m_notUniqueTokens)
+{
+    registerCallbackFunction();
+}
+afl::detail::FunctionFormatter::FunctionFormatter(FunctionFormatter&& other) noexcept
+    : function(nullptr)
+    , m_resourceManager(std::move(other.m_resourceManager)) , m_formatFunctions(std::move(other.m_formatFunctions))
+    , m_uniqueTokens(std::move(other.m_uniqueTokens)) , m_notUniqueTokens(std::move(other.m_notUniqueTokens))
+{
+    registerCallbackFunction();
+}
+afl::detail::FunctionFormatter::~FunctionFormatter()
+{
+    m_resourceManager->removeCallbackFunction(function, ResourceManagerCallbackType::Load_Unload);
 }
 
-void afl::detail::FunctionFormatter::reloadResources()
+afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(const FunctionFormatter& other)
 {
-    std::shared_ptr<const TokenWrapper<std::string>> tmpWrapper;
-    for(const auto& pair : m_resourceManager->m_tokens) {
-        tmpWrapper = pair.second.first;
-        if(tmpWrapper->token->type == TokenType::Operator || tmpWrapper->token->type == TokenType::ArgumentDelimiter
-           || tmpWrapper->token->type == TokenType::BracketOpen || tmpWrapper->token->type == TokenType::BracketClose)
+    m_resourceManager = other.m_resourceManager;
+    m_formatFunctions = other.m_formatFunctions;
+    m_uniqueTokens = other.m_uniqueTokens;
+    m_notUniqueTokens = other.m_notUniqueTokens;
+    return *this;
+}
+afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(FunctionFormatter&& other) noexcept
+{
+    m_resourceManager = std::move(other.m_resourceManager);
+    m_formatFunctions = std::move(other.m_formatFunctions);
+    m_uniqueTokens = std::move(other.m_uniqueTokens);
+    m_notUniqueTokens = std::move(other.m_notUniqueTokens);
+    return *this;
+}
+
+void afl::detail::FunctionFormatter::registerCallbackFunction()
+{
+    static auto lambda = [this](const std::string&, ResourceType) -> void { this->reloadTokens(); };
+    function = [](const std::string& s, ResourceType t) -> void { lambda(s, t); };
+    m_resourceManager->addCallbackFunction(function, ResourceManagerCallbackType::Load_Unload);
+}
+
+void afl::detail::FunctionFormatter::reloadTokens()
+{
+    for(const auto& tokenWrapper : m_resourceManager->getTokenManager()->getTokens()) {
+        if(tokenWrapper->token->type == TokenType::Operator || tokenWrapper->token->type == TokenType::ArgumentDelimiter
+           || tokenWrapper->token->type == TokenType::BracketOpen || tokenWrapper->token->type == TokenType::BracketClose)
         {
-            m_uniqueTokens.push_back(std::move(tmpWrapper));
+            m_uniqueTokens.push_back(tokenWrapper);
         } else {
-            m_notUniqueTokens.push_back(std::move(tmpWrapper));
+            m_notUniqueTokens.push_back(tokenWrapper);
         }
     }
 }
 
 std::string afl::detail::FunctionFormatter::formatFunction(std::string function)
 {
-    std::string formattedString = replaceTokenAliases(std::move(function), m_uniqueTokens, m_notUniqueTokens);
-
+    std::string tmp, formattedString = std::move(function);
+    while(tmp != formattedString) {
+        tmp = formattedString;
+        formattedString = replaceTokenAliases(std::move(formattedString), m_uniqueTokens, m_notUniqueTokens);
+    }
     return formattedString;
 }
 
 std::vector<std::string> afl::detail::FunctionFormatter::splitIntoTokens(std::string string)
 {
-    for(const std::shared_ptr<const TokenWrapper<std::string>>& wrapper : m_uniqueTokens) {
+    for(const std::shared_ptr<const TokenWrapper<std::string>>& wrapper : m_uniqueTokens)
         string = replaceString(string, wrapper->token->value, " " + wrapper->token->value + " ");
-    }
     return splitAtSpaces(std::move(string));
 }

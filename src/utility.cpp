@@ -70,3 +70,49 @@ std::string afl::trimString(std::string string)
         return "";
     return string.substr(front, end - front + 1);
 }
+/**
+ * Replaces all occurrences of @p toReplace with @p replacement in @p string.
+ * @param string The string to replace in
+ * @param toReplace The key to replace in @p string
+ * @param replacement The value to replace @p toReplace with in @p string
+ * @return the replaced string
+ */
+std::string afl::replaceString(std::string string, const std::string &toReplace, const std::string &replacement)
+{
+    size_t index = 0;
+    for (index = string.find(toReplace, index); index != std::string::npos; index = string.find(toReplace, index + (replacement.size() - toReplace.size()))) {
+        string.replace(index, toReplace.size(), replacement);
+    }
+    return string;
+}
+/**
+ * Replaces all occurrences of @p keys with @p replacement in @p string.
+ * @param string The string to replace in
+ * @param keys The keys to replace in @p string
+ * @param replacement The value to replace @p keys with in @p string
+ * @return the replaced string
+ *
+ * @see afl::replaceString
+ */
+std::string afl::replaceString(std::string string, const std::vector<std::string>& keys, const std::string& replacement)
+{
+    for(const std::string& key : keys) {
+        string = replaceString(string, key, replacement);
+    }
+    return string;
+}
+/**
+ * Replaces all occurrences of @p toReplace with @p replacement in @p string.
+ * @param string The string to replace in
+ * @param keysReplacementPairs Pairs with value to replace as first and replacement as second element.
+ * @return the replaced string
+ *
+ * @see afl::replaceString
+ */
+std::string afl::replaceString(std::string string, const std::vector<std::pair<std::vector<std::string>, std::string>>& keysReplacementPairs)
+{
+    for(const std::pair<std::vector<std::string>, std::string>& pair : keysReplacementPairs) {
+        string = replaceString(string, pair.first, pair.second);
+    }
+    return string;
+}

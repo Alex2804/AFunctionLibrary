@@ -12,16 +12,6 @@
 
 namespace afl
 {
-    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<std::string>>> getTokens(const std::vector<std::string>& stringTokens);
-    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<std::string>>> parseTokens(const std::string& string);
-
-    template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::vector<std::shared_ptr<Token<T>>> shuntingYard(const std::vector<std::shared_ptr<Token<T>>>& tokens);
-
-    template<typename T>
-    AFUNCTIONLIBRARY_EXPORT SyntaxTree<std::shared_ptr<Token<T>>> generateSyntaxTree(const std::vector<std::shared_ptr<Token<T>>>& tokens);
-    AFUNCTIONLIBRARY_EXPORT SyntaxTree<std::shared_ptr<Token<std::string>>> generateSyntaxTree(const std::string& string);
-
     enum class FunctionFormatState
     {
         Raw,
@@ -44,7 +34,7 @@ namespace afl
     {
     public:
         Function();
-        explicit Function(std::string string);
+        explicit Function(std::string rawFunction);
         Function(const Function& other);
         Function(Function&& other) noexcept;
         virtual ~Function();
@@ -53,12 +43,13 @@ namespace afl
         Function& operator=(Function&& other) noexcept;
 
         void setRawFunctionString(std::string string);
-        bool format(const FunctionFormatState& formatState);
-        std::string getFunctionString(const FunctionFormatState& formatState = FunctionFormatState::Raw);
+        bool format(FunctionFormatState formatState);
+        std::string getFunctionString(FunctionFormatState formatState = FunctionFormatState::Raw);
 
-        bool createSyntaxTree(const SyntaxTreeFormatState& formatState);
-        SyntaxTree<Token<std::string>> getSyntaxTree(const SyntaxTreeFormatState& formatState = SyntaxTreeFormatState::Formatted);
+        bool createSyntaxTree(SyntaxTreeFormatState formatState);
+        SyntaxTree<Token<std::string>> getSyntaxTree(SyntaxTreeFormatState formatState = SyntaxTreeFormatState::Formatted);
 
+        double calculate(double value);
         double* calculate(double* values, int count, bool createNew = true);
 
     private:

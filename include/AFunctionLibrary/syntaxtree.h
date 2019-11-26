@@ -27,9 +27,16 @@ namespace afl
         SyntaxTree<T>& operator=(const SyntaxTree<T>& other);
         SyntaxTree<T>& operator=(SyntaxTree<T>&& other) noexcept;
 
+        bool empty() const;
+        void clear();
+
+        const Node<T>* root() const;
+        void setRoot(Node<T>* root, bool deleteOld=true);
+
         std::string toString() const;
 
-        Node<T>* root;
+    private:
+        Node<T>* m_root;
     };
 
     template<typename T>
@@ -51,8 +58,8 @@ namespace afl
 
         std::string toString() const;
 
-        T value;
-        std::vector<Node<T>*> children;
+        T m_value;
+        std::vector<Node<T>*> m_children;
     };
 
     template<typename T>
