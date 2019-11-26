@@ -52,7 +52,6 @@ target_include_directories(AFunctionLibrary
         PRIVATE ${PRIVATE_INCLUDE_DIRECTORIES})
 target_link_libraries(AFunctionLibrary APluginLibrary pugixml)
 
-set(AFunctionLibraryTest TRUE)
 if(${AFunctionLibraryTest})
     add_subdirectory(tests)
 endif()

@@ -43,4 +43,13 @@ std::string afl::stringify(T t){
     return afl::detail::stringify(t, detail::has_to_string<T>{});
 }
 
+template<>
+std::string afl::stringify<char>(char t);
+template<>
+std::string afl::stringify<float>(float t);
+template<>
+std::string afl::stringify<double>(double t);
+template<>
+std::string afl::stringify<long double>(long double t);
+
 #endif //AFUNCTIONLIBRARY_UTILITY_TPP

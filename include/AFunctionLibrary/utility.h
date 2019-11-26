@@ -8,7 +8,7 @@
 namespace afl
 {
     template<typename T>
-    std::string stringify(T t);
+    inline std::string stringify(T t);
 
     std::vector<std::string> splitAtSpaces(std::string string);
     std::string trimString(std::string string);

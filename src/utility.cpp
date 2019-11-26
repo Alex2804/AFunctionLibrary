@@ -11,23 +11,24 @@ namespace
         return str;
     }
 }
+
 template<>
-std::string afl::stringify(char t)
+std::string afl::stringify<char>(char t)
 {
     return std::string(1, t);
 }
 template<>
-std::string afl::stringify(float t)
+std::string afl::stringify<float>(float t)
 {
     return stringifyFloatingPointNumber(t);
 }
 template<>
-std::string afl::stringify(double t)
+std::string afl::stringify<double>(double t)
 {
     return stringifyFloatingPointNumber(t);
 }
 template<>
-std::string afl::stringify(long double t)
+std::string afl::stringify<long double>(long double t)
 {
     return stringifyFloatingPointNumber(t);
 }

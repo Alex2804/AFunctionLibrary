@@ -8,6 +8,7 @@
 #include <tuple>
 
 #include "../../src/private/tokenmanager.h"
+#include "../../src/private/resourcemanager.h"
 
 std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenWrapper<std::string>>> allTokens = {
         {"+", std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
@@ -183,7 +184,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
-                    {"res/plugins/first/first_plugin.so", {"+", "*", "^"}},
+                    {afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin), {"+", "*", "^"}},
                     {"path/to/alternative_operators", {"+", "*"}},
                     {"path/to/functions", {"abs"}}
             };
@@ -221,7 +222,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     tokens.at("+").second = 1;
     tokens.at("*").second = 1;
     ASSERT_EQ(manager.m_tokens, tokens);
-    pathTokenValueRefs.erase("res/plugins/first/first_plugin.so");
+    pathTokenValueRefs.erase(afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin));
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     pluginFunctions.clear();
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
@@ -414,7 +415,7 @@ GTEST_TEST(TokenManager_Test, createToken)
     manager.addPluginFeatures(plugin);
 
     std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> created = manager.createToken("1", false);
-    std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), "res/plugins/first/first_plugin.so"};
+    std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
 
@@ -424,7 +425,7 @@ GTEST_TEST(TokenManager_Test, createToken)
     ASSERT_EQ(created.second, created2.second);
 
     expected = {std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), "res/plugins/first/first_plugin.so"};
+                std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
 
