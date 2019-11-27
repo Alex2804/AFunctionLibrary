@@ -53,16 +53,12 @@ namespace afl
             size_t loadDirectory(const std::string& path, ResourceType type, bool recursive);
             void unload(const std::string& path, ResourceType type);
 
-            void addCallbackFunction(ResourceManagerCallbackFunction function, ResourceManagerCallbackType type);
-            void removeCallbackFunction(ResourceManagerCallbackFunction function, ResourceManagerCallbackType type);
-
             const apl::PluginManager* getPluginManager() const;
             TokenManager* getTokenManager();
 
         private:
             apl::PluginManager* m_pluginManager;
             TokenManager* m_tokenManager;
-            std::vector<ResourceManagerCallbackFunction> loadCallbackFunctions, unloadCallbackFunctions;
         };
     }
 }

@@ -15,12 +15,12 @@ void afl::detail::parseTokenField(const pugi::xml_node& node, const std::string&
             if(fieldString == "-1")
                 bundle.token.precedence = -1;
             else
-                bundle.token.precedence = fieldValue.as_uint(bundle.token.precedence);
+                bundle.token.precedence = static_cast<size_t>(fieldValue.as_uint(bundle.token.precedence));
         } else if (fieldName == "parameter_count") {
             if(fieldString == "-1")
                 bundle.token.parameterCount = -1;
             else
-                bundle.token.parameterCount = fieldValue.as_uint(bundle.token.parameterCount);
+                bundle.token.parameterCount = static_cast<size_t>(fieldValue.as_uint(bundle.token.parameterCount));
         } else if (fieldName == "associativity" && !fieldString.empty()) {
             bundle.token.associativity = stringToTokenAssociativity(fieldString, bundle.token.associativity);
         } else if (fieldName == "alias" || fieldName == "aliases") { // alias without extra type is interpreted as string alias

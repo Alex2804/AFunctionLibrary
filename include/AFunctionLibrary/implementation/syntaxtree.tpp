@@ -6,7 +6,7 @@ namespace afl
     namespace detail
     {
         template<typename T>
-        inline std::pair<std::vector<std::string>, size_t> toStringHelper(const Node <T> *node, const char *chars[]);
+        inline std::pair<std::vector<std::string>, size_t> toStringHelper(const Node <T> *node, const char* connectors[]);
     }
 }
 
@@ -162,8 +162,8 @@ afl::Node<T> &afl::Node<T>::operator=(Node<T> &&other) noexcept
 template<typename T>
 std::string afl::Node<T>::toString() const
 {
-    const char* chars[] = {"\u007c", "\u251c", "\u250c", "\u2500", "\u253c", "\u252c", "\u2524", "\u2510", "\u2534"};
-    std::vector<std::string> lines = detail::toStringHelper(this, chars).first;
+    const char* connectors[] = {"\u007c", "\342\224\234", "\342\224\214", "\342\224\200", "\342\224\274", "\342\224\254", "\342\224\244", "\342\224\220", "\342\224\264"};
+    std::vector<std::string> lines = detail::toStringHelper(this, connectors).first;
     std::string string;
     if(!lines.empty()) {
         string.reserve(static_cast<int>((lines.size() - 1) * (lines.front().size() + 1)) + (lines.back().size()));
@@ -186,7 +186,7 @@ std::ostream& afl::operator<<(std::ostream& os, const Node<T>& node)
 
 
 template<typename T>
-std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const afl::Node<T> *node, const char* chars[])
+std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const afl::Node<T> *node, const char* connectors[])
 {
     std::vector<std::string> bodyLines, headLines;
     size_t width = 0, lineCount = 0;
@@ -198,21 +198,20 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
     stringstream << node->m_value;
     std::string value = afl::stringify(node->m_value);
 
-    int nodeCount = node->m_children.size();
+    size_t nodeCount = node->m_children.size();
     if(nodeCount > 0) {
         pairs.reserve(nodeCount);
         widths.reserve(nodeCount);
-        for (int i = 0; i < nodeCount; i++) {
-            pair = toStringHelper(node->m_children.at(i), chars);
+        for (size_t i = 0; i < nodeCount; i++) {
+            pair = toStringHelper(node->m_children.at(i), connectors);
             if (!pair.first.empty() && !pair.first.front().empty()) {
                 lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount; // std::max(lineCount, pair.first.size());
                 pairs.push_back(pair);
                 widths.push_back(pair.first.front().size());
                 positions.push_back(width + pair.second);
                 width += widths.back();
-                if(i < nodeCount - 1) {
+                if(i < nodeCount - 1)
                     width += spacer.size();
-                }
             }
         }
 
@@ -254,7 +253,7 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
         valueStartIndex = valueMiddleIndex - (value.size() / 2);
         headLines.reserve(2);
         headLines.push_back(std::string(valueStartIndex, ' ').append(value).append(width - valueStartIndex - value.size(), ' '));
-        headLines.push_back(std::string(valueMiddleIndex, ' ').append(chars[0]).append(width - valueMiddleIndex - 1, ' '));
+        headLines.push_back(std::string(valueMiddleIndex, ' ').append(connectors[0]).append(width - valueMiddleIndex - 1, ' '));
     } else {
         valueMiddleIndex = positions.front() + ((positions.back() - positions.front()) / 2);
         valueStartIndex = valueMiddleIndex - (value.size() / 2);
@@ -262,28 +261,28 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
         string.reserve(width);
         string.append(valueStartIndex, ' ').append(value).append(width - valueStartIndex - value.size(), ' ');
         headLines.push_back(string);
-        std::vector<const char*> connectionStringVector;
+        std::vector<std::string> connectionStringVector;
         connectionStringVector.reserve(width);
         connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.front(), " ");
-        connectionStringVector.push_back((positions.front() == valueMiddleIndex) ? chars[1] : chars[2]);
+        connectionStringVector.push_back((positions.front() == valueMiddleIndex) ? connectors[1] : connectors[2]);
         bool connectedValue = false;
         for(unsigned long i = 1; i < positions.size()-1; i++) {
-            connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.at(i) - connectionStringVector.size(), chars[3]);
-            connectionStringVector.push_back((positions.at(i) == valueMiddleIndex) ? chars[4] : chars[5]);
+            connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.at(i) - connectionStringVector.size(), connectors[3]);
+            connectionStringVector.push_back((positions.at(i) == valueMiddleIndex) ? connectors[4] : connectors[5]);
             if(positions.at(i) == valueMiddleIndex) {
                 connectedValue = true;
             }
         }
-        connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.back() - connectionStringVector.size(), chars[3]);
-        connectionStringVector.push_back((positions.back() == valueMiddleIndex) ? chars[6] : chars[7]);
+        connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.back() - connectionStringVector.size(), connectors[3]);
+        connectionStringVector.push_back((positions.back() == valueMiddleIndex) ? connectors[6] : connectors[7]);
         connectionStringVector.insert(connectionStringVector.end(), width - connectionStringVector.size(), " ");
         if(!connectedValue) {
-            connectionStringVector[valueMiddleIndex] = chars[8];
+            connectionStringVector[valueMiddleIndex] = connectors[8];
         }
         std::string connectionString;
         connectionString.reserve(width);
-        for(const char* c : connectionStringVector) {
-            connectionString.append(c);
+        for(std::string s : connectionStringVector) {
+            connectionString.append(s);
         }
         headLines.push_back(connectionString);
     }

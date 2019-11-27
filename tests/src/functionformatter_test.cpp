@@ -9,7 +9,8 @@ GTEST_TEST(FunctionFormatter_Test, formatTokenAliases)
 {
     auto resourceManager = std::make_shared<afl::detail::ResourceManager>();
     resourceManager->load("../extensions/tokens", afl::detail::ResourceType::Extension);
-    afl::detail::FunctionFormatter formatter(resourceManager);
-    std::string formatted = formatter.formatFunction("4+2*absolute(3)");
+    auto formatter = new afl::detail::FunctionFormatter(resourceManager);
+    std::string formatted = formatter->formatFunction("4+2*absolute(3)");
     std::cout << formatted;
+    delete formatter;
 }

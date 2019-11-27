@@ -78,53 +78,16 @@ namespace
 }
 
 afl::detail::FunctionFormatter::FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager)
-    : function(nullptr), m_resourceManager(std::move(resourceManager))
+    : m_resourceManager(std::move(resourceManager))
 {
     reloadTokens();
-    registerCallbackFunction();
 }
-afl::detail::FunctionFormatter::FunctionFormatter(const FunctionFormatter& other)
-    : function(nullptr)
-    , m_resourceManager(other.m_resourceManager) , m_formatFunctions(other.m_formatFunctions)
-    , m_uniqueTokens(other.m_uniqueTokens) , m_notUniqueTokens(other.m_notUniqueTokens)
-{
-    registerCallbackFunction();
-}
-afl::detail::FunctionFormatter::FunctionFormatter(FunctionFormatter&& other) noexcept
-    : function(nullptr)
-    , m_resourceManager(std::move(other.m_resourceManager)) , m_formatFunctions(std::move(other.m_formatFunctions))
-    , m_uniqueTokens(std::move(other.m_uniqueTokens)) , m_notUniqueTokens(std::move(other.m_notUniqueTokens))
-{
-    registerCallbackFunction();
-}
-afl::detail::FunctionFormatter::~FunctionFormatter()
-{
-    m_resourceManager->removeCallbackFunction(function, ResourceManagerCallbackType::Load_Unload);
-}
+afl::detail::FunctionFormatter::FunctionFormatter(const FunctionFormatter& other) = default;
+afl::detail::FunctionFormatter::FunctionFormatter(FunctionFormatter&& other) noexcept = default;
+afl::detail::FunctionFormatter::~FunctionFormatter() = default;
 
-afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(const FunctionFormatter& other)
-{
-    m_resourceManager = other.m_resourceManager;
-    m_formatFunctions = other.m_formatFunctions;
-    m_uniqueTokens = other.m_uniqueTokens;
-    m_notUniqueTokens = other.m_notUniqueTokens;
-    return *this;
-}
-afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(FunctionFormatter&& other) noexcept
-{
-    m_resourceManager = std::move(other.m_resourceManager);
-    m_formatFunctions = std::move(other.m_formatFunctions);
-    m_uniqueTokens = std::move(other.m_uniqueTokens);
-    m_notUniqueTokens = std::move(other.m_notUniqueTokens);
-    return *this;
-}
-
-void afl::detail::FunctionFormatter::registerCallbackFunction()
-{
-    static auto lambda = [this](const std::string&, ResourceType) -> void { this->reloadTokens(); };
-    function = [](const std::string& s, ResourceType t) -> void { lambda(s, t); };
-    m_resourceManager->addCallbackFunction(function, ResourceManagerCallbackType::Load_Unload);
-}
+afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(const FunctionFormatter& other) = default;
+afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(FunctionFormatter&& other) noexcept = default;
 
 void afl::detail::FunctionFormatter::reloadTokens()
 {

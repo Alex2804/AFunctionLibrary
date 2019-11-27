@@ -98,7 +98,6 @@ bool afl::detail::ResourceManager::load(std::string path, ResourceType type)
         apl::Plugin* plugin;
         if((plugin = m_pluginManager->load(path)) != nullptr) {
             m_tokenManager->addPluginFeatures(plugin);
-            invokeResourceManagerCallbacks(loadCallbackFunctions, getFullPathName(std::move(path), ResourceType::Plugin), ResourceType::Plugin);
             return true;
         }
     } else if(type == ResourceType::Extension) {
@@ -110,11 +109,8 @@ bool afl::detail::ResourceManager::load(std::string path, ResourceType type)
         std::vector<std::shared_ptr<TokenWrapper<std::string>>> tokensVector;
         parseExtensionRecursive(doc.root(), tokensVector);
 
-        for(const std::shared_ptr<TokenWrapper<std::string>>& tokenWrapper : tokensVector) {
-                m_tokenManager->addToken(tokenWrapper, fullPath);
-        }
-
-        invokeResourceManagerCallbacks(loadCallbackFunctions, fullPath, type);
+        for(const std::shared_ptr<TokenWrapper<std::string>>& tokenWrapper : tokensVector)
+            m_tokenManager->addToken(tokenWrapper, fullPath);
         return true;
     } else {
         throw std::runtime_error("Unimplemented afl::detail::ResourceType!");
@@ -127,10 +123,8 @@ size_t afl::detail::ResourceManager::loadDirectory(const std::string& path, Reso
     if(type == ResourceType::Plugin) {
         std::vector<apl::Plugin*> plugins = m_pluginManager->loadDirectory(path, recursive);
         count = plugins.size();
-        for (apl::Plugin *plugin : plugins) {
+        for (apl::Plugin *plugin : plugins)
             m_tokenManager->addPluginFeatures(plugin);
-            invokeResourceManagerCallbacks(loadCallbackFunctions, getFullPathName(plugin->getPath(), ResourceType::Plugin), ResourceType::Plugin);
-        }
     } else if(type == ResourceType::Extension) {
         size_t extensionSize = std::strlen(kExtensionsFileExtension);
         for(const std::string& p : getDirectoryFiles(path, kExtensionsFileExtension, recursive)) {
@@ -150,40 +144,8 @@ void afl::detail::ResourceManager::unload(const std::string& path, ResourceType 
         apl::Plugin* plugin = m_pluginManager->getLoadedPlugin(path);
         m_tokenManager->removePluginFeatures(plugin);
         m_pluginManager->unload(plugin);
-        invokeResourceManagerCallbacks(unloadCallbackFunctions, fullPath, ResourceType::Plugin);
-    } else if(type == ResourceType::Extension) {
-        invokeResourceManagerCallbacks(unloadCallbackFunctions, fullPath, ResourceType::Extension);
-    } else {
+    } else if(type != ResourceType::Extension) {
         throw std::runtime_error("Unimplemented afl::detail::ResourceType!");
-    }
-}
-
-void afl::detail::ResourceManager::addCallbackFunction(ResourceManagerCallbackFunction function,
-                                                       ResourceManagerCallbackType type)
-{
-    if(type == ResourceManagerCallbackType::Load || type == ResourceManagerCallbackType::Load_Unload)
-        loadCallbackFunctions.push_back(function);
-    if(type == ResourceManagerCallbackType::Unload || type == ResourceManagerCallbackType::Load_Unload)
-        unloadCallbackFunctions.push_back(function);
-}
-void afl::detail::ResourceManager::removeCallbackFunction(ResourceManagerCallbackFunction function,
-                                                          ResourceManagerCallbackType type)
-{
-    if(type == ResourceManagerCallbackType::Load || type == ResourceManagerCallbackType::Load_Unload) {
-        for(auto iterator = loadCallbackFunctions.end(); iterator != loadCallbackFunctions.begin(); iterator--) {
-            if(*iterator == function) {
-                loadCallbackFunctions.erase(iterator);
-                break;
-            }
-        }
-    }
-    if(type == ResourceManagerCallbackType::Unload || type == ResourceManagerCallbackType::Load_Unload) {
-        for(auto iterator = unloadCallbackFunctions.end(); iterator != unloadCallbackFunctions.begin(); iterator--) {
-            if(*iterator == function) {
-                unloadCallbackFunctions.erase(iterator);
-                break;
-            }
-        }
     }
 }
 

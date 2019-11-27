@@ -1,5 +1,7 @@
 #include "AFunctionLibrary/utility.h"
 
+#include <algorithm>
+
 namespace
 {
     template<typename T>
@@ -65,8 +67,8 @@ std::vector<std::string> afl::splitAtSpaces(std::string string)
 std::string afl::trimString(std::string string)
 {
     size_t front, end;
-    for(front = 0; front < string.size() && isspace(string[front]); front++);
-    for(end = string.size() - 1; end > 0 && isspace(string[end]); end--);
+    for(front = 0; front < string.size() && std::isspace(string[front]); front++);
+    for(end = string.empty() ? 0 : string.size() - 1; end > 0 && std::isspace(string[end]); end--);
     if(end < front)
         return "";
     return string.substr(front, end - front + 1);

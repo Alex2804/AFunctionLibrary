@@ -27,7 +27,7 @@ namespace afl
 
     namespace detail
     {
-        struct AFUNCTIONLIBRARY_NO_EXPORT FunctionPrivate;
+        class AFUNCTIONLIBRARY_NO_EXPORT FunctionPrivate;
     }
 
     class AFUNCTIONLIBRARY_EXPORT Function

@@ -11,10 +11,10 @@ GTEST_TEST(Utility_Test, stringify_templateSpecializations)
     ASSERT_EQ(afl::stringify('c'), "c");
     ASSERT_EQ(afl::stringify('9'), "9");
 
-    ASSERT_EQ(afl::stringify<float>(12.3231), "12.3231");
-    ASSERT_EQ(afl::stringify<float>(-12.3231), "-12.3231");
-    ASSERT_EQ(afl::stringify<float>(-12.0), "-12");
-    ASSERT_EQ(afl::stringify<float>(0.0), "0");
+    ASSERT_EQ(afl::stringify<float>(static_cast<float>(12.3231)), "12.3231");
+    ASSERT_EQ(afl::stringify<float>(static_cast<float>(-12.3231)), "-12.3231");
+    ASSERT_EQ(afl::stringify<float>(static_cast<float>(-12.0)), "-12");
+    ASSERT_EQ(afl::stringify<float>(static_cast<float>(0.0)), "0");
 
     ASSERT_EQ(afl::stringify<double>(12.3231), "12.3231");
     ASSERT_EQ(afl::stringify<double>(-12.3231), "-12.3231");

@@ -92,13 +92,10 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
     manager1.m_pluginFunctions = pluginFunctions;
 
     // move constructor
-    afl::detail::TokenManager copiedManager(std::move(manager1));
-    ASSERT_EQ(copiedManager.m_tokens, tokens);
-    ASSERT_EQ(copiedManager.m_pathTokenValueRefs, pathTokenValueRefs);
-    ASSERT_EQ(copiedManager.m_pluginFunctions, pluginFunctions);
-    ASSERT_TRUE(manager1.m_tokens.empty());
-    ASSERT_TRUE(manager1.m_pathTokenValueRefs.empty());
-    ASSERT_TRUE(manager1.m_pluginFunctions.empty());
+    afl::detail::TokenManager movedManager(std::move(manager1));
+    ASSERT_EQ(movedManager.m_tokens, tokens);
+    ASSERT_EQ(movedManager.m_pathTokenValueRefs, pathTokenValueRefs);
+    ASSERT_EQ(movedManager.m_pluginFunctions, pluginFunctions);
 
     afl::detail::TokenManager manager2;
     manager2.m_tokens = tokens;
@@ -106,13 +103,10 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
     manager2.m_pluginFunctions = pluginFunctions;
 
     // move assignment
-    copiedManager = std::move(manager2);
-    ASSERT_EQ(copiedManager.m_tokens, tokens);
-    ASSERT_EQ(copiedManager.m_pathTokenValueRefs, pathTokenValueRefs);
-    ASSERT_EQ(copiedManager.m_pluginFunctions, pluginFunctions);
-    ASSERT_TRUE(manager2.m_tokens.empty());
-    ASSERT_TRUE(manager2.m_pathTokenValueRefs.empty());
-    ASSERT_TRUE(manager2.m_pluginFunctions.empty());
+    movedManager = std::move(manager2);
+    ASSERT_EQ(movedManager.m_tokens, tokens);
+    ASSERT_EQ(movedManager.m_pathTokenValueRefs, pathTokenValueRefs);
+    ASSERT_EQ(movedManager.m_pluginFunctions, pluginFunctions);
 }
 
 GTEST_TEST(TokenManager_Test, addPluginFeatures)

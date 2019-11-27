@@ -17,7 +17,7 @@ void afl::detail::TokenManager::addPluginFeatures(const apl::Plugin* plugin)
     const size_t featureCount = plugin->getFeatureCount();
     std::vector<createTokenPluginFunction> tokenFunctions;
     std::vector<createTokenAliasesPluginFunction> aliasesFunctions;
-    for(int i = 0; i < featureCount; i++) {
+    for(size_t i = 0; i < featureCount; i++) {
         if(std::strcmp(featureInfos[i]->featureGroup, afl::kCreateTokenFeatureGroupName) == 0)
             tokenFunctions.push_back(reinterpret_cast<createTokenPluginFunction>(featureInfos[i]->functionPointer));
         else if(std::strcmp(featureInfos[i]->featureGroup, afl::kCreateTokenAliasesFeatureGroupName) == 0)

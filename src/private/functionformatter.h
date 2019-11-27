@@ -34,9 +34,6 @@ namespace afl
             std::vector<std::string> splitIntoTokens(std::string string);
 
         private:
-            void registerCallbackFunction();
-
-            ResourceManagerCallbackFunction function;
             std::shared_ptr<ResourceManager> m_resourceManager;
             std::vector<std::pair<const apl::Plugin*, std::vector<formatFunctionPluginFunction>>> m_formatFunctions;
             std::vector<std::shared_ptr<const TokenWrapper<std::string>>> m_uniqueTokens, m_notUniqueTokens;
