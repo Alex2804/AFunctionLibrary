@@ -20,23 +20,23 @@ namespace
         }
         aliases.emplace_back(std::move(vector), tokenValue);
     }
-    void extractAliases(const std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>>& tokens,
+    void extractAliases(const std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>>& tokens,
                         std::vector<std::pair<std::vector<std::string>, std::string>>& stringAliases,  // first: string aliases, second: token->value
                         std::vector<std::pair<std::vector<std::regex>, std::string>>& regexAliases) // first: regex aliases, second: token->value
     {
-        for(const std::shared_ptr<const afl::detail::TokenWrapper<std::string>>& wrapper : tokens) {
-            for(const afl::TokenAliases<std::string>& alias : wrapper->aliases) {
+        for(const auto& pair : tokens) {
+            for(const afl::TokenAliases<std::string>& alias : pair.second.first->aliases) {
                 if(alias.type == afl::TokenAliasType::Regex)
-                    extractAliases(wrapper->token->value, alias.aliases, regexAliases);
+                    extractAliases(pair.second.first->token->value, alias.aliases, regexAliases);
                 else if(alias.type == afl::TokenAliasType::String)
-                    extractAliases(wrapper->token->value, alias.aliases, stringAliases);
+                    extractAliases(pair.second.first->token->value, alias.aliases, stringAliases);
             }
         }
     }
 
     std::string replaceTokenAliases(std::string function,
-                                    const std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>>& uniqueTokens,
-                                    const std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>>& notUniqueTokens)
+                                    const std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>>& uniqueTokens,
+                                    const std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>>& notUniqueTokens)
     {
         function.erase(std::remove_if(function.begin(), function.end(), ::isspace), function.end()); // remove all spaces
 
@@ -54,9 +54,8 @@ namespace
         }
 
         // separate unique tokens with spaces
-        for(const std::shared_ptr<const afl::detail::TokenWrapper<std::string>>& wrapper : uniqueTokens) {
-            formatted = afl::replaceString(formatted, wrapper->token->value, " " + wrapper->token->value + " ");
-        }
+        for(const auto& pair : uniqueTokens)
+            formatted = afl::replaceString(formatted, pair.second.first->token->value, " " + pair.second.first->token->value + " ");
 
         stringAliases.clear();
         regexAliases.clear();
@@ -80,7 +79,7 @@ namespace
 afl::detail::FunctionFormatter::FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager)
     : m_resourceManager(std::move(resourceManager))
 {
-    reloadTokens();
+    reloadPluginFormatFunctions();
 }
 afl::detail::FunctionFormatter::FunctionFormatter(const FunctionFormatter& other) = default;
 afl::detail::FunctionFormatter::FunctionFormatter(FunctionFormatter&& other) noexcept = default;
@@ -89,32 +88,44 @@ afl::detail::FunctionFormatter::~FunctionFormatter() = default;
 afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(const FunctionFormatter& other) = default;
 afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(FunctionFormatter&& other) noexcept = default;
 
-void afl::detail::FunctionFormatter::reloadTokens()
+void afl::detail::FunctionFormatter::reloadPluginFormatFunctions()
 {
-    for(const auto& tokenWrapper : m_resourceManager->getTokenManager()->getTokens()) {
-        if(tokenWrapper->token->type == TokenType::Operator || tokenWrapper->token->type == TokenType::ArgumentDelimiter
-           || tokenWrapper->token->type == TokenType::BracketOpen || tokenWrapper->token->type == TokenType::BracketClose)
-        {
-            m_uniqueTokens.push_back(tokenWrapper);
-        } else {
-            m_notUniqueTokens.push_back(tokenWrapper);
-        }
-    }
+    m_pluginFormatFunctions = m_resourceManager->getPluginManager()->getFeatures(kFormatFunctionFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
 }
 
 std::string afl::detail::FunctionFormatter::formatFunction(std::string function)
 {
-    std::string tmp, formattedString = std::move(function);
-    while(tmp != formattedString) {
-        tmp = formattedString;
-        formattedString = replaceTokenAliases(std::move(formattedString), m_uniqueTokens, m_notUniqueTokens);
+    std::string tmp1 = function.empty() ? " " : "", tmp2;
+    std::string formattedString = std::move(function);
+    // replace aliases
+    while(tmp1 != formattedString) {
+        tmp1 = formattedString;
+        formattedString = replaceTokenAliases(std::move(formattedString),
+                m_resourceManager->getTokenManager()->m_uniqueTokens,
+                m_resourceManager->getTokenManager()->m_notUniqueTokens);
+    }
+    // format with plugin format functions
+    char* formattedCString;
+    while(tmp1 != formattedString) {
+        tmp1 = formattedString;
+        for(const apl::PluginFeatureInfo* featureInfo : m_pluginFormatFunctions) {
+            tmp2 = formattedString.empty() ? " " : "";
+            while(formattedString != tmp2) {
+                tmp2 = formattedString;
+                formattedCString = reinterpret_cast<formatFunctionPluginFunction>(featureInfo->functionPointer)(formattedString.c_str());
+                if(formattedCString != nullptr) {
+                    formattedString = formattedCString;
+                    featureInfo->pluginInfo->freeMemory(formattedCString);
+                }
+            }
+        }
     }
     return formattedString;
 }
 
 std::vector<std::string> afl::detail::FunctionFormatter::splitIntoTokens(std::string string)
 {
-    for(const std::shared_ptr<const TokenWrapper<std::string>>& wrapper : m_uniqueTokens)
-        string = replaceString(string, wrapper->token->value, " " + wrapper->token->value + " ");
+    for(const auto& pair : m_resourceManager->getTokenManager()->m_uniqueTokens)
+        string = replaceString(string, pair.second.first->token->value, " " + pair.second.first->token->value + " ");
     return splitAtSpaces(std::move(string));
 }

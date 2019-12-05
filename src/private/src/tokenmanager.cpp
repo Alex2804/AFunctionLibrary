@@ -36,24 +36,12 @@ void afl::detail::TokenManager::removePluginFeatures(const apl::Plugin* plugin)
                         { return std::get<0>(tuple)->getPluginInfo() == pluginInfo; }), m_pluginFunctions.end());
     removeReferences(getFullPathName(plugin->getPath(), ResourceType::Plugin));
 }
-void afl::detail::TokenManager::removeReferences(const std::string &refPath)
-{
-    auto refIterator = m_pathTokenValueRefs.find(refPath);
-    if(refIterator != m_pathTokenValueRefs.end()) {
-        for(const std::string& value : refIterator->second) {
-            auto tokenIterator = m_tokens.find(value);
-            if(tokenIterator != m_tokens.end() && --(tokenIterator->second.second) == 0)
-                m_tokens.erase(tokenIterator);
-        }
-        m_pathTokenValueRefs.erase(refIterator);
-    }
-}
 
-bool afl::detail::TokenManager::addToken(std::shared_ptr<TokenWrapper<std::string>> tokenWrapper, std::string refPath)
+bool afl::detail::TokenManager::addToken(std::shared_ptr<TokenPtrBundle<std::string>> tokenPtrBundle, std::string refPath)
 {
-    if(tokenWrapper == nullptr || tokenWrapper->token == nullptr)
+    if(tokenPtrBundle == nullptr || (!isUnique(tokenPtrBundle->token.get()) && !isNotUnique(tokenPtrBundle->token.get())))
         return false;
-    std::string tokenValue = tokenWrapper->token->value;
+    std::string tokenValue = tokenPtrBundle->token->value;
     auto refIterator = m_pathTokenValueRefs.find(refPath);
     if(refIterator != m_pathTokenValueRefs.end()) {
         if(std::find(refIterator->second.begin(), refIterator->second.end(), tokenValue) != refIterator->second.end()) // token with this reference exists already
@@ -61,64 +49,78 @@ bool afl::detail::TokenManager::addToken(std::shared_ptr<TokenWrapper<std::strin
     } else {
         refIterator = m_pathTokenValueRefs.emplace(std::move(refPath), std::vector<std::string>()).first;
     }
-    auto tokenIterator = m_tokens.emplace(tokenValue,
-            std::pair<std::shared_ptr<TokenWrapper<std::string>>, size_t>{std::move(tokenWrapper), 0}).first;
-    tokenIterator->second.second += 1;
-    for(const auto & i : refIterator->second) {
-        if(i == tokenValue)
-            return true;
-    }
+    // insert or increment ref count
+    size_t newRefCount;
+    if(isUnique(tokenPtrBundle->token.get()))
+        newRefCount = ++(m_uniqueTokens.emplace(tokenValue, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>{std::move(tokenPtrBundle), 0}).first->second.second);
+    else
+        newRefCount = ++(m_notUniqueTokens.emplace(tokenValue, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>{std::move(tokenPtrBundle), 0}).first->second.second);
+    // create reference if not existing
     refIterator->second.emplace_back(std::move(tokenValue));
     return true;
 }
 void afl::detail::TokenManager::removeToken(const std::string& value, const std::string& refPath)
 {
-    auto tokenIterator = m_tokens.find(value);
-    if(tokenIterator != m_tokens.end()) { // if token with this value exists
-        auto refIterator = m_pathTokenValueRefs.find(refPath); // search references of refPath
-        if (refIterator != m_pathTokenValueRefs.end()) { // if refPath has any references
-            auto refTokenStringIterator = std::find(refIterator->second.begin(), refIterator->second.end(), value); // search reference
-            if (refTokenStringIterator != refIterator->second.end()) { // if reference between refPath and value exists
-                refIterator->second.erase(refTokenStringIterator); // delete reference
-                if (--(tokenIterator->second.second) == 0) { // if this is the last reference to the token
-                    m_tokens.erase(tokenIterator); // delete the token
-                }
-            }
-            if(refIterator->second.empty())
-                m_pathTokenValueRefs.erase(refIterator);
+    // token with this value exists
+    auto refIterator = m_pathTokenValueRefs.find(refPath); // search references of refPath
+    if (refIterator != m_pathTokenValueRefs.end()) { // if refPath has any references
+        auto refTokenStringIterator = std::find(refIterator->second.begin(), refIterator->second.end(), value); // search reference
+        if (refTokenStringIterator != refIterator->second.end()) { // if reference between refPath and value exists
+            refIterator->second.erase(refTokenStringIterator); // delete reference
+
+            auto tokenIterator = m_uniqueTokens.find(value);
+            if (tokenIterator != m_uniqueTokens.end() && --(tokenIterator->second.second) == 0) // if this is the last reference to the token in uniqueTokens
+                m_uniqueTokens.erase(tokenIterator); // delete the token
+            tokenIterator = m_notUniqueTokens.find(value);
+            if (tokenIterator != m_notUniqueTokens.end() && --(tokenIterator->second.second) == 0) // if this is the last reference to the token in notUniqueTokens
+                m_notUniqueTokens.erase(tokenIterator); // delete the token
         }
+        if(refIterator->second.empty())
+            m_pathTokenValueRefs.erase(refIterator); // remove reference entry if there are no associated tokens with this refPath
     }
 }
-void afl::detail::TokenManager::removeToken(const std::shared_ptr<const TokenWrapper<std::string>>& tokenWrapper, const std::string& refPath)
+void afl::detail::TokenManager::removeReferences(const std::string& refPath)
 {
-    if(tokenWrapper != nullptr && tokenWrapper->token != nullptr)
-        removeToken(tokenWrapper->token->value, refPath);
+    auto refIterator = m_pathTokenValueRefs.find(refPath);
+    if(refIterator != m_pathTokenValueRefs.end()) {
+        for(const std::string& value : refIterator->second) {
+            auto tokenIterator = m_uniqueTokens.find(value);
+            if(tokenIterator != m_uniqueTokens.end() && --(tokenIterator->second.second) == 0)
+                m_uniqueTokens.erase(tokenIterator);
+            tokenIterator = m_notUniqueTokens.find(value);
+            if(tokenIterator != m_notUniqueTokens.end() && --(tokenIterator->second.second) == 0)
+                m_notUniqueTokens.erase(tokenIterator);
+        }
+        m_pathTokenValueRefs.erase(refIterator);
+    }
 }
 
-std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> afl::detail::TokenManager::createToken(const char* value, bool createAliases) const
+std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> afl::detail::TokenManager::createToken(const std::string& value, bool createAliases) const
 {
     std::vector<afl::TokenAliases<std::string>> aliases;
     if(createAliases)
         aliases = this->createAliases(value);
+    const char* cValue = value.c_str();
     const apl::Plugin* plugin = nullptr; // plugin from which the token was created;
     CStringToken* cToken = nullptr;
     for(const auto& tuple : m_pluginFunctions) {
         plugin = std::get<0>(tuple);
         for(createTokenPluginFunction function : std::get<1>(tuple)) {
-            cToken = function(value);
+            cToken = function(cValue);
             if(cToken != nullptr)
                 goto TOKEN_FOUND; // break if token was found
         }
     }
-    TOKEN_FOUND:
+    TOKEN_FOUND: // label for nested loop interrupt
     if(cToken != nullptr) {
         auto token = std::make_shared<const Token<std::string>>(value, cToken->type, cToken->precedence, cToken->parameterCount, cToken->associativity);
-        return {std::make_shared<TokenWrapper<std::string>>(std::move(token), std::move(aliases)),
+        plugin->freeMemory(cToken);
+        return {std::make_shared<TokenPtrBundle<std::string>>(std::move(token), std::move(aliases)),
                 getFullPathName(plugin->getPath(), ResourceType::Plugin)};
     }
-    return {std::shared_ptr<TokenWrapper<std::string>>(), ""};
+    return {std::shared_ptr<TokenPtrBundle<std::string>>(), ""};
 }
-std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAliases(const char* value) const
+std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAliases(const std::string& value) const
 {
     std::array<TokenAliasType, 2> types = {TokenAliasType::String, TokenAliasType::Regex};
     std::vector<TokenAliases<std::string>> aliases;
@@ -127,11 +129,12 @@ std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAli
         aliases.emplace_back();
         aliases.back().type = type;
     }
+    const char* cValue = value.c_str();
     for(const auto& tuple : m_pluginFunctions) {
         const apl::Plugin* plugin = std::get<0>(tuple);
         for(createTokenAliasesPluginFunction function : std::get<2>(tuple)) {
             for(size_t i = 0; i < types.size(); i++) {
-                cAlias = function(value, types[i]);
+                cAlias = function(cValue, types[i]);
                 if(cAlias != nullptr) {
                     std::copy(cAlias->aliases, cAlias->aliases + cAlias->aliasesCount, std::inserter(aliases[i].aliases, aliases[i].aliases.end()));
                     for(size_t j = 0; j < cAlias->aliasesCount; j++) {
@@ -147,36 +150,37 @@ std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAli
     return aliases;
 }
 
-std::shared_ptr<const afl::detail::TokenWrapper<std::string>> afl::detail::TokenManager::getToken(const std::string &value) const
+std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>> afl::detail::TokenManager::getToken(const std::string &value) const
 {
-    auto iterator = m_tokens.find(value);
-    if(iterator != m_tokens.end()) // token exists
+    auto iterator = m_uniqueTokens.find(value);
+    if(iterator != m_uniqueTokens.end()) // token exists
         return iterator->second.first;
-    return std::shared_ptr<const TokenWrapper<std::string>>();
+    iterator = m_notUniqueTokens.find(value);
+    if(iterator != m_notUniqueTokens.end())
+        return iterator->second.first;
+    return std::shared_ptr<const TokenPtrBundle<std::string>>();
 }
-std::shared_ptr<const afl::detail::TokenWrapper<std::string>> afl::detail::TokenManager::getToken(const std::string &value, bool createIfNotExist)
+std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>> afl::detail::TokenManager::getToken(const std::string &value, bool createIfNotExist)
 {
-    std::shared_ptr<const TokenWrapper<std::string>> token = getToken(value);
+    std::shared_ptr<const TokenPtrBundle<std::string>> token = getToken(value);
     if(token == nullptr && createIfNotExist) {
-        std::pair<std::shared_ptr<TokenWrapper<std::string>>, std::string> pair = createToken(value.c_str());
+        std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, std::string> pair = createToken(value);
         if(addToken(pair.first, std::move(pair.second)))
             return pair.first;
     }
     return token;
 }
-std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>> afl::detail::TokenManager::getTokens() const
+std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> afl::detail::TokenManager::getTokens() const
 {
-    std::vector<std::shared_ptr<const TokenWrapper<std::string>>> tokens;
-    for(const std::pair<const std::string, std::pair<std::shared_ptr<TokenWrapper<std::string>>, size_t>>& pair : m_tokens)
-        tokens.push_back(pair.second.first);
-    return tokens;
+    return filterTokens([](const Token<std::string>* t){ return true;});
 }
-std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>> afl::detail::TokenManager::getTokens(TokenType type) const
+
+bool afl::detail::TokenManager::isUnique(const afl::Token<std::string>* token)
 {
-    std::vector<std::shared_ptr<const TokenWrapper<std::string>>> tokens;
-    for(const std::pair<const std::string, std::pair<std::shared_ptr<TokenWrapper<std::string>>, size_t>>& pair : m_tokens) {
-        if(pair.second.first->token->type == type)
-            tokens.push_back(pair.second.first);
-    }
-    return tokens;
+    return token != nullptr && (token->type == TokenType::Operator || token->type == TokenType::ArgumentDelimiter
+                                || token->type == TokenType::BracketOpen || token->type == TokenType::BracketClose);
+}
+bool afl::detail::TokenManager::isNotUnique(const afl::Token<std::string>* token)
+{
+    return token != nullptr && !isUnique(token);
 }

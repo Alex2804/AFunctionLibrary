@@ -43,6 +43,39 @@ bool afl::Token<T>::requireParameterCount()
 }
 
 template<typename T>
+const T& afl::Token<T>::getValue() const
+{
+    return value;
+}
+template<typename T>
+T& afl::Token<T>::getValue()
+{
+    return value;
+}
+template<typename T>
+afl::TokenType afl::Token<T>::getType() const
+{
+    return type;
+}
+
+template<typename T>
+size_t afl::Token<T>::getPrecedence() const
+{
+    return precedence;
+}
+
+template<typename T>
+size_t afl::Token<T>::getParameterCount() const
+{
+    return parameterCount;
+}
+template<typename T>
+afl::TokenAssociativity afl::Token<T>::getAssociativity() const
+{
+    return associativity;
+}
+
+template<typename T>
 bool afl::TokenAliases<T>::operator==(const TokenAliases &other) const
 {
     return type == other.type && aliases == other.aliases;

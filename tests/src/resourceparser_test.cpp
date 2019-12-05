@@ -39,7 +39,7 @@ GTEST_TEST(ResourceParser_Test, stringToTokenAssociativity)
     ASSERT_EQ(afl::detail::stringToTokenAssociativity("not right", afl::TokenAssociativity::Left), afl::TokenAssociativity::Left);
 }
 
-void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::TokenWrapper<std::string>>>& tokensVector)
+void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>>& tokensVector)
 {
     ASSERT_EQ(tokensVector.size(), 6);
 
@@ -89,8 +89,8 @@ GTEST_TEST(ResourceParser_Test, parseTokensRecursive)
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(path.c_str());
     ASSERT_TRUE(result);
-    std::vector<std::shared_ptr<afl::detail::TokenWrapper<std::string>>> tokensVector;
-    afl::detail::TokenBundle<std::string> defaultBundle;
+    std::vector<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>> tokensVector;
+    afl::detail::TokenInstanceBundle<std::string> defaultBundle;
     defaultBundle.token = afl::Token<std::string>("", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
     defaultBundle.aliases = std::vector<afl::TokenAliases<std::string>>();
     std::unordered_set<std::string> valueSet;
@@ -105,7 +105,7 @@ GTEST_TEST(ResourceParser_Test, parseExtensionRecursive_Tokens)
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(path.c_str());
     ASSERT_TRUE(result);
-    std::vector<std::shared_ptr<afl::detail::TokenWrapper<std::string>>> tokensVector;
+    std::vector<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>> tokensVector;
     afl::detail::parseExtensionRecursive(doc, tokensVector);
     testTokenParsingResult(tokensVector);
 }

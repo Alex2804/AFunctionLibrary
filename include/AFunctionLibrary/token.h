@@ -29,6 +29,13 @@ namespace afl
         bool requireAssociativity();
         bool requireParameterCount();
 
+        const T& getValue() const;
+        T& getValue();
+        TokenType getType() const;
+        size_t getPrecedence() const;
+        size_t getParameterCount() const;
+        TokenAssociativity getAssociativity() const;
+
         T value;
         TokenType type;
         size_t precedence;

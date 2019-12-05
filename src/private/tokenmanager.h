@@ -4,6 +4,8 @@
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
 #include <unordered_map>
+#include <unordered_set>
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -34,27 +36,32 @@ namespace afl
 
             void addPluginFeatures(const apl::Plugin* plugin);
             void removePluginFeatures(const apl::Plugin* plugin);
+
+            bool addToken(std::shared_ptr<TokenPtrBundle < std::string>> tokenBundle, std::string refPath);
+            void removeToken(const std::string& value, const std::string& refPath);
             void removeReferences(const std::string& refPath);
 
-            bool addToken(std::shared_ptr<TokenWrapper<std::string>> tokenWrapper, std::string refPath);
-            void removeToken(const std::string& value, const std::string& refPath);
-            void removeToken(const std::shared_ptr<const TokenWrapper<std::string>>& tokenWrapper, const std::string& refPath);
+            std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, std::string> createToken(const std::string& value, bool createAliases = true) const;
+            std::vector<TokenAliases<std::string>> createAliases(const std::string& value) const;
 
-            std::pair<std::shared_ptr<TokenWrapper<std::string>>, std::string> createToken(const char* value, bool createAliases = true) const;
-            std::vector<TokenAliases<std::string>> createAliases(const char* value) const;
+            std::shared_ptr<const TokenPtrBundle<std::string>> getToken(const std::string& value) const;
+            std::shared_ptr<const TokenPtrBundle<std::string>> getToken(const std::string& value, bool createIfNotExist);
+            std::vector<std::shared_ptr<const TokenPtrBundle<std::string>>> getTokens() const;
 
-            std::shared_ptr<const TokenWrapper<std::string>> getToken(const std::string& value) const;
-            std::shared_ptr<const TokenWrapper<std::string>> getToken(const std::string& value, bool createIfNotExist);
-            std::vector<std::shared_ptr<const TokenWrapper<std::string>>> getTokens() const;
-            std::vector<std::shared_ptr<const TokenWrapper<std::string>>> getTokens(TokenType type) const;
+            template<typename T>
+            std::vector<std::shared_ptr<const TokenPtrBundle<std::string>>> filterTokens(const T& filterFunction) const;
+
+            static bool isUnique(const afl::Token<std::string>* token);
+            static bool isNotUnique(const afl::Token<std::string>* token);
 
         public:
-            std::unordered_map<std::string, std::pair<std::shared_ptr<TokenWrapper<std::string>>, size_t>> m_tokens;
+            std::unordered_map<std::string, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>> m_uniqueTokens, m_notUniqueTokens;
             std::unordered_map<std::string, std::vector<std::string>> m_pathTokenValueRefs;
             std::vector<std::tuple<const apl::Plugin*, std::vector<createTokenPluginFunction>, std::vector<createTokenAliasesPluginFunction>>> m_pluginFunctions;
         };
     }
 }
 
+#include "implementation/tokenmanager.tpp"
 
 #endif //AFUNCTIONLIBRARY_TOKENMANAGER_H

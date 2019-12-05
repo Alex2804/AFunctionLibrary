@@ -10,22 +10,25 @@
 #include "../../src/private/tokenmanager.h"
 #include "../../src/private/resourcemanager.h"
 
-std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenWrapper<std::string>>> allTokens = {
-        {"+", std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
-        {"*", std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
-        {"^", std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right), std::vector<afl::TokenAliases<std::string>>{})},
-        {"abs", std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None),
-                                                                         std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"absolute", "absolute2"}}, afl::TokenAliases<std::string>{afl::TokenAliasType::Regex, {".*absolute.*"}}})},
+std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>> allTokens = {
+        {"+", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
+        {"*", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
+        {"^", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right), std::vector<afl::TokenAliases<std::string>>{})},
+        {"abs", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None),
+                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"absolute", "absolute2"}}, afl::TokenAliases<std::string>{afl::TokenAliasType::Regex, {".*absolute.*"}}})},
 };
 
 GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 23}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 46}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 92}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 184}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 23}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 46}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 92}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 184}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -39,41 +42,50 @@ GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
             };
 
     afl::detail::TokenManager manager1;
-    manager1.m_tokens = tokens;
+    manager1.m_uniqueTokens = uniqueTokens;
+    manager1.m_notUniqueTokens = notUniqueTokens;
     manager1.m_pathTokenValueRefs = pathTokenValueRefs;
     manager1.m_pluginFunctions = pluginFunctions;
 
     // copy constructor
     afl::detail::TokenManager copiedManager(manager1);
-    ASSERT_EQ(copiedManager.m_tokens, tokens);
+    ASSERT_EQ(copiedManager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(copiedManager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(copiedManager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(copiedManager.m_pluginFunctions, pluginFunctions);
-    copiedManager.m_tokens.clear();
+    copiedManager.m_uniqueTokens.clear();
+    copiedManager.m_notUniqueTokens.clear();
     copiedManager.m_pathTokenValueRefs.clear();
     copiedManager.m_pluginFunctions.clear();
 
     // copy assignment
     copiedManager = manager1;
-    ASSERT_EQ(copiedManager.m_tokens, tokens);
+    ASSERT_EQ(copiedManager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(copiedManager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(copiedManager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(copiedManager.m_pluginFunctions, pluginFunctions);
-    copiedManager.m_tokens.clear();
+    copiedManager.m_uniqueTokens.clear();
+    copiedManager.m_notUniqueTokens.clear();
     copiedManager.m_pathTokenValueRefs.clear();
     copiedManager.m_pluginFunctions.clear();
 
-    ASSERT_EQ(manager1.m_tokens, tokens);
+    ASSERT_EQ(manager1.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager1.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager1.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager1.m_pluginFunctions, pluginFunctions);
 }
 
 GTEST_TEST(TokenManager_Test, move_constructor_assignment)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 23}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 46}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 92}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 184}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 23}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 46}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 92}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 184}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -87,36 +99,43 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
             };
 
     afl::detail::TokenManager manager1;
-    manager1.m_tokens = tokens;
+    manager1.m_uniqueTokens = uniqueTokens;
+    manager1.m_notUniqueTokens = notUniqueTokens;
     manager1.m_pathTokenValueRefs = pathTokenValueRefs;
     manager1.m_pluginFunctions = pluginFunctions;
 
     // move constructor
     afl::detail::TokenManager movedManager(std::move(manager1));
-    ASSERT_EQ(movedManager.m_tokens, tokens);
+    ASSERT_EQ(movedManager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(movedManager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(movedManager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(movedManager.m_pluginFunctions, pluginFunctions);
 
     afl::detail::TokenManager manager2;
-    manager2.m_tokens = tokens;
+    manager2.m_uniqueTokens = uniqueTokens;
+    manager2.m_notUniqueTokens = notUniqueTokens;
     manager2.m_pathTokenValueRefs = pathTokenValueRefs;
     manager2.m_pluginFunctions = pluginFunctions;
 
     // move assignment
     movedManager = std::move(manager2);
-    ASSERT_EQ(movedManager.m_tokens, tokens);
+    ASSERT_EQ(movedManager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(movedManager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(movedManager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(movedManager.m_pluginFunctions, pluginFunctions);
 }
 
 GTEST_TEST(TokenManager_Test, addPluginFeatures)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 2}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 2}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 1}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 1}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 2}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 2}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 1}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 1}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -127,7 +146,8 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions;
 
     afl::detail::TokenManager manager;
-    manager.m_tokens = tokens;
+    manager.m_uniqueTokens = uniqueTokens;
+    manager.m_notUniqueTokens = notUniqueTokens;
     manager.m_pathTokenValueRefs = pathTokenValueRefs;
 
     manager.addPluginFeatures(nullptr);
@@ -163,18 +183,22 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     std::sort(std::get<2>(manager.m_pluginFunctions.front()).begin(), std::get<2>(manager.m_pluginFunctions.front()).end());
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    ASSERT_EQ(manager.m_tokens, tokens);
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
 }
 
 GTEST_TEST(TokenManager_Test, removePluginFeatures)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 2}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 2}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 1}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 1}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 2}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 2}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 1}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 1}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -202,20 +226,23 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
             {{plugin, createTokenPluginFunctions, createTokenAliasesPluginFunctions}};
 
     afl::detail::TokenManager manager;
-    manager.m_tokens = tokens;
+    manager.m_uniqueTokens = uniqueTokens;
+    manager.m_notUniqueTokens = notUniqueTokens;
     manager.m_pathTokenValueRefs = pathTokenValueRefs;
     manager.m_pluginFunctions = pluginFunctions;
 
     manager.removePluginFeatures(nullptr);
-    ASSERT_EQ(manager.m_tokens, tokens);
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removePluginFeatures(plugin);
-    tokens.erase("^");
-    tokens.at("+").second = 1;
-    tokens.at("*").second = 1;
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.erase("^");
+    uniqueTokens.at("+").second = 1;
+    uniqueTokens.at("*").second = 1;
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase(afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin));
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     pluginFunctions.clear();
@@ -224,12 +251,15 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
 
 GTEST_TEST(TokenManager_Test, removeReferences)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 2}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 2}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 1}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 1}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 2}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 2}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 1}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 1}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -241,75 +271,85 @@ GTEST_TEST(TokenManager_Test, removeReferences)
             {{nullptr, {nullptr, nullptr, nullptr, nullptr}, {nullptr, nullptr, nullptr}}};
 
     afl::detail::TokenManager manager;
-    manager.m_tokens = tokens;
+    manager.m_uniqueTokens = uniqueTokens;
+    manager.m_notUniqueTokens = notUniqueTokens;
     manager.m_pathTokenValueRefs = pathTokenValueRefs;
     manager.m_pluginFunctions = pluginFunctions;
 
     manager.removeReferences("path/to/operators");
-    tokens.erase("^");
-    tokens.at("+").second = 1;
-    tokens.at("*").second = 1;
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.erase("^");
+    uniqueTokens.at("+").second = 1;
+    uniqueTokens.at("*").second = 1;
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/operators");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeReferences("path/to/alternative_operators");
-    tokens.erase("+");
-    tokens.erase("*");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.erase("+");
+    uniqueTokens.erase("*");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/alternative_operators");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeReferences("path/to/functions");
-    tokens.erase("abs");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    notUniqueTokens.erase("abs");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/functions");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    ASSERT_TRUE(manager.m_tokens.empty());
+    ASSERT_TRUE(manager.m_uniqueTokens.empty());
+    ASSERT_TRUE(manager.m_notUniqueTokens.empty());
     ASSERT_TRUE(manager.m_pathTokenValueRefs.empty());
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
 
 GTEST_TEST(TokenManager_Test, addToken)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens;
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens, notUniqueTokens;
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs;
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions;
 
     afl::detail::TokenManager manager;
     manager.addToken(allTokens.at("+"), "path/to/operators");
-    tokens = {{"+", {allTokens.at("+"), 1}}};
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens = {{"+", {allTokens.at("+"), 1}}};
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs = {{"path/to/operators", {"+"}}};
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.addToken(allTokens.at("abs"), "path/to/functions");
-    tokens.emplace("abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 1});
-    ASSERT_EQ(manager.m_tokens, tokens);
+    notUniqueTokens.emplace("abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 1});
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.emplace("path/to/functions", std::vector<std::string>{"abs"});
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.addToken(allTokens.at("*"), "path/to/operators");
-    tokens.emplace("*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 1});
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.emplace("*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 1});
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.at("path/to/operators").push_back("*");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.addToken(allTokens.at("+"), "path/to/operators");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.addToken(allTokens.at("*"), "path/to/alternative_operators");
-    tokens.at("*").second = 2;
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.at("*").second = 2;
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.emplace("path/to/alternative_operators", std::vector<std::string>{"*"});
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
@@ -317,12 +357,15 @@ GTEST_TEST(TokenManager_Test, addToken)
 
 GTEST_TEST(TokenManager_Test, removeToken)
 {
-    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>> tokens =
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
-                    {"+", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("+"), 2}},
-                    {"*", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("*"), 2}},
-                    {"^", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("^"), 1}},
-                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, size_t>{allTokens.at("abs"), 1}}
+                    {"+", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("+"), 2}},
+                    {"*", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("*"), 2}},
+                    {"^", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("^"), 1}}
+            };
+    std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> notUniqueTokens =
+            {
+                    {"abs", std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>{allTokens.at("abs"), 1}}
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
@@ -334,68 +377,79 @@ GTEST_TEST(TokenManager_Test, removeToken)
             {{nullptr, {nullptr, nullptr, nullptr, nullptr}, {nullptr, nullptr, nullptr}}};
 
     afl::detail::TokenManager manager;
-    manager.m_tokens = tokens;
+    manager.m_uniqueTokens = uniqueTokens;
+    manager.m_notUniqueTokens = notUniqueTokens;
     manager.m_pathTokenValueRefs = pathTokenValueRefs;
     manager.m_pluginFunctions = pluginFunctions;
 
     manager.removeToken("*", "path/to/operators");
-    tokens.at("*").second = 1;
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.at("*").second = 1;
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.at("path/to/operators") = {"+", "^"};
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    manager.removeToken(allTokens.at("*"), "path/to/operators");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    manager.removeToken("*", "path/to/operators");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeToken("*", "path/to/alternative_operators");
-    tokens.erase("*");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.erase("*");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.at("path/to/alternative_operators") = {"+"};
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeToken("abs", "pat/to/not/to/remove/functions");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    manager.removeToken(allTokens.at("abs"), "path/to/functions");
-    tokens.erase("abs");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    manager.removeToken("abs", "path/to/functions");
+    notUniqueTokens.erase("abs");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/functions");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeToken("+", "path/to/alternative_operators");
-    tokens.at("+").second = 1;
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.at("+").second = 1;
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/alternative_operators");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeToken("some_operator", "path/to/operators");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
     manager.removeToken("^", "path/to/operators");
-    tokens.erase("^");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    uniqueTokens.erase("^");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.at("path/to/operators") = {"+"};
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    manager.removeToken(allTokens.at("+"), "path/to/operators");
-    tokens.erase("+");
-    ASSERT_EQ(manager.m_tokens, tokens);
+    manager.removeToken("+", "path/to/operators");
+    uniqueTokens.erase("+");
+    ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
+    ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     pathTokenValueRefs.erase("path/to/operators");
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    ASSERT_TRUE(manager.m_tokens.empty());
+    ASSERT_TRUE(manager.m_uniqueTokens.empty());
+    ASSERT_TRUE(manager.m_notUniqueTokens.empty());
     ASSERT_TRUE(manager.m_pathTokenValueRefs.empty());
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
@@ -408,18 +462,18 @@ GTEST_TEST(TokenManager_Test, createToken)
     ASSERT_TRUE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
 
-    std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> created = manager.createToken("1", false);
-    std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created = manager.createToken("1", false);
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
 
     created = manager.createToken("1", true);
-    std::pair<std::shared_ptr<afl::detail::TokenWrapper<std::string>>, std::string> created2 = manager.createToken("1");
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created2 = manager.createToken("1");
     ASSERT_EQ(*created.first, *created2.first);
     ASSERT_EQ(created.second, created2.second);
 
-    expected = {std::make_shared<afl::detail::TokenWrapper<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+    expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
+                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
 
@@ -470,9 +524,9 @@ GTEST_TEST(TokenManager_Test, getToken)
     ASSERT_EQ(manager.getToken("+", true), allTokens.at("+"));
     ASSERT_EQ(manager.getToken("*", true), allTokens.at("*"));
     ASSERT_EQ(manager.getToken("^", true), allTokens.at("^"));
-    afl::detail::TokenWrapper<std::string> wrapper(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                                                   std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::set<std::string>{"one"}}});
-    ASSERT_EQ(*manager.getToken("1", true), wrapper);
+    afl::detail::TokenPtrBundle<std::string> tokenBundle(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
+                                                     std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::set<std::string>{"one"}}});
+    ASSERT_EQ(*manager.getToken("1", true), tokenBundle);
     ASSERT_EQ(manager.getToken("no_token", true).get(), nullptr);
 }
 
@@ -484,20 +538,31 @@ GTEST_TEST(TokenManager_Test, getTokens)
     manager.addToken(allTokens.at("^"), "path/to/operators");
     manager.addToken(allTokens.at("abs"), "path/to/functions");
 
-    std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>> expected =
+    std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> expected =
             {allTokens.at("+"), allTokens.at("*"), allTokens.at("^"), allTokens.at("abs") };
     std::sort(expected.begin(), expected.end());
-    std::vector<std::shared_ptr<const afl::detail::TokenWrapper<std::string>>> tokens = manager.getTokens();
+    std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> tokens = manager.getTokens();
     std::sort(tokens.begin(), tokens.end());
     ASSERT_EQ(expected, tokens);
+}
 
-    expected = {allTokens.at("+"), allTokens.at("*"), allTokens.at("^") };
+GTEST_TEST(TokenManager_Test, filterTokens)
+{
+    afl::detail::TokenManager manager;
+    manager.addToken(allTokens.at("+"), "path/to/operators");
+    manager.addToken(allTokens.at("*"), "path/to/operators");
+    manager.addToken(allTokens.at("^"), "path/to/operators");
+    manager.addToken(allTokens.at("abs"), "path/to/functions");
+
+    std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> expected =
+            {allTokens.at("+"), allTokens.at("*"), allTokens.at("^") };
     std::sort(expected.begin(), expected.end());
-    tokens = manager.getTokens(afl::TokenType::Operator);
+    std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> tokens =
+            manager.filterTokens([](const afl::Token<std::string>* t){ return t->type == afl::TokenType::Operator; });
     std::sort(tokens.begin(), tokens.end());
     ASSERT_EQ(expected, tokens);
 
     expected = {allTokens.at("abs") };
-    tokens = manager.getTokens(afl::TokenType::Function);
+    tokens = manager.filterTokens([](const afl::Token<std::string>* t){ return t->type == afl::TokenType::Function; });
     ASSERT_EQ(expected, tokens);
 }

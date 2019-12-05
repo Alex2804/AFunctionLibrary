@@ -34,7 +34,7 @@ afl::TokenType afl::detail::stringToTokenType(const std::string& string, TokenTy
 }
 
 void afl::detail::parseExtensionRecursive(const pugi::xml_node &node,
-                                          std::vector<std::shared_ptr<TokenWrapper<std::string>>> &tokens)
+                                          std::vector<std::shared_ptr<TokenPtrBundle<std::string>>> &tokens)
 {
     std::string childName;
     for(const pugi::xml_node& child : node.children()) {
@@ -42,7 +42,7 @@ void afl::detail::parseExtensionRecursive(const pugi::xml_node &node,
         if(childName == "extension") {
             parseExtensionRecursive(child, tokens);
         } else if(childName == "token") {
-            TokenBundle<std::string> defaultBundle;
+            TokenInstanceBundle<std::string> defaultBundle;
             defaultBundle.token = Token<std::string>("", TokenType::Constant, 0, 0, TokenAssociativity::None);
             defaultBundle.aliases = std::vector<TokenAliases<std::string>>();
             std::unordered_set<std::string> valueSet;
@@ -52,7 +52,7 @@ void afl::detail::parseExtensionRecursive(const pugi::xml_node &node,
 }
 
 
-void afl::detail::parseTokenAliases(std::string aliasString, TokenBundle<std::string> &bundle,
+void afl::detail::parseTokenAliases(std::string aliasString, TokenInstanceBundle<std::string> &bundle,
                                     afl::TokenAliasType type)
 {
     std::vector<std::string> tmpAliases = splitAtSpaces(std::move(aliasString));
@@ -65,8 +65,8 @@ void afl::detail::parseTokenAliases(std::string aliasString, TokenBundle<std::st
     }
     std::copy(tmpAliases.begin(), tmpAliases.end(), std::inserter(iterator->aliases, iterator->aliases.end()));
 }
-void afl::detail::parseTokensRecursive(const pugi::xml_node &node, TokenBundle<std::string> token,
-                                       std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens,
+void afl::detail::parseTokensRecursive(const pugi::xml_node &node, TokenInstanceBundle<std::string> token,
+                                       std::vector<std::shared_ptr<TokenPtrBundle<std::string>>>& tokens,
                                        std::unordered_set<std::string>& valueSet)
 {
     if(std::strcmp(node.name(), "token") != 0) // if name of node is not "token"

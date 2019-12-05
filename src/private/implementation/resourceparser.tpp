@@ -3,8 +3,8 @@
 
 template<typename T>
 void afl::detail::parseTokenField(const pugi::xml_node& node, const std::string& fieldName, const T& fieldValue,
-                                  TokenBundle<std::string>& bundle,
-                                  std::vector<std::shared_ptr<TokenWrapper<std::string>>>& tokens,
+                                  TokenInstanceBundle<std::string>& bundle,
+                                  std::vector<std::shared_ptr<TokenPtrBundle<std::string>>>& tokens,
                                   std::unordered_set<std::string>& valueSet)
 {
     std::string fieldString = afl::trimString(fieldValue.as_string(""));
@@ -34,7 +34,7 @@ void afl::detail::parseTokenField(const pugi::xml_node& node, const std::string&
             for(std::string s : splitAtSpaces(fieldString)) {
                 if(valueSet.find(s) == valueSet.end()) {
                     bundle.token.value = s;
-                    tokens.push_back(std::make_shared<TokenWrapper<std::string>>(bundle));
+                    tokens.push_back(std::make_shared<TokenPtrBundle<std::string>>(bundle));
                     valueSet.emplace(std::move(s));
                 }
             }

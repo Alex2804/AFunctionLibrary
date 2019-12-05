@@ -27,7 +27,7 @@ namespace afl
             FunctionFormatter& operator=(const FunctionFormatter& other);
             FunctionFormatter& operator=(FunctionFormatter&& other) noexcept;
 
-            void reloadTokens();
+            void reloadPluginFormatFunctions();
 
             std::string formatFunction(std::string function);
 
@@ -35,8 +35,7 @@ namespace afl
 
         private:
             std::shared_ptr<ResourceManager> m_resourceManager;
-            std::vector<std::pair<const apl::Plugin*, std::vector<formatFunctionPluginFunction>>> m_formatFunctions;
-            std::vector<std::shared_ptr<const TokenWrapper<std::string>>> m_uniqueTokens, m_notUniqueTokens;
+            std::vector<const apl::PluginFeatureInfo*> m_pluginFormatFunctions;
         };
     }
 }

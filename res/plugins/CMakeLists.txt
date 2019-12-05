@@ -3,7 +3,7 @@ project(AFunctionLibraryDefaultPlugin VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(HEADERS)
+set(HEADERS ../../src/private/implementation/tokenmanager.tpp)
 set(SOURCES
         src/createtokensdefault.cpp)
 

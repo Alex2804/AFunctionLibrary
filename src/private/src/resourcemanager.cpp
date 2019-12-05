@@ -106,11 +106,11 @@ bool afl::detail::ResourceManager::load(std::string path, ResourceType type)
         pugi::xml_parse_result result = doc.load_file(fullPath.c_str());
         if(!result)
             return false;
-        std::vector<std::shared_ptr<TokenWrapper<std::string>>> tokensVector;
+        std::vector<std::shared_ptr<TokenPtrBundle<std::string>>> tokensVector;
         parseExtensionRecursive(doc.root(), tokensVector);
 
-        for(const std::shared_ptr<TokenWrapper<std::string>>& tokenWrapper : tokensVector)
-            m_tokenManager->addToken(tokenWrapper, fullPath);
+        for(const std::shared_ptr<TokenPtrBundle<std::string>>& tokenBundle : tokensVector)
+            m_tokenManager->addToken(tokenBundle, fullPath);
         return true;
     } else {
         throw std::runtime_error("Unimplemented afl::detail::ResourceType!");
