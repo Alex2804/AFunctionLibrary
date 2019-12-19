@@ -2,7 +2,8 @@
 
 #include <cstring>
 #include <list>
-#include <algorithm>
+
+#include "AFunctionLibrary/utility.h"
 
 afl::TokenAssociativity afl::detail::stringToTokenAssociativity(const std::string& string, TokenAssociativity defaultValue)
 {
@@ -55,15 +56,14 @@ void afl::detail::parseExtensionRecursive(const pugi::xml_node &node,
 void afl::detail::parseTokenAliases(std::string aliasString, TokenInstanceBundle<std::string> &bundle,
                                     afl::TokenAliasType type)
 {
-    std::vector<std::string> tmpAliases = splitAtSpaces(std::move(aliasString));
     auto iterator = bundle.aliases.begin();
     while(iterator != bundle.aliases.end() && iterator->type != type)
         ++iterator;
     if(iterator == bundle.aliases.end()) {
-        bundle.aliases.push_back(TokenAliases<std::string>{type, std::set<std::string>()});
+        bundle.aliases.emplace_back(type);
         iterator = --bundle.aliases.end();
     }
-    std::copy(tmpAliases.begin(), tmpAliases.end(), std::inserter(iterator->aliases, iterator->aliases.end()));
+    iterator->append(splitAtSpaces(std::move(aliasString)));
 }
 void afl::detail::parseTokensRecursive(const pugi::xml_node &node, TokenInstanceBundle<std::string> token,
                                        std::vector<std::shared_ptr<TokenPtrBundle<std::string>>>& tokens,

@@ -1,19 +1,52 @@
 #ifndef AFUNCTIONLIBRARYTEST_TEST_INCLUDE_H
 #define AFUNCTIONLIBRARYTEST_TEST_INCLUDE_H
 
+#include <random>
+
 #include "AFunctionLibrary/syntaxtree.h"
+#include "AFunctionLibrary/token.h"
 
 namespace afl
 {
     namespace test
     {
+        inline std::vector<size_t> generateRandomGroupID() {
+            std::random_device rd;
+            std::mt19937 mt(rd());
+            std::uniform_int_distribution<size_t> sizeDist(1, 20);
+            std::uniform_int_distribution<size_t> idDist(0, std::numeric_limits<size_t>::max());
+
+            size_t groupIDLength = sizeDist(mt);
+            std::vector<size_t> groupID;
+            groupID.reserve(groupIDLength);
+            for (int i=0; i < groupIDLength; ++i)
+                groupID.push_back(idDist(mt));
+            return groupID;
+        }
+
+        static std::shared_ptr<afl::Token<std::string>> tokenPlus = std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left);
+        static std::shared_ptr<afl::Token<std::string>> tokenMultiply = std::make_shared<afl::Token<std::string>>("*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left);
+        static std::shared_ptr<afl::Token<std::string>> tokenPower = std::make_shared<afl::Token<std::string>>("^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right);
+        static std::shared_ptr<afl::Token<std::string>> tokenAbs = std::make_shared<afl::Token<std::string>>("abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> token3 = std::make_shared<afl::Token<std::string>>("3", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> token5 = std::make_shared<afl::Token<std::string>>("5", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> tokenAb = std::make_shared<afl::Token<std::string>>("ab", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> tokenBracketOpen = std::make_shared<afl::Token<std::string>>("(", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> tokenBracketClose = std::make_shared<afl::Token<std::string>>(")", afl::TokenType::BracketClose, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> tokenPow = std::make_shared<afl::Token<std::string>>("pow", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 2, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> tokenSemicolon = std::make_shared<afl::Token<std::string>>(";", afl::TokenType::ArgumentDelimiter, 0, 0, afl::TokenAssociativity::None);
+
         struct Token
         {
             int x;
             int y;
 
-            inline bool operator==(const Token& other) {
+            bool operator==(const Token& other) {
                 return x == other.x && y == other.y;
+            }
+
+            Token& operator*() {
+                return *this;
             }
         };
         inline std::ostream &operator<<(std::ostream &os, const Token &t)
@@ -22,31 +55,27 @@ namespace afl
             return os;
         }
 
-        inline afl::Node<Token>* createTokenNode(int value, int minValue, int maxValue, int level)
+        template<typename T>
+        afl::Node<T> createNode(int value, int minValue, int maxValue, int level, T(*createValue)(int value))
         {
             if(level > 1) {
-                std::vector<afl::Node<Token> *> children;
+                std::vector<afl::Node<T>> children;
                 --level;
                 for (int i = minValue; i <= maxValue; i++) {
-                    children.push_back(createTokenNode(i, minValue, maxValue, level));
+                    children.push_back(createNode(i, minValue, maxValue, level, createValue));
                 }
-                return new afl::Node<Token>({value, -value}, children);
+                return afl::Node<T>(createValue(value), std::move(children));
             } else {
-                return new afl::Node<Token>({value, -value});
+                return afl::Node<T>(createValue(value));
             }
         }
-        inline afl::Node<int>* createIntNode(int value, int minValue, int maxValue, int level)
+        inline afl::Node<Token> createTokenNode(int value, int minValue, int maxValue, int level)
         {
-            if(level > 1) {
-                std::vector<afl::Node<int>*> children;
-                --level;
-                for (int i = minValue; i <= maxValue; i++) {
-                    children.push_back(createIntNode(i, minValue, maxValue, level));
-                }
-                return new afl::Node<int>(value, children);
-            } else {
-                return new afl::Node<int>(value);
-            }
+            return createNode<Token>(value, minValue, maxValue, level, [](int value){ return Token{value, -value}; });
+        }
+        inline afl::Node<int> createIntNode(int value, int minValue, int maxValue, int level)
+        {
+            return createNode<int>(value, minValue, maxValue, level, [](int value){ return value; });
         }
 
 

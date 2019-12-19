@@ -73,8 +73,7 @@ void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::Token
         for(size_t j = 0; j < tokensVector.at(i)->aliases.size(); j++) {
             ASSERT_EQ(tokensVector.at(i)->aliases.at(j).type, std::get<1>(aliases.at(i)).at(j));
             ASSERT_EQ(tokensVector.at(i)->aliases.at(j).aliases.size(), std::get<2>(aliases.at(i)).at(j));
-            std::set<std::string> actualSet = tokensVector.at(i)->aliases.at(j).aliases;
-            std::vector<std::string> actualVector = std::vector<std::string>(actualSet.begin(), actualSet.end());
+            std::vector<std::string> actualVector = tokensVector.at(i)->aliases.at(j).aliases;
             std::vector<std::string> expectedVector = std::get<3>(aliases.at(i)).at(j);
             std::sort(actualVector.begin(), actualVector.end());
             std::sort(expectedVector.begin(), expectedVector.end());

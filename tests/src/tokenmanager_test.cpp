@@ -525,7 +525,7 @@ GTEST_TEST(TokenManager_Test, getToken)
     ASSERT_EQ(manager.getToken("*", true), allTokens.at("*"));
     ASSERT_EQ(manager.getToken("^", true), allTokens.at("^"));
     afl::detail::TokenPtrBundle<std::string> tokenBundle(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                                                     std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::set<std::string>{"one"}}});
+                                                     std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::vector<std::string>{"one"}}});
     ASSERT_EQ(*manager.getToken("1", true), tokenBundle);
     ASSERT_EQ(manager.getToken("no_token", true).get(), nullptr);
 }

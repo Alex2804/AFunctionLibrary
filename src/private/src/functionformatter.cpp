@@ -10,7 +10,7 @@
 namespace
 {
     template<typename T>
-    void extractAliases(const std::string& tokenValue, const std::set<std::string>& aliasStrings,
+    void extractAliases(const std::string& tokenValue, const std::vector<std::string>& aliasStrings,
                         std::vector<std::pair<std::vector<T>, std::string>>& aliases)
     {
         std::vector<T> vector;

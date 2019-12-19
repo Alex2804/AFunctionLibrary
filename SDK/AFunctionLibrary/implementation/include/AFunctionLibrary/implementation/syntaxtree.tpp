@@ -6,7 +6,7 @@ namespace afl
     namespace detail
     {
         template<typename T>
-        inline std::pair<std::vector<std::string>, size_t> toStringHelper(const Node <T> *node, const char* connectors[]);
+        inline std::pair<std::vector<std::string>, size_t> toStringHelper(const Node<T>& node, const char* connectors[]);
     }
 }
 
@@ -16,26 +16,29 @@ namespace afl
 
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree()
-    : m_root(nullptr)
+        : m_root(nullptr)
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(T value)
-    : m_root(new Node<T>(std::move(value)))
+        : m_root(new Node<T>(std::move(value)))
 {}
 template<typename T>
-afl::SyntaxTree<T>::SyntaxTree(Node<T>* root)
-    : m_root(root)
+afl::SyntaxTree<T>::SyntaxTree(Node<T> root)
+        : m_root(new Node<T>(std::move(root)))
 {}
 template<typename T>
-afl::SyntaxTree<T>::SyntaxTree(const SyntaxTree<T> &other)
-    : m_root(new Node<T>(*other.m_root))
+afl::SyntaxTree<T>::SyntaxTree(std::unique_ptr<Node<T>> root)
+: m_root(root.release())
 {}
 template<typename T>
-afl::SyntaxTree<T>::SyntaxTree(SyntaxTree<T> &&other) noexcept
-    : m_root(nullptr)
+afl::SyntaxTree<T>::SyntaxTree(const SyntaxTree<T>& other)
+        : m_root(new Node<T>(*other.m_root))
+{}
+template<typename T>
+afl::SyntaxTree<T>::SyntaxTree(SyntaxTree<T>&& other) noexcept
+        : m_root(other.m_root)
 {
-    using std::swap;
-    swap(m_root, other.m_root);
+    other.m_root = nullptr;
 }
 template<typename T>
 afl::SyntaxTree<T>::~SyntaxTree()
@@ -44,7 +47,7 @@ afl::SyntaxTree<T>::~SyntaxTree()
 }
 
 template<typename T>
-afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(const SyntaxTree<T> &other)
+afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(const SyntaxTree<T>& other)
 {
     auto tmpRoot = new Node<T>(*other.m_root);
     delete m_root;
@@ -52,11 +55,24 @@ afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(const SyntaxTree<T> &other)
     return *this;
 }
 template<typename T>
-afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(SyntaxTree<T> &&other) noexcept
+afl::SyntaxTree<T>& afl::SyntaxTree<T>::operator=(SyntaxTree<T>&& other) noexcept
 {
     using std::swap;
     swap(m_root, other.m_root);
     return *this;
+}
+
+template<typename T>
+bool afl::SyntaxTree<T>::operator==(const afl::SyntaxTree<T>& other) const
+{
+    if(m_root == nullptr || other.m_root == nullptr || m_root == other.m_root)
+        return m_root == other.m_root;
+    return *m_root == *other.m_root;
+}
+template<typename T>
+bool afl::SyntaxTree<T>::operator!=(const afl::SyntaxTree<T>& other) const
+{
+    return !operator==(other);
 }
 
 template<typename T>
@@ -67,7 +83,6 @@ bool afl::SyntaxTree<T>::empty() const
 template<typename T>
 void afl::SyntaxTree<T>::clear()
 {
-    delete m_root;
     m_root = nullptr;
 }
 
@@ -77,11 +92,16 @@ const afl::Node<T>* afl::SyntaxTree<T>::root() const
     return m_root;
 }
 template<typename T>
-void afl::SyntaxTree<T>::setRoot(afl::Node<T> *root, bool deleteOld)
+afl::Node<T>* afl::SyntaxTree<T>::root()
+{
+    return m_root;
+}
+template<typename T>
+void afl::SyntaxTree<T>::setRoot(std::unique_ptr<afl::Node<T>> root, bool deleteOld)
 {
     if(deleteOld)
-        clear();
-    m_root = root;
+        delete m_root;
+    m_root = root.release();
 }
 
 template<typename T>
@@ -89,12 +109,53 @@ std::string afl::SyntaxTree<T>::toString() const
 {
     return empty() ? "" : m_root->toString();
 }
+
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 {
-    os << tree.toString();
-    return os;
+    return os << tree.toString();
 }
+
+
+// =============================================== generateSyntaxTree =============================================== //
+
+
+template<typename T>
+afl::SyntaxTree<T> afl::generateSyntaxTree(const std::vector<T>& infixTokens)
+{
+    std::vector<T> postfixTokens = afl::shuntingYard(infixTokens);
+
+    std::stack<Node<T>> nodeStack;
+    std::vector<Node<T>> tmpNodes;
+
+    for(const auto& token : postfixTokens) {
+        if(getType(token) == TokenType::Number || getType(token) == TokenType::Constant) {
+            nodeStack.emplace(token);
+        } else if(getType(token) == TokenType::Operator || getType(token) == TokenType::Function) {
+            size_t count = getType(token) == TokenType ::Operator ? 2 : getParameterCount(token);
+            tmpNodes.reserve(count);
+            while(count-- > 0) {
+                if(nodeStack.empty())
+                    throw std::runtime_error("Not enough parameter for function or operator!");
+                tmpNodes.emplace_back(std::move(nodeStack.top()));
+                nodeStack.pop();
+            }
+            nodeStack.emplace(token, std::vector<Node<T>>(tmpNodes.rbegin(), tmpNodes.rend()));
+        } else {
+            throw std::runtime_error("Other TokenType than Number, Constant, Operator or Function in postfix notation (shunting yard doesn't work correctly)!");
+        }
+        tmpNodes.clear();
+    }
+
+    if(nodeStack.empty()) {
+        throw std::runtime_error("Node stack mustn't be empty!");
+    } else if(nodeStack.size() > 1) {
+        throw std::runtime_error("There must be only one node on the node-stack (the root of the tree)!");
+    }
+
+    return SyntaxTree<T>(std::move(nodeStack.top()));
+}
+
 
 // ====================================================== Node ====================================================== //
 
@@ -102,68 +163,37 @@ std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 template<typename T>
 afl::Node<T>::Node(T value)
         : m_value(std::move(value))
-        , m_children(std::vector<Node < T> * > ())
 {}
 template<typename T>
-afl::Node<T>::Node(T value, std::vector<Node<T>*> children)
-    : m_value(std::move(value)), m_children(std::move(children))
+afl::Node<T>::Node(T value, std::vector<Node<T>> children)
+: m_value(std::move(value)), m_children(std::move(children))
 {}
+
 template<typename T>
-afl::Node<T>::Node(const Node<T> &other)
-        : m_value(other.m_value)
+afl::Node<T>& afl::Node<T>::operator=(Node<T>&& other) noexcept
 {
-    m_children.reserve(other.m_children.size());
-    for(const Node<T>* child : other.m_children) {
-        m_children.push_back(new Node<T>(*child));
-    }
-}
-template<typename T>
-afl::Node<T>::Node(Node<T> &&other) noexcept
-{
+    m_value = std::move(other.m_value);
     using std::swap;
-    swap(m_value, other.m_value);
     swap(m_children, other.m_children);
-}
-template<typename T>
-afl::Node<T>::~Node()
-{
-    for(Node<T>* child : m_children) {
-        delete child;
-    }
+    return *this;
 }
 
 template<typename T>
-afl::Node<T> &afl::Node<T>::operator=(const Node<T> &other)
+bool afl::Node<T>::operator==(const afl::Node<T>& other) const
 {
-    // copy value
-    m_value = other.m_value;
-    // copy children
-    std::vector<Node<T>*> tmpChildren;
-    tmpChildren.reserve(other.m_children.size());
-    for(const Node<T>* child : other.m_children) {
-        tmpChildren.push_back(new Node<T>(*child));
-    }
-    using std::swap;
-    swap(m_children, tmpChildren);
-    for(Node<T>* child : tmpChildren) {
-        delete child;
-    }
-    return *this;
+    return m_value == other.m_value && m_children == other.m_children;
 }
 template<typename T>
-afl::Node<T> &afl::Node<T>::operator=(Node<T> &&other) noexcept
+bool afl::Node<T>::operator!=(const afl::Node<T>& other) const
 {
-    using std::swap;
-    swap(m_value, other.m_value);
-    swap(m_children, other.m_children);
-    return *this;
+    return !operator==(other);
 }
 
 template<typename T>
 std::string afl::Node<T>::toString() const
 {
     const char* connectors[] = {"\u007c", "\342\224\234", "\342\224\214", "\342\224\200", "\342\224\274", "\342\224\254", "\342\224\244", "\342\224\220", "\342\224\264"};
-    std::vector<std::string> lines = detail::toStringHelper(this, connectors).first;
+    std::vector<std::string> lines = detail::toStringHelper(*this, connectors).first;
     std::string string;
     if(!lines.empty()) {
         string.reserve(static_cast<int>((lines.size() - 1) * (lines.front().size() + 1)) + (lines.back().size()));
@@ -174,11 +204,11 @@ std::string afl::Node<T>::toString() const
     }
     return string;
 }
+
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const Node<T>& node)
 {
-    os << node.toString();
-    return os;
+    return os << node.toString();
 }
 
 
@@ -186,7 +216,7 @@ std::ostream& afl::operator<<(std::ostream& os, const Node<T>& node)
 
 
 template<typename T>
-std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const afl::Node<T> *node, const char* connectors[])
+std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const afl::Node<T>& node, const char* connectors[])
 {
     std::vector<std::string> bodyLines, headLines;
     size_t width = 0, lineCount = 0;
@@ -195,17 +225,17 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
     std::vector<size_t> widths, positions;
     std::string string, prependString, appendString, spacer(3, ' ');
     std::stringstream stringstream;
-    stringstream << node->m_value;
-    std::string value = afl::stringify(node->m_value);
+    stringstream << node.m_value;
+    std::string value = afl::stringify(node.m_value);
 
-    size_t nodeCount = node->m_children.size();
+    size_t nodeCount = node.m_children.size();
     if(nodeCount > 0) {
         pairs.reserve(nodeCount);
         widths.reserve(nodeCount);
         for (size_t i = 0; i < nodeCount; i++) {
-            pair = toStringHelper(node->m_children.at(i), connectors);
+            pair = toStringHelper(node.m_children.at(i), connectors);
             if (!pair.first.empty() && !pair.first.front().empty()) {
-                lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount; // std::max(lineCount, pair.first.size());
+                lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount; // std::max(lineCount, pair.c_api.size());
                 pairs.push_back(pair);
                 widths.push_back(pair.first.front().size());
                 positions.push_back(width + pair.second);
@@ -264,24 +294,24 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
         std::vector<std::string> connectionStringVector;
         connectionStringVector.reserve(width);
         connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.front(), " ");
-        connectionStringVector.push_back((positions.front() == valueMiddleIndex) ? connectors[1] : connectors[2]);
+        connectionStringVector.emplace_back((positions.front() == valueMiddleIndex) ? connectors[1] : connectors[2]);
         bool connectedValue = false;
         for(unsigned long i = 1; i < positions.size()-1; i++) {
             connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.at(i) - connectionStringVector.size(), connectors[3]);
-            connectionStringVector.push_back((positions.at(i) == valueMiddleIndex) ? connectors[4] : connectors[5]);
+            connectionStringVector.emplace_back((positions.at(i) == valueMiddleIndex) ? connectors[4] : connectors[5]);
             if(positions.at(i) == valueMiddleIndex) {
                 connectedValue = true;
             }
         }
         connectionStringVector.insert(connectionStringVector.end(), prependString.size() + positions.back() - connectionStringVector.size(), connectors[3]);
-        connectionStringVector.push_back((positions.back() == valueMiddleIndex) ? connectors[6] : connectors[7]);
+        connectionStringVector.emplace_back((positions.back() == valueMiddleIndex) ? connectors[6] : connectors[7]);
         connectionStringVector.insert(connectionStringVector.end(), width - connectionStringVector.size(), " ");
         if(!connectedValue) {
             connectionStringVector[valueMiddleIndex] = connectors[8];
         }
         std::string connectionString;
         connectionString.reserve(width);
-        for(std::string s : connectionStringVector) {
+        for(const std::string& s : connectionStringVector) {
             connectionString.append(s);
         }
         headLines.push_back(connectionString);

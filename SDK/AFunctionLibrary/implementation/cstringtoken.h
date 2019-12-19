@@ -2,27 +2,12 @@
 #define AFUNCTIONLIBRARY_CSTRINGTOKEN_H
 
 #include "definitions.h"
+#include "include/AFunctionLibrary/tokenenums.h"
 
 namespace afl
 {
     extern "C"
     {
-        enum class TokenType
-        {
-            Constant,
-            Number,
-            Operator,
-            Function,
-            BracketOpen,
-            BracketClose,
-            ArgumentDelimiter
-        };
-        enum class TokenAssociativity
-        {
-            None,
-            Left,
-            Right
-        };
         struct CStringToken
         {
             const char* string;
@@ -32,11 +17,6 @@ namespace afl
             TokenAssociativity associativity;
         };
 
-        enum class TokenAliasType
-        {
-            String,
-            Regex
-        };
         struct CStringTokenAliases
         {
             TokenAliasType type;

@@ -10,7 +10,6 @@
 
 #include "pugixml.hpp"
 
-#include "AFunctionLibrary/utility.h"
 #include "tokenextras.h"
 
 namespace afl

@@ -8,9 +8,6 @@ add_subdirectory(libs/pugixml)
 
 set(HEADERS
         include/AFunctionLibrary/function.h src/private/functionprivate.h
-        include/AFunctionLibrary/syntaxtree.h
-        include/AFunctionLibrary/token.h
-        include/AFunctionLibrary/utility.h
         src/private/resourceparser.h
         src/private/resourcemanager.h
         src/private/tokenmanager.h
@@ -19,9 +16,6 @@ set(HEADERS
         src/private/syntaxtreehandler.h)
 set(SOURCES
         src/function.cpp src/private/src/functionprivate.cpp
-        include/AFunctionLibrary/implementation/syntaxtree.tpp
-        include/AFunctionLibrary/implementation/token.tpp
-        src/utility.cpp include/AFunctionLibrary/implementation/utility.tpp
         src/private/src/resourceparser.cpp
         src/private/src/resourcemanager.cpp
         src/private/src/tokenmanager.cpp
@@ -29,14 +23,22 @@ set(SOURCES
         src/private/src/syntaxtreehandler.cpp)
 
 set(SDK_HEADERS
+        SDK/AFunctionLibrary/implementation
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/syntaxtree.h
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/token.h
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/utility.h
         SDK/AFunctionLibrary/implementation/definitions.h
         SDK/AFunctionLibrary/implementation/macros.h
         SDK/AFunctionLibrary/implementation/cstringtoken.h)
-set(SDK_SOURCES)
+set(SDK_SOURCES
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/syntaxtree.tpp
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/token.tpp
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/utility.ipp)
 
 set(PUBLIC_INCLUDE_DIRECTORIES
         include
         SDK
+        SDK/AFunctionLibrary/implementation/include
         ${CMAKE_CURRENT_BINARY_DIR}/exports)
 set(PRIVATE_INCLUDE_DIRECTORIES
         libs/tinydir)
@@ -51,6 +53,7 @@ target_include_directories(AFunctionLibrary
         PUBLIC ${PUBLIC_INCLUDE_DIRECTORIES}
         PRIVATE ${PRIVATE_INCLUDE_DIRECTORIES})
 target_link_libraries(AFunctionLibrary APluginLibrary pugixml)
+target_compile_definitions(AFunctionLibrary PUBLIC AFUNCTIONLIBRARY_BUILD_LIBRARY)
 
 add_subdirectory(res/plugins)
 add_dependencies(AFunctionLibrary AFunctionLibraryDefaultPlugin)
