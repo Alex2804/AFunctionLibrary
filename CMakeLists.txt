@@ -19,6 +19,7 @@ set(SOURCES
         src/private/src/resourceparser.cpp
         src/private/src/resourcemanager.cpp
         src/private/src/tokenmanager.cpp
+        src/private/src/tokenextras.cpp
         src/private/src/functionformatter.cpp
         src/private/src/syntaxtreehandler.cpp)
 
