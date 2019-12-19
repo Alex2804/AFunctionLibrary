@@ -4,12 +4,10 @@
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
 #include <unordered_map>
-#include <unordered_set>
-#include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "APluginLibrary/libraryloader.h"
 #include "APluginLibrary/plugin.h"
 #include "APluginSDK/plugininfos.h"
 
@@ -20,8 +18,10 @@ namespace afl
 {
     namespace detail
     {
-        typedef CStringToken*(*createTokenPluginFunction)(const char*);
-        typedef CStringTokenAliases*(*createTokenAliasesPluginFunction)(const char*, afl::TokenAliasType);
+        typedef CStringToken*(*cApiCreateTokenPluginFunction)(const char*);
+        typedef std::shared_ptr<const afl::Token<std::string>>(*cppApiCreateTokenPluginFunction)(const std::string&);
+        typedef CStringTokenAliases*(*cApiCreateTokenAliasesPluginFunction)(const char*, afl::TokenAliasType);
+        typedef std::vector<TokenAliases<std::string>>(*cppApiCreateTokenAliasesPluginFunction)(const std::string&);
 
         class AFUNCTIONLIBRARY_NO_EXPORT TokenManager
         {
@@ -48,7 +48,7 @@ namespace afl
             std::shared_ptr<const TokenPtrBundle<std::string>> getToken(const std::string& value, bool createIfNotExist);
             std::vector<std::shared_ptr<const TokenPtrBundle<std::string>>> getTokens() const;
 
-            template<typename T>
+            template<typename T> // template to accept function pointer and std::function
             std::vector<std::shared_ptr<const TokenPtrBundle<std::string>>> filterTokens(const T& filterFunction) const;
 
             static bool isUnique(const afl::Token<std::string>* token);
@@ -57,8 +57,11 @@ namespace afl
         public:
             std::unordered_map<std::string, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>> m_uniqueTokens, m_notUniqueTokens;
             std::unordered_map<std::string, std::vector<std::string>> m_pathTokenValueRefs;
-            std::vector<std::tuple<const apl::Plugin*, std::vector<createTokenPluginFunction>, std::vector<createTokenAliasesPluginFunction>>> m_pluginFunctions;
+            std::vector<std::tuple<const apl::Plugin*, std::vector<cApiCreateTokenPluginFunction>, std::vector<cApiCreateTokenAliasesPluginFunction>, std::vector<cppApiCreateTokenPluginFunction>, std::vector<cppApiCreateTokenAliasesPluginFunction>>> m_pluginFunctions;
         };
+
+        AFUNCTIONLIBRARY_NO_EXPORT std::vector<std::shared_ptr<const Token<std::string>>> stringToTokens(TokenManager* tokenManager, std::string string);
+        AFUNCTIONLIBRARY_NO_EXPORT std::string toFunctionString(TokenManager* tokenManager, std::vector<TokenGroup<std::string>> tokenGroups);
     }
 }
 

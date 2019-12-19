@@ -31,10 +31,10 @@ GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
                     {"path1", {"v1", "v2"}},
                     {"path2", {"v3", "v4"}}
             };
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
-                    {nullptr, {}, {}}
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
+                    {nullptr, {}, {}, {}, {}}
             };
 
     afl::detail::TokenManager manager1;
@@ -88,10 +88,10 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
                     {"path1", {"v1", "v2"}},
                     {"path2", {"v3", "v4"}}
             };
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
-                    {nullptr, {}, {}}
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
+                    {nullptr, {}, {}, {}, {}}
             };
 
     afl::detail::TokenManager manager1;
@@ -139,7 +139,7 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
                     {"path/to/alternative_operators", {"+", "*"}},
                     {"path/to/functions", {"abs"}}
             };
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions;
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions;
 
     afl::detail::TokenManager manager;
     manager.m_uniqueTokens = uniqueTokens;
@@ -149,7 +149,7 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     manager.addPluginFeatures(nullptr);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     plugin->unload();
     ASSERT_FALSE(plugin->isLoaded());
@@ -157,25 +157,31 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
     delete plugin;
 
-    plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     ASSERT_TRUE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
     ASSERT_EQ(manager.m_pluginFunctions.size(), 1);
-    std::vector<afl::detail::createTokenPluginFunction> createTokenPluginFunctions;
-    std::vector<afl::detail::createTokenAliasesPluginFunction> createTokenAliasesPluginFunctions;
+    std::vector<afl::detail::cApiCreateTokenPluginFunction> cApiCreateTokenPluginFunctions;
+    std::vector<afl::detail::cppApiCreateTokenPluginFunction> cppApiCreateTokenPluginFunctions;
+    std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction> cApiCreateTokenAliasesPluginFunctions;
+    std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction> cppApiCreateTokenAliasesPluginFunctions;
     const apl::PluginFeatureInfo* const* featureInfos = plugin->getFeatureInfos();
     const apl::PluginFeatureInfo* featureInfo;
     for(size_t i = 0; i < plugin->getFeatureCount(); i++) {
         featureInfo = featureInfos[i];
         if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenFeatureGroupName) == 0)
-            createTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenPluginFunction>(featureInfo->functionPointer));
+            cApiCreateTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::cApiCreateTokenPluginFunction>(featureInfo->functionPointer));
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_CPP_API_CreateTokenFeatureGroupName) == 0)
+            cppApiCreateTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::cppApiCreateTokenPluginFunction>(featureInfo->functionPointer));
         else if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenAliasesFeatureGroupName) == 0)
-            createTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenAliasesPluginFunction>(featureInfo->functionPointer));
+            cApiCreateTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::cApiCreateTokenAliasesPluginFunction>(featureInfo->functionPointer));
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_CPP_API_CreateTokenAliasesFeatureGroupName) == 0)
+            cppApiCreateTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::cppApiCreateTokenAliasesPluginFunction>(featureInfo->functionPointer));
     }
-    std::sort(createTokenPluginFunctions.begin(), createTokenPluginFunctions.end());
-    std::sort(createTokenAliasesPluginFunctions.begin(), createTokenAliasesPluginFunctions.end());
-    pluginFunctions.emplace_back(plugin, createTokenPluginFunctions, createTokenAliasesPluginFunctions);
+    std::sort(cApiCreateTokenPluginFunctions.begin(), cApiCreateTokenPluginFunctions.end());
+    std::sort(cApiCreateTokenAliasesPluginFunctions.begin(), cApiCreateTokenAliasesPluginFunctions.end());
+    pluginFunctions.emplace_back(plugin, cApiCreateTokenPluginFunctions, cApiCreateTokenAliasesPluginFunctions, cppApiCreateTokenPluginFunctions, cppApiCreateTokenAliasesPluginFunctions);
     std::sort(std::get<1>(manager.m_pluginFunctions.front()).begin(), std::get<1>(manager.m_pluginFunctions.front()).end());
     std::sort(std::get<2>(manager.m_pluginFunctions.front()).begin(), std::get<2>(manager.m_pluginFunctions.front()).end());
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
@@ -200,28 +206,34 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
             };
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs =
             {
-                    {afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin), {"+", "*", "^"}},
+                    {afl::detail::getFullPathName("res/plugins/c_api/c_api_plugin", afl::detail::ResourceType::Plugin), {"+", "*", "^"}},
                     {"path/to/alternative_operators", {"+", "*"}},
                     {"path/to/functions", {"abs"}}
             };
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     ASSERT_TRUE(plugin->isLoaded());
-    std::vector<afl::detail::createTokenPluginFunction> createTokenPluginFunctions;
-    std::vector<afl::detail::createTokenAliasesPluginFunction> createTokenAliasesPluginFunctions;
+    std::vector<afl::detail::cApiCreateTokenPluginFunction> cApiCreateTokenPluginFunctions;
+    std::vector<afl::detail::cppApiCreateTokenPluginFunction> cppApiCreateTokenPluginFunctions;
+    std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction> cApiCreateTokenAliasesPluginFunctions;
+    std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction> cppApiCreateTokenAliasesPluginFunctions;
     const apl::PluginFeatureInfo* const* featureInfos = plugin->getFeatureInfos();
     const apl::PluginFeatureInfo* featureInfo;
     for(size_t i = 0; i < plugin->getFeatureCount(); i++) {
         featureInfo = featureInfos[i];
         if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenFeatureGroupName) == 0)
-            createTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenPluginFunction>(featureInfo->functionPointer));
+            cApiCreateTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::cApiCreateTokenPluginFunction>(featureInfo->functionPointer));
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_CPP_API_CreateTokenFeatureGroupName) == 0)
+            cppApiCreateTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::cppApiCreateTokenPluginFunction>(featureInfo->functionPointer));
         else if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenAliasesFeatureGroupName) == 0)
-            createTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenAliasesPluginFunction>(featureInfo->functionPointer));
+            cApiCreateTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::cApiCreateTokenAliasesPluginFunction>(featureInfo->functionPointer));
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_CPP_API_CreateTokenAliasesFeatureGroupName) == 0)
+            cppApiCreateTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::cppApiCreateTokenAliasesPluginFunction>(featureInfo->functionPointer));
     }
-    std::sort(createTokenPluginFunctions.begin(), createTokenPluginFunctions.end());
-    std::sort(createTokenAliasesPluginFunctions.begin(), createTokenAliasesPluginFunctions.end());
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
-            {{plugin, createTokenPluginFunctions, createTokenAliasesPluginFunctions}};
+    std::sort(cApiCreateTokenPluginFunctions.begin(), cApiCreateTokenPluginFunctions.end());
+    std::sort(cApiCreateTokenAliasesPluginFunctions.begin(), cApiCreateTokenAliasesPluginFunctions.end());
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
+            {{plugin, cApiCreateTokenPluginFunctions, cApiCreateTokenAliasesPluginFunctions, cppApiCreateTokenPluginFunctions, cppApiCreateTokenAliasesPluginFunctions}};
 
     afl::detail::TokenManager manager;
     manager.m_uniqueTokens = uniqueTokens;
@@ -241,7 +253,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     uniqueTokens.at("*").second = 1;
     ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
     ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
-    pathTokenValueRefs.erase(afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin));
+    pathTokenValueRefs.erase(afl::detail::getFullPathName("res/plugins/c_api/c_api_plugin", afl::detail::ResourceType::Plugin));
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     pluginFunctions.clear();
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
@@ -266,10 +278,10 @@ GTEST_TEST(TokenManager_Test, removeReferences)
                     {"path/to/alternative_operators", {"+", "*"}},
                     {"path/to/functions", {"abs"}}
             };
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
-                    {nullptr, {}, {}}
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
+                    {nullptr, {}, {}, {}, {}}
             };
 
     afl::detail::TokenManager manager;
@@ -315,7 +327,7 @@ GTEST_TEST(TokenManager_Test, addToken)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens, notUniqueTokens;
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs;
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions;
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions;
 
     afl::detail::TokenManager manager;
     manager.addToken(allTokens.at("+"), "path/to/operators");
@@ -375,10 +387,10 @@ GTEST_TEST(TokenManager_Test, removeToken)
                     {"path/to/alternative_operators", {"+", "*"}},
                     {"path/to/functions", {"abs"}}
             };
-    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
+    std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
-                    {nullptr, {}, {}}
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
+                    {nullptr, {}, {}, {}, {}}
             };
 
     afl::detail::TokenManager manager;
@@ -462,7 +474,7 @@ GTEST_TEST(TokenManager_Test, removeToken)
 GTEST_TEST(TokenManager_Test, createAliases_c_api)
 {
     afl::detail::TokenManager manager;
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     ASSERT_TRUE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
@@ -476,16 +488,33 @@ GTEST_TEST(TokenManager_Test, createAliases_c_api)
     delete plugin;
 }
 
+GTEST_TEST(TokenManager_Test, createAliases_cpp_api)
+{
+    afl::detail::TokenManager manager;
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/cpp_api/cpp_api_plugin");
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_TRUE(plugin->isLoaded());
+    manager.addPluginFeatures(plugin);
+
+    std::vector<afl::TokenAliases<std::string>> aliases = manager.createAliases("hello");
+    std::vector<afl::TokenAliases<std::string>> expected = {{afl::TokenAliasType::String, {"hello_world"}}};
+    ASSERT_EQ(aliases, expected);
+
+    aliases = manager.createAliases("12");
+    ASSERT_TRUE(aliases.empty());
+    delete plugin;
+}
+
 GTEST_TEST(TokenManager_Test, createToken_c_api)
 {
     afl::detail::TokenManager manager;
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     ASSERT_TRUE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
 
     std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created = manager.createToken("1", false);
-    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/c_api/c_api_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_NE(created.first, nullptr);
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
@@ -498,7 +527,39 @@ GTEST_TEST(TokenManager_Test, createToken_c_api)
     ASSERT_EQ(created.second, created2.second);
 
     expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/c_api/c_api_plugin", afl::detail::ResourceType::Plugin)};
+    ASSERT_EQ(*created.first, *expected.first);
+    ASSERT_EQ(created.second, expected.second);
+
+    created = manager.createToken("12", true);
+    ASSERT_EQ(created.first.get(), nullptr);
+    ASSERT_EQ(created.second, "");
+    delete plugin;
+}
+
+GTEST_TEST(TokenManager_Test, createToken_cpp_api)
+{
+    afl::detail::TokenManager manager;
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/cpp_api/cpp_api_plugin");
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_TRUE(plugin->isLoaded());
+    manager.addPluginFeatures(plugin);
+
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created = manager.createToken("hello", false);
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("hello", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/cpp_api/cpp_api_plugin", afl::detail::ResourceType::Plugin)};
+    ASSERT_NE(created.first, nullptr);
+    ASSERT_EQ(*created.first, *expected.first);
+    ASSERT_EQ(created.second, expected.second);
+
+    created = manager.createToken("hello", true);
+    ASSERT_NE(created.first, nullptr);
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created2 = manager.createToken("hello");
+    ASSERT_NE(created2.first, nullptr);
+    ASSERT_EQ(*created.first, *created2.first);
+    ASSERT_EQ(created.second, created2.second);
+
+    expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("hello", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None),
+                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"hello_world"}}}), afl::detail::getFullPathName("res/plugins/cpp_api/cpp_api_plugin", afl::detail::ResourceType::Plugin)};
     ASSERT_EQ(*created.first, *expected.first);
     ASSERT_EQ(created.second, expected.second);
 
@@ -514,7 +575,7 @@ GTEST_TEST(TokenManager_Test, getToken)
     manager.addToken(allTokens.at("+"), "path/to/operators");
     manager.addToken(allTokens.at("*"), "path/to/operators");
     manager.addToken(allTokens.at("^"), "path/to/operators");
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
     ASSERT_NE(plugin, nullptr);
     ASSERT_TRUE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
@@ -576,4 +637,287 @@ GTEST_TEST(TokenManager_Test, filterTokens)
     expected = {allTokens.at("abs") };
     tokens = manager.filterTokens([](const afl::Token<std::string>* t){ return t->type == afl::TokenType::Function; });
     ASSERT_EQ(expected, tokens);
+}
+
+GTEST_TEST(tokenmanager_h_Test, stringToTokens)
+{
+    afl::detail::TokenManager tokenManager;
+    tokenManager.addToken(allTokens.at("+"), "custom_tokens.atokens");
+    tokenManager.addToken(allTokens.at("*"), "custom_tokens.atokens");
+    tokenManager.addToken(allTokens.at("abs"), "custom_tokens.atokens");
+    auto token3 = std::make_shared<afl::Token<std::string>>("3", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
+    auto token5 = std::make_shared<afl::Token<std::string>>("5", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
+    auto tokenab = std::make_shared<afl::Token<std::string>>("ab", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
+    auto tokenBracketOpen = std::make_shared<afl::Token<std::string>>("(", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
+    auto tokenBracketClose = std::make_shared<afl::Token<std::string>>(")", afl::TokenType::BracketClose, 0, 0, afl::TokenAssociativity::None);
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(token3, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(token5, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(tokenab, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(tokenBracketOpen, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(tokenBracketClose, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+
+    std::vector<std::shared_ptr<const afl::Token<std::string>>> tokens =
+            {token3, allTokens.at("+")->token, token5, allTokens.at("*")->token, allTokens.at("abs")->token,
+             tokenBracketOpen, tokenab, tokenBracketClose};
+    ASSERT_EQ(afl::detail::stringToTokens(&tokenManager, "3+5*abs(ab)"), tokens);
+}
+
+GTEST_TEST(tokenmanager_h_Test, toFunctionString_with_brackets_and_semicolons)
+{
+    afl::detail::TokenManager tokenManager;
+    auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
+    auto bracketClose = std::make_shared<afl::Token<std::string>>("]", afl::TokenType::BracketClose, 0, 0, afl::TokenAssociativity::None);
+    auto argumentDelimiter = std::make_shared<afl::Token<std::string>>("#", afl::TokenType::ArgumentDelimiter, 0, 0, afl::TokenAssociativity::None);
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(bracketOpen, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(bracketClose, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(argumentDelimiter, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+
+    std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
+
+    // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
+    std::vector<afl::TokenGroup<std::string>> tokenGroups;
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({2}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({5}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({6, 1}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({7}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({9}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({10}));
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({11}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({12}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({13, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({13, 2}));
+    tokenGroups.emplace_back(std::vector<size_t>({13, 3}));
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({14}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({15, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({15, 1}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({15, 2, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({15, 2, 2}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({15, 3}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({16}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs(ab)^3*pow(3^5;abs(3+ab))");
+
+    tokenGroups.clear();
+    // pow(abs(3);abs(ab);abs(5))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({1}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({2, 1}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({2, 3}));
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({4, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({4, 3}));
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({5}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({6, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({6, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({6, 3}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({7}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow(abs(3);abs(ab);abs(5))");
+
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.clear();
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({2}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({5}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({6, 1}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({7}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({9}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({10}));
+
+    // 3+5*abs(ab)^3*   pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({11}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({12}));
+    // 3+5*abs(ab)^3*pow(   pow(pow(abs(3);abs(ab));pow(3+5;ab))   ;abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({13, 1}));
+    // 3+5*abs(ab)^3*pow(pow(   pow(abs(3);abs(ab));pow(3+5;ab))  ;abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({13, 2, 1}));
+    // 3+5*abs(ab)^3*pow(pow(pow(   abs(3)   ;abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({13, 2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({13, 2, 2, 1}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 2, 2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({13, 2, 2, 3}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3)   ;   abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({13, 2, 3}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);   abs(ab)   );pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({13, 2, 4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({13, 2, 4, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({13, 2, 4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({13, 2, 4, 3}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({13, 2, 5}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab))   ;   pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({13, 3}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));   pow(3+5;ab)   );abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({13, 4, 1}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(   3+5   ;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({13, 4, 2, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({13, 4, 2, 2}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5   ;   ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({13, 4, 3}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;   ab   ));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({13, 4, 4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({13, 4, 5}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({13, 5}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab))   ;   abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({14}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));   abs(3+ab)   )
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({15, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({15, 1}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 2, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(   3+ab   ))
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({15, 2, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({15, 2, 2}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({15, 3}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
+    tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({16}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))");
+}
+
+GTEST_TEST(tokenmanager_h_Test, toFunctionString_without_brackets_and_semicolons)
+{
+    afl::detail::TokenManager tokenManager;
+    auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
+    auto bracketClose = std::make_shared<afl::Token<std::string>>("]", afl::TokenType::BracketClose, 0, 0, afl::TokenAssociativity::None);
+    auto argumentDelimiter = std::make_shared<afl::Token<std::string>>("#", afl::TokenType::ArgumentDelimiter, 0, 0, afl::TokenAssociativity::None);
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(bracketOpen, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(bracketClose, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+    tokenManager.addToken(std::make_shared<afl::detail::TokenPtrBundle<std::string>>(argumentDelimiter, std::vector<afl::TokenAliases<std::string>>{}), "custom_tokens.atokens");
+
+    std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
+
+    // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
+    std::vector<afl::TokenGroup<std::string>> tokenGroups;
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({2}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({6, 1}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({9}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({10}));
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({11}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({13, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({13, 2}));
+    tokenGroups.emplace_back(std::vector<size_t>({13, 3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({15, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({15, 2, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({15, 2, 2}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs[ab]^3*pow[3^5#abs[3+ab]]");
+
+    tokenGroups.clear();
+    // pow(abs(3);abs(ab);abs(5))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 0}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({6, 2, 0}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow[abs[3]#abs[ab]#abs[5]]");
+
+    tokenGroups.clear();
+    // pow(pow(abs(3);abs(ab));pow(3+5;ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
+    // pow(   pow(abs(3);abs(ab))   ;pow(3+5;ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({2, 0}));
+    // pow(pow(   abs(3)   ;abs(ab));pow(3+5;ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({2, 2, 2, 0}));
+    // pow(pow(abs(3);   abs(ab)   );pow(3+5;ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({2, 4, 2, 0}));
+    // pow(pow(abs(3);abs(ab));   pow(3+5;ab)   )
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({4, 0}));
+    // pow(pow(abs(3);abs(ab));pow(   3+5   ;ab))
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({4, 2, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({4, 2, 2}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;   ab   ))
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({4, 4, 0}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow[pow[abs[3]#abs[ab]]#pow[3+5#ab]]");
+
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.clear();
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({2}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({3}));
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({6, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({6, 1}));
+    tokenGroups.emplace_back(afl::test::tokenPower, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({9}));
+    tokenGroups.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({10}));
+
+    // 3+5*abs(ab)^3*   pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({11}));
+    // 3+5*abs(ab)^3*pow(   pow(pow(abs(3);abs(ab));pow(3+5;ab))   ;abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 0}));
+    // 3+5*abs(ab)^3*pow(pow(   pow(abs(3);abs(ab));pow(3+5;ab))  ;abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 2, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(   abs(3)   ;abs(ab));pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({13, 2, 2, 0}));
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 2, 2, 2, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);   abs(ab)   );pow(3+5;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({13, 2, 4, 0}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({13, 2, 4, 2, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));   pow(3+5;ab)   );abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({13, 4, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(   3+5   ;ab));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({13, 4, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({13, 4, 2, 1}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({13, 4, 2, 2}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;   ab   ));abs(3+ab))
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({13, 4, 4, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));   abs(3+ab)   )
+    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({15, 0}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 2, 0}));
+    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(   3+ab   ))
+    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({15, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({15, 2, 1}));
+    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({15, 2, 2}));
+    tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
+
+    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
+    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs[ab]^3*pow[pow[pow[abs[3]#abs[ab]]#pow[3+5#ab]]#abs[3+ab]]");
 }

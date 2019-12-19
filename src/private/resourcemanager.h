@@ -3,18 +3,11 @@
 
 #include "AFunctionLibrary/afunctionlibrary_export.h"
 
-#include <set>
 #include <string>
 #include <vector>
-#include <memory>
-#include <unordered_map>
 
 #include "APluginLibrary/pluginmanager.h"
 
-#include "AFunctionLibrary/token.h"
-
-#include "tokenextras.h"
-#include "resourceparser.h"
 #include "tokenmanager.h"
 
 namespace afl
@@ -25,14 +18,6 @@ namespace afl
         {
             Plugin,
             Extension
-        };
-
-        typedef void(*ResourceManagerCallbackFunction)(const std::string& path, ResourceType type);
-        enum class ResourceManagerCallbackType
-        {
-            Load,
-            Unload,
-            Load_Unload
         };
 
         AFUNCTIONLIBRARY_NO_EXPORT std::string getFullPathName(std::string path, afl::detail::ResourceType type);

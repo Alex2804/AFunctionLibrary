@@ -1,22 +1,13 @@
 #include "../resourcemanager.h"
 
-#include <cstring>
-#include <algorithm>
-
 #include "tinydir/tinydir.h"
 #include "pugixml.hpp"
 
-namespace
+#include "../resourceparser.h"
+
+namespace afl
 {
     constexpr const char *kExtensionsFileExtension = "xml";
-
-    inline void invokeResourceManagerCallbacks(const std::vector<afl::detail::ResourceManagerCallbackFunction>& functions,
-                                        const std::string& path, afl::detail::ResourceType type)
-    {
-        for(afl::detail::ResourceManagerCallbackFunction function : functions) {
-            function(path, type);
-        }
-    }
 }
 
 std::vector<std::string> afl::detail::getDirectoryFiles(const std::string& path, const std::string& fileExtension, bool recursive)
@@ -57,16 +48,16 @@ std::string afl::detail::getFullPathName(std::string path, afl::detail::Resource
 }
 
 afl::detail::ResourceManager::ResourceManager()
-    : m_pluginManager(new apl::PluginManager())
-    , m_tokenManager(new TokenManager())
+        : m_pluginManager(new apl::PluginManager())
+        , m_tokenManager(new TokenManager())
 {}
 afl::detail::ResourceManager::ResourceManager(const afl::detail::ResourceManager &other)
-    : m_pluginManager(new apl::PluginManager(*other.m_pluginManager))
-    , m_tokenManager(new TokenManager(*other.m_tokenManager))
+        : m_pluginManager(new apl::PluginManager(*other.m_pluginManager))
+        , m_tokenManager(new TokenManager(*other.m_tokenManager))
 {}
 afl::detail::ResourceManager::ResourceManager(afl::detail::ResourceManager &&other) noexcept
-    : m_pluginManager(other.m_pluginManager)
-    , m_tokenManager(other.m_tokenManager)
+        : m_pluginManager(other.m_pluginManager)
+        , m_tokenManager(other.m_tokenManager)
 {
     other.m_pluginManager = nullptr;
     other.m_tokenManager = nullptr;
