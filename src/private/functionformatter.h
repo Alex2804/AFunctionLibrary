@@ -5,8 +5,9 @@
 
 #include <string>
 #include <vector>
-#include <regex>
 #include <memory>
+
+#include "APluginSDK/pluginapi.h"
 
 #include "resourcemanager.h"
 
@@ -14,29 +15,36 @@ namespace afl
 {
     namespace detail
     {
-        typedef char*(*formatFunctionPluginFunction)(const char*);
+        typedef CString*(*CApiProcessStringPluginFunction)(const char*);
+        typedef std::string(*CppApiProcessStringPluginFunction)(std::string);
 
         class AFUNCTIONLIBRARY_NO_EXPORT FunctionFormatter
         {
         public:
             explicit FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager);
-            FunctionFormatter(const FunctionFormatter& other);
-            FunctionFormatter(FunctionFormatter&& other) noexcept;
-            ~FunctionFormatter();
+            FunctionFormatter(const FunctionFormatter& other) = default;
+            FunctionFormatter(FunctionFormatter&& other) noexcept = default;
+            virtual ~FunctionFormatter() = default;
 
-            FunctionFormatter& operator=(const FunctionFormatter& other);
-            FunctionFormatter& operator=(FunctionFormatter&& other) noexcept;
+            FunctionFormatter& operator=(const FunctionFormatter& other) = default;
+            FunctionFormatter& operator=(FunctionFormatter&& other) noexcept = default;
 
             void reloadPluginFormatFunctions();
 
+            std::string replaceAliases(std::string function);
+            std::string formatWithPlugins(std::string function);
             std::string formatFunction(std::string function);
 
-            std::vector<std::string> splitIntoTokens(std::string string);
+        protected:
+            std::shared_ptr<ResourceManager> m_resourceManager;
 
         private:
-            std::shared_ptr<ResourceManager> m_resourceManager;
-            std::vector<const apl::PluginFeatureInfo*> m_pluginFormatFunctions;
+            std::vector<CApiProcessStringPluginFunction> m_cApiPluginFormatStringFunctions;
+            std::vector<CppApiProcessStringPluginFunction> m_cppApiPluginFormatStringFunctions;
         };
+
+        AFUNCTIONLIBRARY_NO_EXPORT std::pair<bool, std::string> invokeCProcessStringPluginFunctions(const std::string& function, const std::vector<CApiProcessStringPluginFunction>& pluginFunctions);
+        AFUNCTIONLIBRARY_NO_EXPORT std::pair<bool, std::string> invokeCppProcessStringPluginFunctions(std::string function, const std::vector<CppApiProcessStringPluginFunction>& pluginFunctions);
     }
 }
 

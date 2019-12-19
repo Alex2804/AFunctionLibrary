@@ -119,7 +119,6 @@ GTEST_TEST(SyntaxTree_Test, move_constructor_assignement)
     ASSERT_EQ(intSyntaxTreeRef.toString(), afl::test::expectedInt);
 }
 
-#include <cstring>
 GTEST_TEST(syntaxtree_h_Test, generateSyntaxTree)
 {
     // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
