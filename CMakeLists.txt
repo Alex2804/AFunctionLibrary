@@ -27,9 +27,8 @@ set(SDK_HEADERS
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/syntaxtree.h
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/token.h
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/utility.h
-        SDK/AFunctionLibrary/implementation/definitions.h
-        SDK/AFunctionLibrary/implementation/macros.h
-        SDK/AFunctionLibrary/implementation/cstringtoken.h)
+        SDK/AFunctionLibrary/implementation/cstring.hpp
+        SDK/AFunctionLibrary/implementation/cstringtoken.hpp)
 set(SDK_SOURCES
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/syntaxtree.tpp
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/token.tpp

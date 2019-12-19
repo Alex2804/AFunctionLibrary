@@ -2,6 +2,8 @@
 
 #include "test_include.h"
 
+#include "AFunctionLibrary/syntaxtree.h"
+
 GTEST_TEST(SyntaxTree_Test, constructors)
 {
     auto tokenSyntaxTree = new afl::SyntaxTree<afl::test::Token>();

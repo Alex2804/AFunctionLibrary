@@ -1,7 +1,5 @@
 #include "gtest/gtest.h"
 
-#include <memory>
-
 #include "../src/private/functionformatter.h"
 #include "../src/private/resourcemanager.h"
 

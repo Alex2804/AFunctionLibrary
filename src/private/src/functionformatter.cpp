@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-#include "AFunctionLibrary/utility.h"
+#include "AFunctionLibrary/implementation/formatfunctionapi/formatfunctionapi_definitions.hpp"
 
 namespace
 {
@@ -90,7 +90,7 @@ afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(Functi
 
 void afl::detail::FunctionFormatter::reloadPluginFormatFunctions()
 {
-    m_pluginFormatFunctions = m_resourceManager->getPluginManager()->getFeatures(kFormatFunctionFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
+    m_pluginFormatFunctions = m_resourceManager->getPluginManager()->getFeatures(k_C_API_FormatFunctionStringFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
 }
 
 std::string afl::detail::FunctionFormatter::formatFunction(std::string function)

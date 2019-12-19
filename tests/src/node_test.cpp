@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 
-#include <sstream>
-
 #include "test_include.h"
+
+#include "AFunctionLibrary/syntaxtree.h"
 
 GTEST_TEST(Node_Test, toString_ostream_operator)
 {

@@ -2,6 +2,7 @@
 #define AFUNCTIONLIBRARYTEST_TEST_INCLUDE_H
 
 #include <random>
+#include <chrono>
 
 #include "AFunctionLibrary/syntaxtree.h"
 #include "AFunctionLibrary/token.h"
@@ -13,6 +14,7 @@ namespace afl
         inline std::vector<size_t> generateRandomGroupID() {
             std::random_device rd;
             std::mt19937 mt(rd());
+            mt.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count());
             std::uniform_int_distribution<size_t> sizeDist(1, 20);
             std::uniform_int_distribution<size_t> idDist(0, std::numeric_limits<size_t>::max());
 

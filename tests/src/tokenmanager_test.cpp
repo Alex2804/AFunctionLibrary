@@ -1,14 +1,10 @@
 #include "gtest/gtest.h"
 
-#include <memory>
-#include <unordered_map>
-#include <string>
-#include <algorithm>
-#include <cstring>
-#include <tuple>
+#include "test_include.h"
 
 #include "../../src/private/tokenmanager.h"
 #include "../../src/private/resourcemanager.h"
+#include "AFunctionLibrary/implementation/createtokenapi/createtokenapi_definitions.hpp"
 
 std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>> allTokens = {
         {"+", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
@@ -159,6 +155,7 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     ASSERT_FALSE(plugin->isLoaded());
     manager.addPluginFeatures(plugin);
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
+    delete plugin;
 
     plugin = apl::Plugin::load("res/plugins/first/first_plugin");
     ASSERT_NE(plugin, nullptr);
@@ -171,9 +168,9 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     const apl::PluginFeatureInfo* featureInfo;
     for(size_t i = 0; i < plugin->getFeatureCount(); i++) {
         featureInfo = featureInfos[i];
-        if(std::strcmp(featureInfo->featureGroup, "afl_create_token") == 0)
+        if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenFeatureGroupName) == 0)
             createTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenPluginFunction>(featureInfo->functionPointer));
-        else if(std::strcmp(featureInfo->featureGroup, "afl_create_token_aliases") == 0)
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenAliasesFeatureGroupName) == 0)
             createTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenAliasesPluginFunction>(featureInfo->functionPointer));
     }
     std::sort(createTokenPluginFunctions.begin(), createTokenPluginFunctions.end());
@@ -186,6 +183,7 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     ASSERT_EQ(manager.m_uniqueTokens, uniqueTokens);
     ASSERT_EQ(manager.m_notUniqueTokens, notUniqueTokens);
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
+    delete plugin;
 }
 
 GTEST_TEST(TokenManager_Test, removePluginFeatures)
@@ -215,9 +213,9 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     const apl::PluginFeatureInfo* featureInfo;
     for(size_t i = 0; i < plugin->getFeatureCount(); i++) {
         featureInfo = featureInfos[i];
-        if(std::strcmp(featureInfo->featureGroup, "afl_create_token") == 0)
+        if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenFeatureGroupName) == 0)
             createTokenPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenPluginFunction>(featureInfo->functionPointer));
-        else if(std::strcmp(featureInfo->featureGroup, "afl_create_token_aliases") == 0)
+        else if(std::strcmp(featureInfo->featureGroup, afl::k_C_API_CreateTokenAliasesFeatureGroupName) == 0)
             createTokenAliasesPluginFunctions.push_back(reinterpret_cast<afl::detail::createTokenAliasesPluginFunction>(featureInfo->functionPointer));
     }
     std::sort(createTokenPluginFunctions.begin(), createTokenPluginFunctions.end());
@@ -247,6 +245,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     ASSERT_EQ(manager.m_pathTokenValueRefs, pathTokenValueRefs);
     pluginFunctions.clear();
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
+    delete plugin;
 }
 
 GTEST_TEST(TokenManager_Test, removeReferences)
@@ -268,7 +267,10 @@ GTEST_TEST(TokenManager_Test, removeReferences)
                     {"path/to/functions", {"abs"}}
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
-            {{nullptr, {nullptr, nullptr, nullptr, nullptr}, {nullptr, nullptr, nullptr}}};
+            {
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
+                    {nullptr, {}, {}}
+            };
 
     afl::detail::TokenManager manager;
     manager.m_uniqueTokens = uniqueTokens;
@@ -374,7 +376,10 @@ GTEST_TEST(TokenManager_Test, removeToken)
                     {"path/to/functions", {"abs"}}
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::createTokenPluginFunction>, std::vector<afl::detail::createTokenAliasesPluginFunction>>> pluginFunctions =
-            {{nullptr, {nullptr, nullptr, nullptr, nullptr}, {nullptr, nullptr, nullptr}}};
+            {
+                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}},
+                    {nullptr, {}, {}}
+            };
 
     afl::detail::TokenManager manager;
     manager.m_uniqueTokens = uniqueTokens;
@@ -454,35 +459,7 @@ GTEST_TEST(TokenManager_Test, removeToken)
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, createToken)
-{
-    afl::detail::TokenManager manager;
-    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
-    ASSERT_NE(plugin, nullptr);
-    ASSERT_TRUE(plugin->isLoaded());
-    manager.addPluginFeatures(plugin);
-
-    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created = manager.createToken("1", false);
-    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
-    ASSERT_EQ(*created.first, *expected.first);
-    ASSERT_EQ(created.second, expected.second);
-
-    created = manager.createToken("1", true);
-    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created2 = manager.createToken("1");
-    ASSERT_EQ(*created.first, *created2.first);
-    ASSERT_EQ(created.second, created2.second);
-
-    expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
-    ASSERT_EQ(*created.first, *expected.first);
-    ASSERT_EQ(created.second, expected.second);
-
-    created = manager.createToken("12", true);
-    ASSERT_EQ(created.first.get(), nullptr);
-    ASSERT_EQ(created.second, "");
-}
-
-GTEST_TEST(TokenManager_Test, createAliases)
+GTEST_TEST(TokenManager_Test, createAliases_c_api)
 {
     afl::detail::TokenManager manager;
     apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
@@ -496,6 +473,39 @@ GTEST_TEST(TokenManager_Test, createAliases)
 
     aliases = manager.createAliases("12");
     ASSERT_TRUE(aliases.empty());
+    delete plugin;
+}
+
+GTEST_TEST(TokenManager_Test, createToken_c_api)
+{
+    afl::detail::TokenManager manager;
+    apl::Plugin* plugin = apl::Plugin::load("res/plugins/first/first_plugin");
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_TRUE(plugin->isLoaded());
+    manager.addPluginFeatures(plugin);
+
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created = manager.createToken("1", false);
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None), std::vector<afl::TokenAliases<std::string>>{}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+    ASSERT_NE(created.first, nullptr);
+    ASSERT_EQ(*created.first, *expected.first);
+    ASSERT_EQ(created.second, expected.second);
+
+    created = manager.createToken("1", true);
+    ASSERT_NE(created.first, nullptr);
+    std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string> created2 = manager.createToken("1");
+    ASSERT_NE(created2.first, nullptr);
+    ASSERT_EQ(*created.first, *created2.first);
+    ASSERT_EQ(created.second, created2.second);
+
+    expected = {std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
+                                                                           std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"one"}}}), afl::detail::getFullPathName("res/plugins/first/first_plugin", afl::detail::ResourceType::Plugin)};
+    ASSERT_EQ(*created.first, *expected.first);
+    ASSERT_EQ(created.second, expected.second);
+
+    created = manager.createToken("12", true);
+    ASSERT_EQ(created.first.get(), nullptr);
+    ASSERT_EQ(created.second, "");
+    delete plugin;
 }
 
 GTEST_TEST(TokenManager_Test, getToken)
@@ -525,9 +535,10 @@ GTEST_TEST(TokenManager_Test, getToken)
     ASSERT_EQ(manager.getToken("*", true), allTokens.at("*"));
     ASSERT_EQ(manager.getToken("^", true), allTokens.at("^"));
     afl::detail::TokenPtrBundle<std::string> tokenBundle(std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None),
-                                                     std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::vector<std::string>{"one"}}});
+                                                         std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, std::vector<std::string>{"one"}}});
     ASSERT_EQ(*manager.getToken("1", true), tokenBundle);
     ASSERT_EQ(manager.getToken("no_token", true).get(), nullptr);
+    delete plugin;
 }
 
 GTEST_TEST(TokenManager_Test, getTokens)

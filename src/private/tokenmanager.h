@@ -13,7 +13,7 @@
 #include "APluginLibrary/plugin.h"
 #include "APluginSDK/plugininfos.h"
 
-#include "AFunctionLibrary/implementation/cstringtoken.h"
+#include "AFunctionLibrary/implementation/cstringtoken.hpp"
 #include "tokenextras.h"
 
 namespace afl

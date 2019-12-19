@@ -6,19 +6,19 @@
 
 template<typename T>
 afl::Token<T>::Token()
-        : type(TokenType::Constant), precedence(0), parameterCount(0), associativity(TokenAssociativity::None)
+    : type(TokenType::Constant), precedence(0), parameterCount(0), associativity(TokenAssociativity::None)
 {}
 template<typename T>
 afl::Token<T>::Token(T value, afl::TokenType type, int precedence, int parameterCount, afl::TokenAssociativity associativity)
-        : value(std::move(value)), type(type), precedence(precedence)
-        , parameterCount(parameterCount), associativity(associativity)
+    : value(std::move(value)), type(type), precedence(precedence)
+    , parameterCount(parameterCount), associativity(associativity)
 {}
 
 template<typename T>
 bool afl::Token<T>::operator==(const afl::Token<T> &other) const
 {
     return value == other.value && type == other.type && precedence == other.precedence
-           && parameterCount == other.parameterCount && associativity == other.associativity;
+        && parameterCount == other.parameterCount && associativity == other.associativity;
 }
 template<typename T>
 bool afl::Token<T>::operator!=(const afl::Token<T> &other) const
@@ -87,7 +87,7 @@ std::ostream& afl::operator<<(std::ostream& os, const Token<T>& token)
 
 template<typename T>
 afl::TokenAliases<T>::TokenAliases(afl::TokenAliasType type)
-        : type(type)
+    : type(type)
 {}
 template<typename T>
 afl::TokenAliases<T>::TokenAliases(std::vector<T> aliases)

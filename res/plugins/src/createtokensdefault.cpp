@@ -6,39 +6,13 @@
 const std::regex constantRegex(R"([a-zA-Z_][\w_]*)");
 const std::regex numberRegex(R"(\d+(\.\d+)?)");
 
-
-afl::CStringToken* createConstantTokens(afl::CStringToken* token, const std::string& tokenString)
+AFL_REGISTER_CREATE_TOKEN_FEATURE(__AFL_C_API_CREATE_TOKEN_DEFAULT_FEATURE_NAME__, tokenValue)
 {
-    if(std::regex_match(tokenString, constantRegex)) {
-        token->type = afl::TokenType::Constant;
-        return token;
-    }
-    return nullptr;
-}
-afl::CStringToken* createNumberTokens(afl::CStringToken* token, const std::string& tokenString)
-{
+    std::string tokenString = tokenValue;
     if(std::regex_match(tokenString, numberRegex)) {
-        token->type = afl::TokenType::Number;
-        return token;
+        return afl::convert(afl::Token<std::string>(tokenValue, afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None));
+    } else if(std::regex_match(tokenString, constantRegex)) {
+        return afl::convert(afl::Token<std::string>(tokenValue, afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None));
     }
-    return nullptr;
-}
-
-typedef afl::CStringToken*(*createTokenFunction)(afl::CStringToken*, const std::string&);
-
-AFL_REGISTER_CREATE_TOKEN_FEATURE(AFL_CREATE_TOKEN_DEFAULT_FEATURE_NAME, tokenValue)
-{
-    auto token = static_cast<afl::CStringToken*>(apl::allocateMemory(sizeof(afl::CStringToken)));
-    token->string = tokenValue;
-    std::string tokenString = token->string;
-    createTokenFunction functions[] = {createConstantTokens, createNumberTokens};
-    for(createTokenFunction function : functions) {
-        token->precedence = 0;
-        token->parameterCount = 0;
-        token->associativity = afl::TokenAssociativity::None;
-        if(function(token, tokenString) != nullptr)
-            return token;
-    }
-    apl::freeMemory(token);
     return nullptr;
 }

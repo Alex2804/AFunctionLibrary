@@ -16,27 +16,27 @@ namespace afl
 
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree()
-        : m_root(nullptr)
+    : m_root(nullptr)
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(T value)
-        : m_root(new Node<T>(std::move(value)))
+    : m_root(new Node<T>(std::move(value)))
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(Node<T> root)
-        : m_root(new Node<T>(std::move(root)))
+    : m_root(new Node<T>(std::move(root)))
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(std::unique_ptr<Node<T>> root)
-: m_root(root.release())
+    : m_root(root.release())
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(const SyntaxTree<T>& other)
-        : m_root(new Node<T>(*other.m_root))
+    : m_root(new Node<T>(*other.m_root))
 {}
 template<typename T>
 afl::SyntaxTree<T>::SyntaxTree(SyntaxTree<T>&& other) noexcept
-        : m_root(other.m_root)
+    : m_root(other.m_root)
 {
     other.m_root = nullptr;
 }
@@ -162,11 +162,11 @@ afl::SyntaxTree<T> afl::generateSyntaxTree(const std::vector<T>& infixTokens)
 
 template<typename T>
 afl::Node<T>::Node(T value)
-        : m_value(std::move(value))
+    : m_value(std::move(value))
 {}
 template<typename T>
 afl::Node<T>::Node(T value, std::vector<Node<T>> children)
-: m_value(std::move(value)), m_children(std::move(children))
+    : m_value(std::move(value)), m_children(std::move(children))
 {}
 
 template<typename T>

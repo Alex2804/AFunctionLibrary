@@ -1,8 +1,5 @@
 #include "gtest/gtest.h"
 
-#include <tuple>
-#include <algorithm>
-
 #include "../src/private/resourceparser.h"
 
 GTEST_TEST(ResourceParser_Test, stringToTokenType)

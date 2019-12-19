@@ -4,8 +4,7 @@
 #include <algorithm>
 #include <array>
 
-#include "AFunctionLibrary/implementation/definitions.h"
-#include "AFunctionLibrary/utility.h"
+#include "AFunctionLibrary/implementation/createtokenapi/createtokenapi_definitions.hpp"
 
 #include "../resourcemanager.h"
 
@@ -18,9 +17,9 @@ void afl::detail::TokenManager::addPluginFeatures(const apl::Plugin* plugin)
     std::vector<createTokenPluginFunction> tokenFunctions;
     std::vector<createTokenAliasesPluginFunction> aliasesFunctions;
     for(size_t i = 0; i < featureCount; i++) {
-        if(std::strcmp(featureInfos[i]->featureGroup, afl::kCreateTokenFeatureGroupName) == 0)
+        if(std::strcmp(featureInfos[i]->featureGroup, afl::k_C_API_CreateTokenFeatureGroupName) == 0)
             tokenFunctions.push_back(reinterpret_cast<createTokenPluginFunction>(featureInfos[i]->functionPointer));
-        else if(std::strcmp(featureInfos[i]->featureGroup, afl::kCreateTokenAliasesFeatureGroupName) == 0)
+        else if(std::strcmp(featureInfos[i]->featureGroup, afl::k_C_API_CreateTokenAliasesFeatureGroupName) == 0)
             aliasesFunctions.push_back(reinterpret_cast<createTokenAliasesPluginFunction>(featureInfos[i]->functionPointer));
     }
     if(!tokenFunctions.empty() || !aliasesFunctions.empty())
@@ -135,14 +134,8 @@ std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAli
         for(createTokenAliasesPluginFunction function : std::get<2>(tuple)) {
             for(size_t i = 0; i < types.size(); i++) {
                 cAlias = function(cValue, types[i]);
-                if(cAlias != nullptr) {
-                    std::copy(cAlias->aliases, cAlias->aliases + cAlias->aliasesCount, std::inserter(aliases[i].aliases, aliases[i].aliases.end()));
-                    for(size_t j = 0; j < cAlias->aliasesCount; j++) {
-                        plugin->freeMemory(cAlias->aliases[j]);
-                    }
-                    plugin->freeMemory(cAlias->aliases);
-                    plugin->freeMemory(cAlias);
-                }
+                if(cAlias != nullptr)
+                    aliases[i].append(convert(cAlias));
             }
         }
     }
