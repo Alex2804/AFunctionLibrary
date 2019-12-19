@@ -13,7 +13,7 @@ set(HEADERS
         src/private/tokenmanager.h
         src/private/tokenextras.h
         src/private/functionformatter.h
-        src/private/syntaxtreehandler.h)
+        )
 set(SOURCES
         src/function.cpp src/private/src/functionprivate.cpp
         src/private/src/resourceparser.cpp
@@ -21,7 +21,7 @@ set(SOURCES
         src/private/src/tokenmanager.cpp
         src/private/src/tokenextras.cpp
         src/private/src/functionformatter.cpp
-        src/private/src/syntaxtreehandler.cpp)
+        )
 
 set(SDK_HEADERS
         SDK/AFunctionLibrary/implementation
