@@ -19,7 +19,7 @@ namespace afl
     namespace detail
     {
         typedef CStringToken*(*cApiCreateTokenPluginFunction)(const char*);
-        typedef std::shared_ptr<const afl::Token<std::string>>(*cppApiCreateTokenPluginFunction)(const std::string&);
+        typedef std::shared_ptr<afl::Token<std::string>>(*cppApiCreateTokenPluginFunction)(const std::string&);
         typedef CStringTokenAliases*(*cApiCreateTokenAliasesPluginFunction)(const char*, afl::TokenAliasType);
         typedef std::vector<TokenAliases<std::string>>(*cppApiCreateTokenAliasesPluginFunction)(const std::string&);
 

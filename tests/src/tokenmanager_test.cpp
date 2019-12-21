@@ -566,6 +566,7 @@ GTEST_TEST(TokenManager_Test, createToken_cpp_api)
     created = manager.createToken("12", true);
     ASSERT_EQ(created.first.get(), nullptr);
     ASSERT_EQ(created.second, "");
+
     delete plugin;
 }
 

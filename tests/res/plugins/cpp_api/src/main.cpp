@@ -4,9 +4,9 @@
 AFL_CPP_API_REGISTER_CREATE_TOKEN_FEATURE(just_for_testing, tokenValue)
 {
     if(std::all_of(tokenValue.begin(), tokenValue.end(), ::isalpha)) {
-        return std::make_shared<const afl::Token<std::string>>(tokenValue, afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
+        return std::make_shared<afl::Token<std::string>>(tokenValue, afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);
     }
-    return std::shared_ptr<const afl::Token<std::string>>();
+    return std::shared_ptr<afl::Token<std::string>>();
 }
 
 AFL_CPP_API_REGISTER_CREATE_TOKEN_ALIASES_FEATURE(just_for_testing, value)

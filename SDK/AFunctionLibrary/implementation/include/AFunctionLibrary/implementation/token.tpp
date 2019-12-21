@@ -114,10 +114,8 @@ bool afl::TokenAliases<T>::operator!=(const TokenAliases &other) const
 template<typename T>
 afl::TokenAliases<T> &afl::TokenAliases<T>::append(const afl::TokenAliases<T>& tokenAliases)
 {
-    if(type == tokenAliases.type) {
+    if(type == tokenAliases.type)
         append(tokenAliases.aliases);
-        //std::copy(tokenAliases.aliases.begin(), tokenAliases.aliases.end(), std::inserter(aliases, aliases.end()));
-    }
     return *this;
 }
 template<typename T>
@@ -125,8 +123,8 @@ afl::TokenAliases<T> &afl::TokenAliases<T>::append(std::vector<T> aliasVector)
 {
     aliases.reserve(aliases.size() + aliasVector.size());
     for(std::string& alias : aliasVector) {
-        if(std::find(aliases.begin(), aliases.end(), std::move(alias)) == aliases.end())
-            aliases.emplace_back(alias);
+        if(std::find(aliases.begin(), aliases.end(), alias) == aliases.end())
+            aliases.emplace_back(std::move(alias));
     }
     aliases.shrink_to_fit();
     return *this;

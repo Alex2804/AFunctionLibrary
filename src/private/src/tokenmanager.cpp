@@ -109,7 +109,7 @@ std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string
     const char* cValue = value.c_str();
     const apl::Plugin* plugin = nullptr; // plugin from which the token was created;
     CStringToken* cToken = nullptr;
-    std::shared_ptr<const afl::Token<std::string>> token;
+    std::shared_ptr<afl::Token<std::string>> token;
     for(const auto& tuple : m_pluginFunctions) {
         plugin = std::get<0>(tuple);
         for(cApiCreateTokenPluginFunction function : std::get<1>(tuple)) {
@@ -127,7 +127,7 @@ std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, std::string
     if(cToken != nullptr)
         token = convert(cToken);
     if(token != nullptr) {
-        return {std::make_shared<TokenPtrBundle<std::string>>(std::move(token), std::move(aliases)),
+        return {std::make_shared<TokenPtrBundle<std::string>>(std::make_shared<const Token<std::string>>(std::move(*token)), std::move(aliases)),
                 getFullPathName(plugin->getPath(), ResourceType::Plugin)};
     }
     return {std::shared_ptr<TokenPtrBundle<std::string>>(), ""};
@@ -143,7 +143,6 @@ std::vector<afl::TokenAliases<std::string>> afl::detail::TokenManager::createAli
     }
     const char* cValue = value.c_str();
     for(const auto& tuple : m_pluginFunctions) {
-        const apl::Plugin* plugin = std::get<0>(tuple);
         for(cApiCreateTokenAliasesPluginFunction function : std::get<2>(tuple)) {
             for(size_t i = 0; i < aliasTypes.size(); i++) {
                 cAlias = function(cValue, aliasTypes[i]);
