@@ -45,25 +45,28 @@ std::string afl::detail::stringify(T t, std::false_type, std::true_type) // has 
     return static_cast<const std::ostringstream&>(std::ostringstream() << *t).str();
 }
 
-template<>
-inline std::string afl::stringify<char>(char t)
+namespace afl
 {
-    return std::string(1, t);
-}
-template<>
-inline std::string afl::stringify<float>(float t)
-{
-    return afl::detail::stringifyFloatingPointNumber(t);
-}
-template<>
-inline std::string afl::stringify<double>(double t)
-{
-    return afl::detail::stringifyFloatingPointNumber(t);
-}
-template<>
-inline std::string afl::stringify<long double>(long double t)
-{
-    return afl::detail::stringifyFloatingPointNumber(t);
+    template<>
+    inline std::string stringify<char>(char t)
+    {
+        return std::string(1, t);
+    }
+    template<>
+    inline std::string stringify<float>(float t)
+    {
+        return afl::detail::stringifyFloatingPointNumber(t);
+    }
+    template<>
+    inline std::string stringify<double>(double t)
+    {
+        return afl::detail::stringifyFloatingPointNumber(t);
+    }
+    template<>
+    inline std::string stringify<long double>(long double t)
+    {
+        return afl::detail::stringifyFloatingPointNumber(t);
+    }
 }
 
 template<typename T>

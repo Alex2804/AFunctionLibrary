@@ -58,6 +58,7 @@ target_compile_definitions(AFunctionLibrary PUBLIC AFUNCTIONLIBRARY_BUILD_LIBRAR
 add_subdirectory(res/plugins)
 add_dependencies(AFunctionLibrary AFunctionLibraryDefaultPlugin)
 
+set(AFunctionLibraryTest TRUE)
 if(${AFunctionLibraryTest})
     add_subdirectory(tests)
 endif()

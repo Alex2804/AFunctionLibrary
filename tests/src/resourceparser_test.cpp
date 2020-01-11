@@ -42,22 +42,22 @@ void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::Token
 
     //                     value, type, precedence, parameterCount, associativity
     std::vector<std::tuple<std::string, afl::TokenType, size_t, size_t, afl::TokenAssociativity>> tokens = {
-            {"+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left},
-            {"-", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left},
-            {"*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left},
-            {"/", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left},
-            {"^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right},
-            {"abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None}
+            std::make_tuple("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left),
+            std::make_tuple("-", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left),
+            std::make_tuple("*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left),
+            std::make_tuple("/", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left),
+            std::make_tuple("^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right),
+            std::make_tuple("abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None)
     };
     afl::TokenAliasType stringAlias = afl::TokenAliasType::String, regexAlias = afl::TokenAliasType::Regex;
     //                     count, types, aliases.size(), aliases
     std::vector<std::tuple<size_t, std::vector<afl::TokenAliasType>, std::vector<size_t>, std::vector<std::vector<std::string>>>> aliases = {
-            {0, {}, {}, {{}}},
-            {0, {}, {}, {{}}},
-            {0, {}, {}, {{}}},
-            {0, {}, {}, {{}}},
-            {0, {}, {}, {{}}},
-            {2, {stringAlias, regexAlias}, {2, 1}, {{"absolute", "absolute2"}, {".*absolute.*"}}}
+            std::make_tuple(0, std::vector<afl::TokenAliasType>(), std::vector<size_t>(), std::vector<std::vector<std::string>>()),
+            std::make_tuple(0, std::vector<afl::TokenAliasType>(), std::vector<size_t>(), std::vector<std::vector<std::string>>()),
+            std::make_tuple(0, std::vector<afl::TokenAliasType>(), std::vector<size_t>(), std::vector<std::vector<std::string>>()),
+            std::make_tuple(0, std::vector<afl::TokenAliasType>(), std::vector<size_t>(), std::vector<std::vector<std::string>>()),
+            std::make_tuple(0, std::vector<afl::TokenAliasType>(), std::vector<size_t>(), std::vector<std::vector<std::string>>()),
+            std::make_tuple(2, std::vector<afl::TokenAliasType>({stringAlias, regexAlias}), std::vector<size_t>({2, 1}), std::vector<std::vector<std::string>>({{"absolute", "absolute2"}, {".*absolute.*"}}))
     };
 
     for(size_t i = 0; i < tokensVector.size(); i++) {

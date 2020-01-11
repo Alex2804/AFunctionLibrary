@@ -33,8 +33,8 @@ GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
-                    {nullptr, {}, {}, {}, {}}
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}),
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {}, {}, {}, {})
             };
 
     afl::detail::TokenManager manager1;
@@ -90,8 +90,8 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
-                    {nullptr, {}, {}, {}, {}}
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}),
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {}, {}, {}, {})
             };
 
     afl::detail::TokenManager manager1;
@@ -233,7 +233,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     std::sort(cApiCreateTokenPluginFunctions.begin(), cApiCreateTokenPluginFunctions.end());
     std::sort(cApiCreateTokenAliasesPluginFunctions.begin(), cApiCreateTokenAliasesPluginFunctions.end());
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
-            {{plugin, cApiCreateTokenPluginFunctions, cApiCreateTokenAliasesPluginFunctions, cppApiCreateTokenPluginFunctions, cppApiCreateTokenAliasesPluginFunctions}};
+            {std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(plugin, cApiCreateTokenPluginFunctions, cApiCreateTokenAliasesPluginFunctions, cppApiCreateTokenPluginFunctions, cppApiCreateTokenAliasesPluginFunctions)};
 
     afl::detail::TokenManager manager;
     manager.m_uniqueTokens = uniqueTokens;
@@ -280,8 +280,8 @@ GTEST_TEST(TokenManager_Test, removeReferences)
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
-                    {nullptr, {}, {}, {}, {}}
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}),
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {}, {}, {}, {})
             };
 
     afl::detail::TokenManager manager;
@@ -389,8 +389,8 @@ GTEST_TEST(TokenManager_Test, removeToken)
             };
     std::vector<std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>> pluginFunctions =
             {
-                    {nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}},
-                    {nullptr, {}, {}, {}, {}}
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {nullptr, nullptr}, {nullptr, nullptr, nullptr, nullptr}, {nullptr}, {nullptr, nullptr}),
+                    std::tuple<const apl::Plugin*, std::vector<afl::detail::cApiCreateTokenPluginFunction>, std::vector<afl::detail::cApiCreateTokenAliasesPluginFunction>, std::vector<afl::detail::cppApiCreateTokenPluginFunction>, std::vector<afl::detail::cppApiCreateTokenAliasesPluginFunction>>(nullptr, {}, {}, {}, {})
             };
 
     afl::detail::TokenManager manager;
