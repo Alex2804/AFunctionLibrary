@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/zeux/pugixml
 	branch = master
-	commit = 41b6ff21c455865bb8ef67c5952b7f895b62bacc
-	parent = d5160736441998e94adae56f38752cfa45f77483
+	commit = 76c3914484f1ec260b927fa98b4c77a25b9047c0
+	parent = fe9448f4eb199a01e63f087255a523e5982ae10c
 	method = merge
-	cmdver = 0.4.0
+	cmdver = 0.4.1
