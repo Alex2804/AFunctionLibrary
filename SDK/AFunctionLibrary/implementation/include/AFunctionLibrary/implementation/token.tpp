@@ -166,7 +166,7 @@ afl::TokenGroup<T>& afl::TokenGroup<T>::operator=(TokenGroup<T>&& other) noexcep
 template<typename T>
 bool afl::TokenGroup<T>::operator==(const TokenGroup<T>& other) const
 {
-    return *token == *other.token && groupID == other.groupID;
+    return ((isToken() && other.isToken() && *token == *other.token) || token == other.token) && groupID == other.groupID;
 }
 template<typename T>
 bool afl::TokenGroup<T>::operator!=(const TokenGroup<T>& other) const
@@ -214,7 +214,10 @@ afl::TokenAssociativity afl::TokenGroup<T>::getAssociativity() const
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const TokenGroup<T>& tokenGroup)
 {
-    return os << *tokenGroup.token;
+    if(tokenGroup.isToken())
+        return os << *tokenGroup.token;
+    else
+        return os << "nullptr";
 }
 
 #endif //AFUNCTIONLIBRARY_TOKEN_TPP

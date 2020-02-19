@@ -55,6 +55,7 @@ namespace afl
             static bool isNotUnique(const afl::Token<std::string>* token);
 
         public:
+            // unique tokens are operators and can never be part of variables
             std::unordered_map<std::string, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>> m_uniqueTokens, m_notUniqueTokens;
             std::unordered_map<std::string, std::vector<std::string>> m_pathTokenValueRefs;
             std::vector<std::tuple<const apl::Plugin*, std::vector<cApiCreateTokenPluginFunction>, std::vector<cApiCreateTokenAliasesPluginFunction>, std::vector<cppApiCreateTokenPluginFunction>, std::vector<cppApiCreateTokenAliasesPluginFunction>>> m_pluginFunctions;
