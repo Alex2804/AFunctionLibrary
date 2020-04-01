@@ -24,16 +24,13 @@ set(SOURCES
         )
 
 set(SDK_HEADERS
-        SDK/AFunctionLibrary/implementation
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/syntaxtree.h
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/token.h
-        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/utility.h
-        SDK/AFunctionLibrary/implementation/cstring.hpp
-        SDK/AFunctionLibrary/implementation/cstringtoken.hpp)
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/utilites.h)
 set(SDK_SOURCES
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/syntaxtree.tpp
         SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/token.tpp
-        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/utility.ipp)
+        SDK/AFunctionLibrary/implementation/include/AFunctionLibrary/implementation/utilities.ipp)
 
 set(PUBLIC_INCLUDE_DIRECTORIES
         include

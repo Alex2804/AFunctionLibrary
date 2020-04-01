@@ -4,7 +4,7 @@
 #ifdef AFUNCTIONLIBRARY_BUILD_LIBRARY
 # include "AFunctionLibrary/afunctionlibrary_export.h"
 #else
-# include "../../../../APluginSDK/implementation/macros.h"
+# include "../../../../libs/APluginSDK/implementation/macros.h"
 # define AFUNCTIONLIBRARY_EXPORT APLUGINSDK_EXPORT
 # define AFUNCTIONLIBRARY_NO_EXPORT APLUGINSDK_NO_EXPORT
 #endif

@@ -117,6 +117,74 @@ std::ostream& afl::operator<<(std::ostream& os, const SyntaxTree<T>& tree)
 }
 
 
+// ================================================== shunting yard ================================================== //
+
+
+/**
+ * Applies the shunting-yard algorithm to the infixTokens vector.
+ *
+ * T must implement the methods "afl::TokenType getType() const", "size_t getPrecedence() const" and
+ * "afl::TokenAssociativity getAssociativity() const".
+ *
+ * @tparam T Type of the token
+ * @param infixTokens The tokens in infix notation.
+ * @return The tokens in postfix notation.
+ */
+template<typename T>
+std::vector<T> afl::shuntingYard(const std::vector<T>& infixTokens)
+{
+    std::vector<T> output;
+    std::stack<T> stack;
+    for(const T& token : infixTokens) {
+        if(getType(token) == TokenType::Number || getType(token)  == TokenType::Constant) {
+            output.push_back(token);
+        } else if(getType(token)  == TokenType::Function || getType(token)  == TokenType::BracketOpen) {
+            stack.push(token);
+        } else if(getType(token)  == TokenType::ArgumentDelimiter) {
+            while(getType(stack.top()) != TokenType::BracketOpen) {
+                output.push_back(stack.top());
+                stack.pop();
+                if(stack.empty())
+                    throw std::runtime_error("Wrong placed argument delimiter or missing opening for closing bracket");
+            }
+        } else if(getType(token)  == TokenType::Operator) {
+            while(!stack.empty()
+                  && getType(stack.top()) == TokenType::Operator
+                  && getAssociativity<T>(token) == TokenAssociativity::Left
+                  && getPrecedence(token) <= getPrecedence(stack.top()))
+            {
+                output.push_back(stack.top());
+                stack.pop();
+            }
+            stack.push(token);
+        } else if(getType(token)  == TokenType::BracketClose) {
+            if(stack.empty())
+                throw std::runtime_error("Missing opening for closing bracket!");
+            while(getType(stack.top()) != TokenType::BracketOpen) {
+                output.push_back(stack.top());
+                stack.pop();
+                if(stack.empty())
+                    throw std::runtime_error("Missing opening for closing bracket!");
+            }
+            stack.pop();
+            if(!stack.empty() && getType(stack.top()) == TokenType::Function) {
+                output.push_back(stack.top());
+                stack.pop();
+            }
+        } else {
+            throw std::runtime_error("Unknown TokenType");
+        }
+    }
+    while(!stack.empty()) {
+        if(getType(stack.top())  == TokenType::BracketOpen)
+            throw std::runtime_error("More opening than closing brackets!");
+        output.push_back(stack.top());
+        stack.pop();
+    }
+    return output;
+}
+
+
 // =============================================== generateSyntaxTree =============================================== //
 
 
@@ -235,7 +303,7 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
         for (size_t i = 0; i < nodeCount; i++) {
             pair = toStringHelper(node.m_children.at(i), connectors);
             if (!pair.first.empty() && !pair.first.front().empty()) {
-                lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount; // std::max(lineCount, pair.c_api.size());
+                lineCount = pair.first.size() > lineCount ? pair.first.size() : lineCount;
                 pairs.push_back(pair);
                 widths.push_back(pair.first.front().size());
                 positions.push_back(width + pair.second);

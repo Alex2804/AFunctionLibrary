@@ -3,7 +3,6 @@
 
 // ====================================================== Token ===================================================== //
 
-
 template<typename T>
 afl::Token<T>::Token()
     : type(TokenType::Constant), precedence(0), parameterCount(0), associativity(TokenAssociativity::None)
@@ -13,6 +12,17 @@ afl::Token<T>::Token(T value, afl::TokenType type, int precedence, int parameter
     : value(std::move(value)), type(type), precedence(precedence)
     , parameterCount(parameterCount), associativity(associativity)
 {}
+template<typename T>
+afl::Token<T>::Token(const afl::Token<T>& other) = default;
+template<typename T>
+afl::Token<T>::Token(afl::Token<T>&& other) noexcept = default;
+template<typename T>
+afl::Token<T>::~Token() = default;
+
+template<typename T>
+afl::Token<T>& afl::Token<T>::operator=(const afl::Token<T>& other) = default;
+template<typename T>
+afl::Token<T>& afl::Token<T>::operator=(afl::Token<T>&& other) noexcept = default;
 
 template<typename T>
 bool afl::Token<T>::operator==(const afl::Token<T> &other) const
@@ -99,6 +109,19 @@ afl::TokenAliases<T>::TokenAliases(afl::TokenAliasType type, std::vector<T> alia
 {
     append(std::move(aliases));
 }
+template<typename T>
+afl::TokenAliases<T>::TokenAliases() = default;
+template<typename T>
+afl::TokenAliases<T>::TokenAliases(const afl::TokenAliases<T>& other) = default;
+template<typename T>
+afl::TokenAliases<T>::TokenAliases(afl::TokenAliases<T>&& other) noexcept = default;
+template<typename T>
+afl::TokenAliases<T>::~TokenAliases() = default;
+
+template<typename T>
+afl::TokenAliases<T>& afl::TokenAliases<T>::operator=(const afl::TokenAliases<T>& other) = default;
+template<typename T>
+afl::TokenAliases<T>& afl::TokenAliases<T>::operator=(afl::TokenAliases<T>&& other) noexcept = default;
 
 template<typename T>
 bool afl::TokenAliases<T>::operator==(const TokenAliases &other) const
@@ -153,15 +176,19 @@ template<typename T>
 afl::TokenGroup<T>::TokenGroup(std::shared_ptr<const Token <T>> token, std::vector<size_t> groupID)
         : token(std::move(token)), groupID(std::move(groupID))
 {}
+template<typename T>
+afl::TokenGroup<T>::TokenGroup() = default;
+template<typename T>
+afl::TokenGroup<T>::TokenGroup(const afl::TokenGroup<T>& other) = default;
+template<typename T>
+afl::TokenGroup<T>::TokenGroup(afl::TokenGroup<T>&& other) noexcept = default;
+template<typename T>
+afl::TokenGroup<T>::~TokenGroup() = default;
 
 template<typename T>
-afl::TokenGroup<T>& afl::TokenGroup<T>::operator=(TokenGroup<T>&& other) noexcept
-{
-    token = std::move(other.token);
-    using std::swap;
-    swap(groupID, other.groupID);
-    return *this;
-}
+afl::TokenGroup<T>& afl::TokenGroup<T>::operator=(const afl::TokenGroup<T>& other) = default;
+template<typename T>
+afl::TokenGroup<T>& afl::TokenGroup<T>::operator=(TokenGroup<T>&& other) noexcept = default;
 
 template<typename T>
 bool afl::TokenGroup<T>::operator==(const TokenGroup<T>& other) const

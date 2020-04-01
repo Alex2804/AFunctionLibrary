@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 
-#include "utility.h"
+#include "utilites.h"
 #include "tokenenums.h"
 
 namespace afl
@@ -18,12 +18,12 @@ namespace afl
     public:
         Token();
         Token(T value, TokenType type, int precedence, int parameterCount, TokenAssociativity associativity);
-        Token(const Token<T>& other) = default;
-        Token(Token<T>&& other) noexcept = default;
-        virtual ~Token() = default;
+        Token(const Token<T>& other);
+        Token(Token<T>&& other) noexcept;
+        virtual ~Token();
 
-        Token<T>& operator=(const Token<T>& other) = default;
-        Token<T>& operator=(Token<T>&& other) noexcept = default;
+        Token<T>& operator=(const Token<T>& other);
+        Token<T>& operator=(Token<T>&& other) noexcept;
 
         bool operator==(const Token<T>& other) const;
         bool operator!=(const Token<T>& other) const;
@@ -54,16 +54,16 @@ namespace afl
     class AFUNCTIONLIBRARY_EXPORT TokenAliases
     {
     public:
-        TokenAliases() = default;
+        TokenAliases();
         explicit TokenAliases(TokenAliasType type);
         explicit TokenAliases(std::vector<T> aliases);
         TokenAliases(TokenAliasType type, std::vector<T> aliases);
-        TokenAliases(const TokenAliases<T>& other) = default;
-        TokenAliases(TokenAliases<T>&& other) noexcept = default;
-        ~TokenAliases() = default;
+        TokenAliases(const TokenAliases<T>& other);
+        TokenAliases(TokenAliases<T>&& other) noexcept;
+        ~TokenAliases();
 
-        TokenAliases<T>& operator=(const TokenAliases<T>& other) = default;
-        TokenAliases<T>& operator=(TokenAliases<T>&& other) noexcept = default;
+        TokenAliases<T>& operator=(const TokenAliases<T>& other);
+        TokenAliases<T>& operator=(TokenAliases<T>&& other) noexcept;
 
         bool operator==(const TokenAliases& other) const;
         bool operator!=(const TokenAliases& other) const;
@@ -81,15 +81,15 @@ namespace afl
     class AFUNCTIONLIBRARY_NO_EXPORT TokenGroup
     {
     public:
-        TokenGroup() = default;
+        TokenGroup();
         explicit TokenGroup(std::shared_ptr<const Token<T>> token);
         explicit TokenGroup(std::vector<size_t> groupID);
         TokenGroup(std::shared_ptr<const Token<T>> token, std::vector<size_t> groupID);
-        TokenGroup(const TokenGroup<T>& other) = default;
-        TokenGroup(TokenGroup<T>&& other) noexcept = default;
-        ~TokenGroup() = default;
+        TokenGroup(const TokenGroup<T>& other);
+        TokenGroup(TokenGroup<T>&& other) noexcept;
+        ~TokenGroup();
 
-        TokenGroup<T>& operator=(const TokenGroup<T>& other) = default;
+        TokenGroup<T>& operator=(const TokenGroup<T>& other);
         TokenGroup<T>& operator=(TokenGroup<T>&& other) noexcept;
 
         bool operator==(const TokenGroup<T>& other) const;

@@ -2,7 +2,7 @@
 
 #include "../src/private/resourceparser.h"
 
-GTEST_TEST(ResourceParser_Test, stringToTokenType)
+GTEST_TEST(Test_ResourceParser, stringToTokenType)
 {
     // test valid string
     ASSERT_EQ(afl::detail::stringToTokenType("constant", afl::TokenType::Number), afl::TokenType::Constant);
@@ -23,7 +23,7 @@ GTEST_TEST(ResourceParser_Test, stringToTokenType)
     ASSERT_EQ(afl::detail::stringToTokenType("not argument_delimiter", afl::TokenType::Constant), afl::TokenType::Constant);
 }
 
-GTEST_TEST(ResourceParser_Test, stringToTokenAssociativity)
+GTEST_TEST(Test_ResourceParser, stringToTokenAssociativity)
 {
     // test valid string
     ASSERT_EQ(afl::detail::stringToTokenAssociativity("left", afl::TokenAssociativity::None), afl::TokenAssociativity::Left);
@@ -79,7 +79,7 @@ void testTokenParsingResult(const std::vector<std::shared_ptr<afl::detail::Token
     }
 }
 
-GTEST_TEST(ResourceParser_Test, parseTokensRecursive)
+GTEST_TEST(Test_ResourceParser, parseTokensRecursive)
 {
     std::string path = "res/extensions/test/tokenSample.xml";
     pugi::xml_document doc;
@@ -95,7 +95,7 @@ GTEST_TEST(ResourceParser_Test, parseTokensRecursive)
 }
 
 
-GTEST_TEST(ResourceParser_Test, parseExtensionRecursive_Tokens)
+GTEST_TEST(Test_ResourceParser, parseExtensionRecursive_Tokens)
 {
     std::string path = "res/extensions/test/tokenSample.xml";
     pugi::xml_document doc;

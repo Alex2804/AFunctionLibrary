@@ -7,7 +7,8 @@
 #include <memory>
 #include <stack>
 
-#include "utility.h"
+#include "utilites.h"
+#include "token.h"
 #include "implementation/tokenaccessinterface.hpp"
 
 namespace afl
@@ -49,6 +50,8 @@ namespace afl
     template<typename T>
     AFUNCTIONLIBRARY_EXPORT std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& tree);
 
+    template<typename T>
+    AFUNCTIONLIBRARY_EXPORT std::vector<T> shuntingYard(const std::vector<T>& infixTokens);
     template<typename T>
     AFUNCTIONLIBRARY_EXPORT SyntaxTree<T> generateSyntaxTree(const std::vector<T>& infixTokens);
 

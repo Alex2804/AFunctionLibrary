@@ -1,9 +1,8 @@
 #include "gtest/gtest.h"
 
-#define A_PLUGIN_SDK_DEBUG
 #include "../../AFunctionLibrary/implementation/cstring.hpp"
 
-GTEST_TEST(CString_Test, equal_operator)
+GTEST_TEST(Test_CString, equal_operator)
 {
     auto cString1 = static_cast<afl::CString*>(std::malloc(sizeof(afl::CString)));
     auto cString2 = static_cast<afl::CString*>(std::malloc(sizeof(afl::CString)));
@@ -40,7 +39,7 @@ GTEST_TEST(CString_Test, equal_operator)
     std::free(cString3);
 }
 
-GTEST_TEST(CString_Test, free)
+GTEST_TEST(Test_CString, free)
 {
     apl::debug::allocationCount = 0;
     apl::debug::freeCount = 0;
@@ -61,7 +60,7 @@ GTEST_TEST(CString_Test, free)
     ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 }
 
-GTEST_TEST(CString_Test, convert)
+GTEST_TEST(Test_CString, convert)
 {
     apl::debug::allocationCount = 0;
     apl::debug::freeCount = 0;

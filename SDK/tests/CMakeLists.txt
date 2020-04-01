@@ -21,8 +21,16 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 set(SOURCES
-        src/cstring_test.cpp src/cstringtoken_test.cpp src/cstringtokenaliases_test.cpp src/cstringtokengroup_test.cpp)
+        ../AFunctionLibrary/libs/APluginSDK/implementation/pluginapi.cpp
+        src/test_utilities.cpp
+        src/test_node.cpp
+        src/test_syntaxtree.cpp
+        src/test_token.cpp
+        src/test_cstring.cpp
+        src/test_cstringtoken.cpp
+        )
 
 add_executable(AFunctionLibrarySDKTest ${SOURCES})
 target_link_libraries(AFunctionLibrarySDKTest gtest_main)
+target_compile_definitions(AFunctionLibrarySDKTest PUBLIC A_PLUGIN_SDK_DEBUG A_PLUGIN_SDK_EXCLUDE_IMPLEMENTATION)
 add_test(NAME AFunctionLibrarySDKTest COMMAND AFunctionLibrarySDKTest)

@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "test_include.h"
+#include "../../../SDK/tests/src/include.h"
 
 #include "../../src/private/tokenextras.h"
 
-GTEST_TEST(tokenextras_h_Test, tokensToString)
+GTEST_TEST(Test_tokenextras_h, tokensToString)
 {
     std::vector<std::shared_ptr<const afl::Token<std::string>>> tokens;
     ASSERT_EQ(afl::detail::tokensToString(tokens), "");
@@ -12,7 +12,7 @@ GTEST_TEST(tokenextras_h_Test, tokensToString)
     ASSERT_EQ(afl::detail::tokensToString(tokens), "3+5*abs(ab)");
 }
 
-GTEST_TEST(tokenextras_h_Test, toGroupVector)
+GTEST_TEST(Test_tokenextras_h, toGroupVector)
 {
     // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
     std::vector<std::shared_ptr<const afl::Token<std::string>>> tokens = {

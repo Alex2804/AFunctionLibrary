@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 
-#include "AFunctionLibrary/token.h"
+#include "../../AFunctionLibrary/implementation/include/AFunctionLibrary/token.h"
 
-GTEST_TEST(Token_Test, constructor)
+GTEST_TEST(Test_Token, constructors)
 {
     afl::Token<int> intToken(42, afl::TokenType::Operator, 12, 3, afl::TokenAssociativity::Left);
     ASSERT_EQ(intToken.value, 42);
@@ -19,7 +19,79 @@ GTEST_TEST(Token_Test, constructor)
     ASSERT_EQ(stringToken.associativity, afl::TokenAssociativity::None);
 }
 
-GTEST_TEST(Token_Test, comparison)
+GTEST_TEST(Test_Token, copy_constructor_assignment)
+{
+    auto stringToken = new afl::Token<std::string>("value", afl::TokenType::Function, 12, 3, afl::TokenAssociativity::None);
+    // copy constructor
+    afl::Token<std::string> copy(*stringToken);
+    ASSERT_EQ(copy.value, "value");
+    ASSERT_EQ(copy.type, afl::TokenType::Function);
+    ASSERT_EQ(copy.precedence, 12);
+    ASSERT_EQ(copy.parameterCount, 3);
+    ASSERT_EQ(copy.associativity, afl::TokenAssociativity::None);
+    ASSERT_EQ(stringToken->value, "value");
+    ASSERT_EQ(stringToken->type, afl::TokenType::Function);
+    ASSERT_EQ(stringToken->precedence, 12);
+    ASSERT_EQ(stringToken->parameterCount, 3);
+    ASSERT_EQ(stringToken->associativity, afl::TokenAssociativity::None);
+
+    // copy assignment
+    copy = *stringToken;
+    ASSERT_EQ(copy.value, "value");
+    ASSERT_EQ(copy.type, afl::TokenType::Function);
+    ASSERT_EQ(copy.precedence, 12);
+    ASSERT_EQ(copy.parameterCount, 3);
+    ASSERT_EQ(copy.associativity, afl::TokenAssociativity::None);
+    ASSERT_EQ(stringToken->value, "value");
+    ASSERT_EQ(stringToken->type, afl::TokenType::Function);
+    ASSERT_EQ(stringToken->precedence, 12);
+    ASSERT_EQ(stringToken->parameterCount, 3);
+    ASSERT_EQ(stringToken->associativity, afl::TokenAssociativity::None);
+
+    // self assignment
+    copy = copy;
+    ASSERT_EQ(copy.value, "value");
+    ASSERT_EQ(copy.type, afl::TokenType::Function);
+    ASSERT_EQ(copy.precedence, 12);
+    ASSERT_EQ(copy.parameterCount, 3);
+    ASSERT_EQ(copy.associativity, afl::TokenAssociativity::None);
+    delete stringToken;
+}
+
+GTEST_TEST(Test_Token, move_constructor_assignment)
+{
+    auto stringToken = new afl::Token<std::string>("value", afl::TokenType::Function, 12, 3, afl::TokenAssociativity::None);
+    // move constructor
+    afl::Token<std::string> moved(std::move(*stringToken));
+    ASSERT_EQ(moved.value, "value");
+    ASSERT_EQ(moved.type, afl::TokenType::Function);
+    ASSERT_EQ(moved.precedence, 12);
+    ASSERT_EQ(moved.parameterCount, 3);
+    ASSERT_EQ(moved.associativity, afl::TokenAssociativity::None);
+    ASSERT_EQ(stringToken->value, "");
+    ASSERT_EQ(stringToken->type, afl::TokenType::Function);
+    ASSERT_EQ(stringToken->precedence, 12);
+    ASSERT_EQ(stringToken->parameterCount, 3);
+    ASSERT_EQ(stringToken->associativity, afl::TokenAssociativity::None);
+    delete stringToken;
+
+    stringToken = new afl::Token<std::string>("value", afl::TokenType::Function, 12, 3, afl::TokenAssociativity::None);
+    // move assignment
+    moved = std::move(*stringToken);
+    ASSERT_EQ(moved.value, "value");
+    ASSERT_EQ(moved.type, afl::TokenType::Function);
+    ASSERT_EQ(moved.precedence, 12);
+    ASSERT_EQ(moved.parameterCount, 3);
+    ASSERT_EQ(moved.associativity, afl::TokenAssociativity::None);
+    ASSERT_EQ(stringToken->value, "");
+    ASSERT_EQ(stringToken->type, afl::TokenType::Function);
+    ASSERT_EQ(stringToken->precedence, 12);
+    ASSERT_EQ(stringToken->parameterCount, 3);
+    ASSERT_EQ(stringToken->associativity, afl::TokenAssociativity::None);
+    delete stringToken;
+}
+
+GTEST_TEST(Test_Token, comparison)
 {
     afl::Token<int> intToken1(42, afl::TokenType::Operator, 12, 3, afl::TokenAssociativity::Left);
     afl::Token<int> intToken2(42, afl::TokenType::Operator, 12, 3, afl::TokenAssociativity::Left);
@@ -66,7 +138,7 @@ GTEST_TEST(Token_Test, comparison)
     ASSERT_TRUE(stringToken1 != otherStringToken5);
 }
 
-GTEST_TEST(Token_Test, requirePrecedence)
+GTEST_TEST(Test_Token, requirePrecedence)
 {
     afl::Token<std::string> token;
     token.type = afl::TokenType::Operator;
@@ -86,7 +158,7 @@ GTEST_TEST(Token_Test, requirePrecedence)
     ASSERT_FALSE(token.requirePrecedence());
 }
 
-GTEST_TEST(Token_Test, requireAssociativity)
+GTEST_TEST(Test_Token, requireAssociativity)
 {
     afl::Token<std::string> token;
     token.type = afl::TokenType::Operator;
@@ -106,7 +178,7 @@ GTEST_TEST(Token_Test, requireAssociativity)
     ASSERT_FALSE(token.requireAssociativity());
 }
 
-GTEST_TEST(Token_Test, requireParameterCount)
+GTEST_TEST(Test_Token, requireParameterCount)
 {
     afl::Token<std::string> token;
     token.type = afl::TokenType::Function;

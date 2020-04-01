@@ -5,7 +5,7 @@
 
 #include <cstring>
 
-#include "../APluginSDK/pluginapi.h"
+#include "../libs/APluginSDK/pluginapi.h"
 
 namespace afl
 {

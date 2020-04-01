@@ -1,10 +1,10 @@
 #include "gtest/gtest.h"
 
-#include "test_include.h"
+#include "../../SDK/tests/src/include.h"
 
 #include "../../src/private/tokenmanager.h"
 #include "../../src/private/resourcemanager.h"
-#include "AFunctionLibrary/implementation/createtokenapi/createtokenapi_definitions.hpp"
+#include "../../SDK/AFunctionLibrary/implementation/createtokenapi/createtokenapi_definitions.hpp"
 
 std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>> allTokens = {
         {"+", std::make_shared<afl::detail::TokenPtrBundle<std::string>>(std::make_shared<afl::Token<std::string>>("+", afl::TokenType::Operator, 1, 0, afl::TokenAssociativity::Left), std::vector<afl::TokenAliases<std::string>>{})},
@@ -14,7 +14,7 @@ std::unordered_map<std::string, std::shared_ptr<afl::detail::TokenPtrBundle<std:
                                                                            std::vector<afl::TokenAliases<std::string>>{afl::TokenAliases<std::string>{afl::TokenAliasType::String, {"absolute", "absolute2"}}, afl::TokenAliases<std::string>{afl::TokenAliasType::Regex, {".*absolute.*"}}})},
 };
 
-GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
+GTEST_TEST(Test_TokenManager, copy_constructor_assignment)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -71,7 +71,7 @@ GTEST_TEST(TokenManager_Test, copy_constructor_assignment)
     ASSERT_EQ(manager1.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, move_constructor_assignment)
+GTEST_TEST(Test_TokenManager, move_constructor_assignment)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -121,7 +121,7 @@ GTEST_TEST(TokenManager_Test, move_constructor_assignment)
     ASSERT_EQ(movedManager.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, addPluginFeatures)
+GTEST_TEST(Test_TokenManager, addPluginFeatures)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -192,7 +192,7 @@ GTEST_TEST(TokenManager_Test, addPluginFeatures)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, removePluginFeatures)
+GTEST_TEST(Test_TokenManager, removePluginFeatures)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -260,7 +260,7 @@ GTEST_TEST(TokenManager_Test, removePluginFeatures)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, removeReferences)
+GTEST_TEST(Test_TokenManager, removeReferences)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -323,7 +323,7 @@ GTEST_TEST(TokenManager_Test, removeReferences)
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, addToken)
+GTEST_TEST(Test_TokenManager, addToken)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens, notUniqueTokens;
     std::unordered_map<std::string, std::vector<std::string>> pathTokenValueRefs;
@@ -369,7 +369,7 @@ GTEST_TEST(TokenManager_Test, addToken)
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, removeToken)
+GTEST_TEST(Test_TokenManager, removeToken)
 {
     std::unordered_map<std::string, std::pair<std::shared_ptr<afl::detail::TokenPtrBundle<std::string>>, size_t>> uniqueTokens =
             {
@@ -471,7 +471,7 @@ GTEST_TEST(TokenManager_Test, removeToken)
     ASSERT_EQ(manager.m_pluginFunctions, pluginFunctions);
 }
 
-GTEST_TEST(TokenManager_Test, createAliases_c_api)
+GTEST_TEST(Test_TokenManager, createAliases_c_api)
 {
     afl::detail::TokenManager manager;
     apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
@@ -488,7 +488,7 @@ GTEST_TEST(TokenManager_Test, createAliases_c_api)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, createAliases_cpp_api)
+GTEST_TEST(Test_TokenManager, createAliases_cpp_api)
 {
     afl::detail::TokenManager manager;
     apl::Plugin* plugin = apl::Plugin::load("res/plugins/cpp_api/cpp_api_plugin");
@@ -505,7 +505,7 @@ GTEST_TEST(TokenManager_Test, createAliases_cpp_api)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, createToken_c_api)
+GTEST_TEST(Test_TokenManager, createToken_c_api)
 {
     afl::detail::TokenManager manager;
     apl::Plugin* plugin = apl::Plugin::load("res/plugins/c_api/c_api_plugin");
@@ -537,7 +537,7 @@ GTEST_TEST(TokenManager_Test, createToken_c_api)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, createToken_cpp_api)
+GTEST_TEST(Test_TokenManager, createToken_cpp_api)
 {
     afl::detail::TokenManager manager;
     apl::Plugin* plugin = apl::Plugin::load("res/plugins/cpp_api/cpp_api_plugin");
@@ -570,7 +570,7 @@ GTEST_TEST(TokenManager_Test, createToken_cpp_api)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, getToken)
+GTEST_TEST(Test_TokenManager, getToken)
 {
     afl::detail::TokenManager manager;
     manager.addToken(allTokens.at("+"), "path/to/operators");
@@ -603,7 +603,7 @@ GTEST_TEST(TokenManager_Test, getToken)
     delete plugin;
 }
 
-GTEST_TEST(TokenManager_Test, getTokens)
+GTEST_TEST(Test_TokenManager, getTokens)
 {
     afl::detail::TokenManager manager;
     manager.addToken(allTokens.at("+"), "path/to/operators");
@@ -619,7 +619,7 @@ GTEST_TEST(TokenManager_Test, getTokens)
     ASSERT_EQ(expected, tokens);
 }
 
-GTEST_TEST(TokenManager_Test, filterTokens)
+GTEST_TEST(Test_TokenManager, filterTokens)
 {
     afl::detail::TokenManager manager;
     manager.addToken(allTokens.at("+"), "path/to/operators");
@@ -640,7 +640,7 @@ GTEST_TEST(TokenManager_Test, filterTokens)
     ASSERT_EQ(expected, tokens);
 }
 
-GTEST_TEST(tokenmanager_h_Test, stringToTokens)
+GTEST_TEST(Test_tokenmanager_h, stringToTokens)
 {
     afl::detail::TokenManager tokenManager;
     tokenManager.addToken(allTokens.at("+"), "custom_tokens.atokens");
@@ -663,7 +663,7 @@ GTEST_TEST(tokenmanager_h_Test, stringToTokens)
     ASSERT_EQ(afl::detail::stringToTokens(&tokenManager, "3+5*abs(ab)"), tokens);
 }
 
-GTEST_TEST(tokenmanager_h_Test, toFunctionString_with_brackets_and_semicolons)
+GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
 {
     afl::detail::TokenManager tokenManager;
     auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
@@ -802,7 +802,7 @@ GTEST_TEST(tokenmanager_h_Test, toFunctionString_with_brackets_and_semicolons)
     ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))");
 }
 
-GTEST_TEST(tokenmanager_h_Test, toFunctionString_without_brackets_and_semicolons)
+GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons)
 {
     afl::detail::TokenManager tokenManager;
     auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);

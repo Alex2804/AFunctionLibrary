@@ -2,7 +2,7 @@
 
 #include "../src/private/resourcemanager.h"
 
-GTEST_TEST(ResourceManager_Test, load_unload)
+GTEST_TEST(Test_ResourceManager, load_unload)
 {
     // plugins
     afl::detail::ResourceManager manager;
@@ -23,7 +23,7 @@ GTEST_TEST(ResourceManager_Test, load_unload)
     manager.unload("res/extensions/test/tokenSample", afl::detail::ResourceType::Extension);
     ASSERT_EQ(manager.getTokenManager()->getTokens().size(), 0);
 }
-GTEST_TEST(ResourceManager_Test, loadDirectory_unload)
+GTEST_TEST(Test_ResourceManager, loadDirectory_unload)
 {
     // plugins
     afl::detail::ResourceManager manager;

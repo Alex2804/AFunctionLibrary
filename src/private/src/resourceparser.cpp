@@ -3,7 +3,7 @@
 #include <cstring>
 #include <list>
 
-#include "AFunctionLibrary/utility.h"
+#include "AFunctionLibrary/utilites.h"
 
 afl::TokenAssociativity afl::detail::stringToTokenAssociativity(const std::string& string, TokenAssociativity defaultValue)
 {
