@@ -140,7 +140,7 @@ void afl::detail::ResourceManager::unload(const std::string& path, ResourceType 
     }
 }
 
-const apl::PluginManager* afl::detail::ResourceManager::getPluginManager() const
+apl::PluginManager* afl::detail::ResourceManager::getPluginManager()
 {
     return m_pluginManager;
 }

@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 
+#include "APluginLibrary/pluginmanagerobserver.h"
 #include "APluginSDK/pluginapi.h"
 
 #include "resourcemanager.h"
@@ -18,22 +19,23 @@ namespace afl
         typedef CString*(*CApiProcessStringPluginFunction)(const char*);
         typedef std::string(*CppApiProcessStringPluginFunction)(std::string);
 
-        class AFUNCTIONLIBRARY_NO_EXPORT FunctionFormatter
+        class AFUNCTIONLIBRARY_NO_EXPORT FunctionFormatter : public apl::PluginManagerObserver
         {
         public:
             explicit FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager);
             FunctionFormatter(const FunctionFormatter& other) = default;
             FunctionFormatter(FunctionFormatter&& other) noexcept = default;
-            virtual ~FunctionFormatter() = default;
+            virtual ~FunctionFormatter();
 
             FunctionFormatter& operator=(const FunctionFormatter& other) = default;
             FunctionFormatter& operator=(FunctionFormatter&& other) noexcept = default;
 
-            void reloadPluginFormatFunctions();
-
             std::string replaceAliases(std::string function);
             std::string formatWithPlugins(std::string function);
             std::string formatFunction(std::string function);
+
+            void pluginLoaded(apl::PluginManager* pluginManager, apl::Plugin* plugin) override;
+            void pluginUnloaded(apl::PluginManager* pluginManager, apl::Plugin* plugin) override;
 
         protected:
             std::shared_ptr<ResourceManager> m_resourceManager;

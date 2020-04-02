@@ -70,13 +70,9 @@ namespace
     }
 }
 
+
 afl::detail::FunctionFormatter::FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager)
         : m_resourceManager(std::move(resourceManager))
-{
-    reloadPluginFormatFunctions();
-}
-
-void afl::detail::FunctionFormatter::reloadPluginFormatFunctions()
 {
     std::vector<const apl::PluginFeatureInfo*> tmpFeatures = m_resourceManager->getPluginManager()->getFeatures(k_C_API_FormatFunctionStringFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
     m_cApiPluginFormatStringFunctions.reserve(tmpFeatures.size());
@@ -87,6 +83,12 @@ void afl::detail::FunctionFormatter::reloadPluginFormatFunctions()
     m_cppApiPluginFormatStringFunctions.reserve(tmpFeatures.size());
     for(const apl::PluginFeatureInfo* info : tmpFeatures)
         m_cppApiPluginFormatStringFunctions.push_back(reinterpret_cast<CppApiProcessStringPluginFunction>(info->functionPointer));
+
+    m_resourceManager->getPluginManager()->addObserver(this);
+}
+afl::detail::FunctionFormatter::~FunctionFormatter()
+{
+    m_resourceManager->getPluginManager()->removeObserver(this);
 }
 
 std::string afl::detail::FunctionFormatter::replaceAliases(std::string function)
@@ -94,8 +96,7 @@ std::string afl::detail::FunctionFormatter::replaceAliases(std::string function)
     std::string tmp;
     do {
         tmp = function;
-        function = replaceTokenAliases(std::move(function), m_resourceManager->getTokenManager()->m_uniqueTokens,
-                                       m_resourceManager->getTokenManager()->m_notUniqueTokens);
+        function = replaceTokenAliases(std::move(function), m_resourceManager->getTokenManager()->m_uniqueTokens, m_resourceManager->getTokenManager()->m_notUniqueTokens);
     } while(function != tmp);
     return function;
 }
@@ -117,6 +118,30 @@ std::string afl::detail::FunctionFormatter::formatFunction(std::string function)
         function = formatWithPlugins(std::move(function));
     } while(function != tmp);
     return function;
+}
+
+void afl::detail::FunctionFormatter::pluginLoaded(apl::PluginManager* pluginManager, apl::Plugin* plugin)
+{
+    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getPluginFeatureInfos();
+    for(size_t i = 0; i < plugin->getPluginInfo()->getPluginFeatureCount(); ++i) {
+        const apl::PluginFeatureInfo* featureInfo = featureInfos[i];
+        if(std::strcmp(featureInfo->featureGroup, k_C_API_FormatFunctionStringFeatureGroupName) == 0)
+            m_cApiPluginFormatStringFunctions.push_back(reinterpret_cast<CApiProcessStringPluginFunction>(featureInfo->functionPointer));
+        else if(std::strcmp(featureInfo->featureGroup, k_CPP_API_FormatFunctionStringFeatureGroupName) == 0)
+            m_cppApiPluginFormatStringFunctions.push_back(reinterpret_cast<CppApiProcessStringPluginFunction>(featureInfo->functionPointer));
+    }
+}
+
+void afl::detail::FunctionFormatter::pluginUnloaded(apl::PluginManager* pluginManager, apl::Plugin* plugin)
+{
+    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getPluginFeatureInfos();
+    for(size_t i = 0; i < plugin->getPluginInfo()->getPluginFeatureCount(); ++i) {
+        const apl::PluginFeatureInfo* featureInfo = featureInfos[i];
+        if(std::strcmp(featureInfo->featureGroup, k_C_API_FormatFunctionStringFeatureGroupName) == 0)
+            m_cApiPluginFormatStringFunctions.erase(std::remove(m_cApiPluginFormatStringFunctions.begin(), m_cApiPluginFormatStringFunctions.end(), featureInfo->functionPointer), m_cApiPluginFormatStringFunctions.end());
+        else if(std::strcmp(featureInfo->featureGroup, k_CPP_API_FormatFunctionStringFeatureGroupName) == 0)
+            m_cppApiPluginFormatStringFunctions.erase(std::remove(m_cppApiPluginFormatStringFunctions.begin(), m_cppApiPluginFormatStringFunctions.end(), featureInfo->functionPointer), m_cppApiPluginFormatStringFunctions.end());
+    }
 }
 
 

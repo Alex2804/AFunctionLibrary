@@ -38,7 +38,7 @@ namespace afl
             size_t loadDirectory(const std::string& path, ResourceType type, bool recursive);
             void unload(const std::string& path, ResourceType type);
 
-            const apl::PluginManager* getPluginManager() const;
+            apl::PluginManager* getPluginManager();
             TokenManager* getTokenManager();
 
         private:
