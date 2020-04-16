@@ -14,8 +14,8 @@ namespace afl
             std::random_device rd;
             std::mt19937 mt(rd());
             mt.seed(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-            std::uniform_int_distribution<size_t> sizeDist(1, 20);
-            std::uniform_int_distribution<size_t> idDist(0, std::numeric_limits<size_t>::max());
+            std::uniform_int_distribution<size_t> sizeDist(1, 5);
+            std::uniform_int_distribution<size_t> idDist(0, 1000);
 
             size_t groupIDLength = sizeDist(mt);
             std::vector<size_t> groupID;

@@ -187,7 +187,7 @@ GTEST_TEST(Test_syntaxtree_h, generateSyntaxTree)
     };
     std::vector<afl::Token<std::string>> instanceTokens;
     std::vector<const afl::Token<std::string>*> ptrTokens;
-    std::vector<std::shared_ptr<const afl::TokenGroup<std::string>>> sharedPtrTokenGroups;
+    std::vector<std::shared_ptr<afl::TokenGroup<std::string>>> sharedPtrTokenGroups;
     std::vector<afl::TokenGroup<std::string>> instanceTokenGroups;
     std::vector<const afl::TokenGroup<std::string>*> ptrTokenGroups;
     instanceTokens.reserve(sharedPtrTokens.size());
@@ -199,6 +199,7 @@ GTEST_TEST(Test_syntaxtree_h, generateSyntaxTree)
         instanceTokens.push_back(*token);
         ptrTokens.push_back(token.get());
         sharedPtrTokenGroups.emplace_back(new afl::TokenGroup<std::string>(token, afl::test::generateRandomGroupID()));
+        sharedPtrTokenGroups.back()->printGroupID = false;
         instanceTokenGroups.push_back(*sharedPtrTokenGroups.back());
         ptrTokenGroups.push_back(sharedPtrTokenGroups.back().get());
     }
@@ -206,7 +207,7 @@ GTEST_TEST(Test_syntaxtree_h, generateSyntaxTree)
     afl::SyntaxTree<std::shared_ptr<const afl::Token<std::string>>> sharedPtrTokensSyntaxTree = afl::generateSyntaxTree(sharedPtrTokens);
     afl::SyntaxTree<afl::Token<std::string>> instanceTokensSyntaxTree = afl::generateSyntaxTree(instanceTokens);
     afl::SyntaxTree<const afl::Token<std::string>*> ptrTokensSyntaxTree = afl::generateSyntaxTree(ptrTokens);
-    afl::SyntaxTree<std::shared_ptr<const afl::TokenGroup<std::string>>> sharedPtrTokenGroupsSyntaxTree = afl::generateSyntaxTree(sharedPtrTokenGroups);
+    afl::SyntaxTree<std::shared_ptr<afl::TokenGroup<std::string>>> sharedPtrTokenGroupsSyntaxTree = afl::generateSyntaxTree(sharedPtrTokenGroups);
     afl::SyntaxTree<afl::TokenGroup<std::string>> instanceTokenGroupsSyntaxTree = afl::generateSyntaxTree(instanceTokenGroups);
     afl::SyntaxTree<const afl::TokenGroup<std::string>*> ptrTokenGroupsSyntaxTree = afl::generateSyntaxTree(ptrTokenGroups);
 

@@ -107,6 +107,7 @@ namespace afl
 
         std::shared_ptr<const Token<T>> token;
         std::vector<size_t> groupID;
+        bool printGroupID = true;
     };
 
     template<typename T>

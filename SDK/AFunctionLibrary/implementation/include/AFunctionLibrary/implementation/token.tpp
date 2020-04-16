@@ -241,18 +241,21 @@ afl::TokenAssociativity afl::TokenGroup<T>::getAssociativity() const
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const TokenGroup<T>& tokenGroup)
 {
-    os << "[";
+    if(tokenGroup.printGroupID)
+        os << "[";
     if(tokenGroup.isToken())
         os << *tokenGroup.token;
     else
         os << "nullptr";
-    os << " {";
-    for(size_t i = 0; i < tokenGroup.groupID.size(); ++i) {
-        if(i > 0)
-            os << ", ";
-        os << std::to_string(tokenGroup.groupID[i]);
+    if(tokenGroup.printGroupID) {
+        os << " {";
+        for(size_t i = 0; i < tokenGroup.groupID.size(); ++i) {
+            if(i > 0)
+                os << ", ";
+            os << std::to_string(tokenGroup.groupID[i]);
+        }
+        os << "}]";
     }
-    os << "}]";
     return os;
 }
 

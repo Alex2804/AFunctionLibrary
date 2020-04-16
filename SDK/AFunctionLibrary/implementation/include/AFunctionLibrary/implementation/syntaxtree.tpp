@@ -349,8 +349,9 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
     } else if(pairs.size() == 1) {
         valueMiddleIndex = prependString.size() + pairs.front().second;
         valueStartIndex = (valueMiddleIndex < value.size() / 2) ? 0 : valueMiddleIndex - (value.size() / 2);
+        size_t valuePrependSpaceCount = (width < valueStartIndex + value.size()) ? 0 : width - valueStartIndex - value.size();
         headLines.reserve(2);
-        headLines.push_back(std::string(valueStartIndex, ' ').append(value).append(width - valueStartIndex - value.size(), ' '));
+        headLines.push_back(std::string(valueStartIndex, ' ').append(value).append(valuePrependSpaceCount, ' '));
         headLines.push_back(std::string(valueMiddleIndex, ' ').append(connectors[0]).append(width - valueMiddleIndex - 1, ' '));
     } else {
         valueMiddleIndex = positions.front() + ((positions.back() - positions.front()) / 2);
