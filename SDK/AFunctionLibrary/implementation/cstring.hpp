@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_CSTRING_HPP
-#define AFUNCTIONLIBRARY_CSTRING_HPP
+#ifndef AFUNCTIONLIBRARYSDK_CSTRING_HPP
+#define AFUNCTIONLIBRARYSDK_CSTRING_HPP
 
 #include "include/AFunctionLibrary/implementation/exports.h"
 
@@ -71,4 +71,4 @@ std::string afl::convert(CString* cString)
     return string;
 }
 
-#endif //AFUNCTIONLIBRARY_CSTRING_HPP
+#endif //AFUNCTIONLIBRARYSDK_CSTRING_HPP

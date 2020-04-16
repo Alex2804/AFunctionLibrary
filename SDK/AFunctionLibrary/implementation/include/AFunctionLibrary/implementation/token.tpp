@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_TOKEN_TPP
-#define AFUNCTIONLIBRARY_TOKEN_TPP
+#ifndef AFUNCTIONLIBRARYSDK_TOKEN_TPP
+#define AFUNCTIONLIBRARYSDK_TOKEN_TPP
 
 // ====================================================== Token ===================================================== //
 
@@ -241,10 +241,19 @@ afl::TokenAssociativity afl::TokenGroup<T>::getAssociativity() const
 template<typename T>
 std::ostream& afl::operator<<(std::ostream& os, const TokenGroup<T>& tokenGroup)
 {
+    os << "[";
     if(tokenGroup.isToken())
-        return os << *tokenGroup.token;
+        os << *tokenGroup.token;
     else
-        return os << "nullptr";
+        os << "nullptr";
+    os << " {";
+    for(size_t i = 0; i < tokenGroup.groupID.size(); ++i) {
+        if(i > 0)
+            os << ", ";
+        os << std::to_string(tokenGroup.groupID[i]);
+    }
+    os << "}]";
+    return os;
 }
 
-#endif //AFUNCTIONLIBRARY_TOKEN_TPP
+#endif //AFUNCTIONLIBRARYSDK_TOKEN_TPP

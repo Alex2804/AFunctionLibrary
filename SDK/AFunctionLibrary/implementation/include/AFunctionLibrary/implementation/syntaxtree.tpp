@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_SYNTAXTREE_TPP
-#define AFUNCTIONLIBRARY_SYNTAXTREE_TPP
+#ifndef AFUNCTIONLIBRARYSDK_SYNTAXTREE_TPP
+#define AFUNCTIONLIBRARYSDK_SYNTAXTREE_TPP
 
 namespace afl
 {
@@ -348,13 +348,13 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
         return {headLines, value.size() / 2};
     } else if(pairs.size() == 1) {
         valueMiddleIndex = prependString.size() + pairs.front().second;
-        valueStartIndex = valueMiddleIndex - (value.size() / 2);
+        valueStartIndex = (valueMiddleIndex < value.size() / 2) ? 0 : valueMiddleIndex - (value.size() / 2);
         headLines.reserve(2);
         headLines.push_back(std::string(valueStartIndex, ' ').append(value).append(width - valueStartIndex - value.size(), ' '));
         headLines.push_back(std::string(valueMiddleIndex, ' ').append(connectors[0]).append(width - valueMiddleIndex - 1, ' '));
     } else {
         valueMiddleIndex = positions.front() + ((positions.back() - positions.front()) / 2);
-        valueStartIndex = valueMiddleIndex - (value.size() / 2);
+        valueStartIndex = (valueMiddleIndex < value.size() / 2) ? 0 : valueMiddleIndex - (value.size() / 2);
         string = std::string();
         string.reserve(width);
         string.append(valueStartIndex, ' ').append(value).append(width - valueStartIndex - value.size(), ' ');
@@ -389,4 +389,4 @@ std::pair<std::vector<std::string>, size_t> afl::detail::toStringHelper(const af
     return {headLines, valueMiddleIndex};
 }
 
-#endif //AFUNCTIONLIBRARY_SYNTAXTREE_TPP
+#endif //AFUNCTIONLIBRARYSDK_SYNTAXTREE_TPP

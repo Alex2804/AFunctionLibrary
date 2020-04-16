@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_CSTRINGTOKENSYNTAXTREE_HPP
-#define AFUNCTIONLIBRARY_CSTRINGTOKENSYNTAXTREE_HPP
+#ifndef AFUNCTIONLIBRARYSDK_CSTRINGTOKENSYNTAXTREE_HPP
+#define AFUNCTIONLIBRARYSDK_CSTRINGTOKENSYNTAXTREE_HPP
 
 #include "cstringtoken.hpp"
 #include "include/AFunctionLibrary/syntaxtree.h"
@@ -27,12 +27,15 @@ namespace afl
 
     inline AFUNCTIONLIBRARY_NO_EXPORT CStringTokenGroupNode* convert(const Node<TokenGroup<std::string>>& node);
     inline AFUNCTIONLIBRARY_NO_EXPORT Node<TokenGroup<std::string>> convert(CStringTokenGroupNode* cNode, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
+    inline AFUNCTIONLIBRARY_NO_EXPORT Node<TokenGroup<std::string>> convert(const CStringTokenGroupNode* cNode, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
 }
 
 
 bool afl::operator==(const CStringTokenGroupNode& n1, const CStringTokenGroupNode& n2)
 {
-    if(!equal(n1.token, n2.token) || n1.childrenCount != n2.childrenCount)
+    if(&n1 == &n2)
+        return true;
+    else if(!equal(n1.token, n2.token) || n1.childrenCount != n2.childrenCount)
         return false;
     for(size_t i = 0; i < n1.childrenCount; ++i) {
         if(!equal(n1.children[i], n2.children[i]))
@@ -74,8 +77,13 @@ afl::CStringTokenGroupNode* afl::convert(const Node<TokenGroup<std::string>>& no
         cNode->children[i] = convert(node.m_children[i]);
     return cNode;
 }
-
 afl::Node<afl::TokenGroup<std::string>> afl::convert(CStringTokenGroupNode* cNode, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
+{
+    auto node = convert(const_cast<const CStringTokenGroupNode*>(cNode), getTokenFunction);
+    free(cNode);
+    return node;
+}
+afl::Node<afl::TokenGroup<std::string>> afl::convert(const CStringTokenGroupNode* cNode, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
 {
     if(cNode == nullptr)
         return Node<TokenGroup<std::string>>(convert(static_cast<CStringTokenGroup*>(nullptr), getTokenFunction));
@@ -83,10 +91,7 @@ afl::Node<afl::TokenGroup<std::string>> afl::convert(CStringTokenGroupNode* cNod
     children.reserve(cNode->childrenCount);
     for(size_t i = 0; i < cNode->childrenCount; ++i)
         children.push_back(std::move(convert(cNode->children[i], getTokenFunction)));
-    auto node = afl::Node<afl::TokenGroup<std::string>>(convert(cNode->token, getTokenFunction), children);
-    cNode->childrenCount = 0;
-    free(cNode->token);
-    return node;
+    return afl::Node<afl::TokenGroup<std::string>>(convert(cNode->token, getTokenFunction), children);
 }
 
-#endif //AFUNCTIONLIBRARY_CSTRINGTOKENSYNTAXTREE_HPP
+#endif //AFUNCTIONLIBRARYSDK_CSTRINGTOKENSYNTAXTREE_HPP

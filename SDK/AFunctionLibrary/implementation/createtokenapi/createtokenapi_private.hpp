@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_CREATETOKENAPI_PRIVATE_HPP
-#define AFUNCTIONLIBRARY_CREATETOKENAPI_PRIVATE_HPP
+#ifndef AFUNCTIONLIBRARYSDK_CREATETOKENAPI_PRIVATE_HPP
+#define AFUNCTIONLIBRARYSDK_CREATETOKENAPI_PRIVATE_HPP
 
 #include "../../APluginSDK/pluginapi.h"
 
@@ -19,4 +19,4 @@
     A_PLUGIN_REGISTER_FEATURE(std::vector<afl::TokenAliases<std::string>>, feature_group, feature_name,                \
                               const std::string& value_name)
 
-#endif //AFUNCTIONLIBRARY_CREATETOKENAPI_PRIVATE_HPP
+#endif //AFUNCTIONLIBRARYSDK_CREATETOKENAPI_PRIVATE_HPP

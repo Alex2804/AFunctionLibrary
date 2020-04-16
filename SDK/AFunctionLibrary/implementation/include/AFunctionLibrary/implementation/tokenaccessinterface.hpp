@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_TOKENACCESSINTERFACE_HPP
-#define AFUNCTIONLIBRARY_TOKENACCESSINTERFACE_HPP
+#ifndef AFUNCTIONLIBRARYSDK_TOKENACCESSINTERFACE_HPP
+#define AFUNCTIONLIBRARYSDK_TOKENACCESSINTERFACE_HPP
 
 #include <cstddef>
 
@@ -116,4 +116,4 @@ inline afl::TokenAssociativity afl::getAssociativity(const T& token) {
     return getAssociativity(token, detail::is_arrow_dereferenceable<T>{});
 }
 
-#endif //AFUNCTIONLIBRARY_TOKENACCESSINTERFACE_HPP
+#endif //AFUNCTIONLIBRARYSDK_TOKENACCESSINTERFACE_HPP

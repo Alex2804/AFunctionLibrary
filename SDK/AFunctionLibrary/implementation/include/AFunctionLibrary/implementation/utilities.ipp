@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_UTILITIES_IPP
-#define AFUNCTIONLIBRARY_UTILITIES_IPP
+#ifndef AFUNCTIONLIBRARYSDK_UTILITIES_IPP
+#define AFUNCTIONLIBRARYSDK_UTILITIES_IPP
 
 namespace afl
 {
@@ -187,4 +187,4 @@ std::string afl::replaceString(std::string string, const std::vector<std::pair<s
     return string;
 }
 
-#endif //AFUNCTIONLIBRARY_UTILITIES_IPP
+#endif //AFUNCTIONLIBRARYSDK_UTILITIES_IPP

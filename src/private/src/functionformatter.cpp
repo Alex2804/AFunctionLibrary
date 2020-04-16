@@ -74,21 +74,24 @@ namespace
 afl::detail::FunctionFormatter::FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager)
         : m_resourceManager(std::move(resourceManager))
 {
-    std::vector<const apl::PluginFeatureInfo*> tmpFeatures = m_resourceManager->getPluginManager()->getFeatures(k_C_API_FormatFunctionStringFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
-    m_cApiPluginFormatStringFunctions.reserve(tmpFeatures.size());
-    for(const apl::PluginFeatureInfo* info : tmpFeatures)
-        m_cApiPluginFormatStringFunctions.push_back(reinterpret_cast<CApiProcessStringPluginFunction>(info->functionPointer));
-
-    tmpFeatures = m_resourceManager->getPluginManager()->getFeatures(k_CPP_API_FormatFunctionStringFeatureGroupName, apl::PluginFeatureFilter::FeatureGroup);
-    m_cppApiPluginFormatStringFunctions.reserve(tmpFeatures.size());
-    for(const apl::PluginFeatureInfo* info : tmpFeatures)
-        m_cppApiPluginFormatStringFunctions.push_back(reinterpret_cast<CppApiProcessStringPluginFunction>(info->functionPointer));
-
     m_resourceManager->getPluginManager()->addObserver(this);
+    reloadPluginFunctions();
 }
+afl::detail::FunctionFormatter::FunctionFormatter(const afl::detail::FunctionFormatter& other)
+    : FunctionFormatter(other.m_resourceManager)
+{}
 afl::detail::FunctionFormatter::~FunctionFormatter()
 {
     m_resourceManager->getPluginManager()->removeObserver(this);
+}
+
+afl::detail::FunctionFormatter& afl::detail::FunctionFormatter::operator=(const afl::detail::FunctionFormatter& other)
+{
+    m_resourceManager->getPluginManager()->removeObserver(this);
+    m_resourceManager = other.m_resourceManager;
+    m_resourceManager->getPluginManager()->addObserver(this);
+    reloadPluginFunctions();
+    return *this;
 }
 
 std::string afl::detail::FunctionFormatter::replaceAliases(std::string function)
@@ -105,7 +108,8 @@ std::string afl::detail::FunctionFormatter::formatWithPlugins(std::string functi
     std::pair<bool, std::string> pair = {false, std::move(function)};
     do {
         pair = invokeCProcessStringPluginFunctions(pair.second, m_cApiPluginFormatStringFunctions);
-        pair = invokeCppProcessStringPluginFunctions(std::move(pair.second), m_cppApiPluginFormatStringFunctions);
+        if(!pair.first)
+            pair = invokeCppProcessStringPluginFunctions(std::move(pair.second), m_cppApiPluginFormatStringFunctions);
     } while(pair.first);
     return pair.second;
 }
@@ -122,8 +126,8 @@ std::string afl::detail::FunctionFormatter::formatFunction(std::string function)
 
 void afl::detail::FunctionFormatter::pluginLoaded(apl::PluginManager* pluginManager, apl::Plugin* plugin)
 {
-    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getPluginFeatureInfos();
-    for(size_t i = 0; i < plugin->getPluginInfo()->getPluginFeatureCount(); ++i) {
+    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getFeatureInfos();
+    for(size_t i = 0; i < plugin->getPluginInfo()->getFeatureCount(); ++i) {
         const apl::PluginFeatureInfo* featureInfo = featureInfos[i];
         if(std::strcmp(featureInfo->featureGroup, k_C_API_FormatFunctionStringFeatureGroupName) == 0)
             m_cApiPluginFormatStringFunctions.push_back(reinterpret_cast<CApiProcessStringPluginFunction>(featureInfo->functionPointer));
@@ -131,11 +135,10 @@ void afl::detail::FunctionFormatter::pluginLoaded(apl::PluginManager* pluginMana
             m_cppApiPluginFormatStringFunctions.push_back(reinterpret_cast<CppApiProcessStringPluginFunction>(featureInfo->functionPointer));
     }
 }
-
 void afl::detail::FunctionFormatter::pluginUnloaded(apl::PluginManager* pluginManager, apl::Plugin* plugin)
 {
-    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getPluginFeatureInfos();
-    for(size_t i = 0; i < plugin->getPluginInfo()->getPluginFeatureCount(); ++i) {
+    const apl::PluginFeatureInfo* const* featureInfos = plugin->getPluginInfo()->getFeatureInfos();
+    for(size_t i = 0; i < plugin->getPluginInfo()->getFeatureCount(); ++i) {
         const apl::PluginFeatureInfo* featureInfo = featureInfos[i];
         if(std::strcmp(featureInfo->featureGroup, k_C_API_FormatFunctionStringFeatureGroupName) == 0)
             m_cApiPluginFormatStringFunctions.erase(std::remove(m_cApiPluginFormatStringFunctions.begin(), m_cApiPluginFormatStringFunctions.end(), featureInfo->functionPointer), m_cApiPluginFormatStringFunctions.end());
@@ -143,27 +146,35 @@ void afl::detail::FunctionFormatter::pluginUnloaded(apl::PluginManager* pluginMa
             m_cppApiPluginFormatStringFunctions.erase(std::remove(m_cppApiPluginFormatStringFunctions.begin(), m_cppApiPluginFormatStringFunctions.end(), featureInfo->functionPointer), m_cppApiPluginFormatStringFunctions.end());
     }
 }
+void afl::detail::FunctionFormatter::reloadPluginFunctions()
+{
+    m_cApiPluginFormatStringFunctions.clear();
+    m_cppApiPluginFormatStringFunctions.clear();
+    apl::PluginManager* pluginManager = m_resourceManager->getPluginManager();
+    for(auto plugin : pluginManager->getLoadedPlugins())
+        pluginLoaded(pluginManager, plugin);
+}
 
 
 std::pair<bool, std::string> afl::detail::invokeCProcessStringPluginFunctions(const std::string& function, const std::vector<CApiProcessStringPluginFunction>& pluginFunctions)
 {
-    CString* tmpCString = nullptr;
+    CString* tmpCString;
     CString* formattedCString = convert(function);
     bool updatedAnyTime = false, updated;
     do {
         updated = false;
-        for(CApiProcessStringPluginFunction formatFunction : pluginFunctions) {
+        for(CApiProcessStringPluginFunction processFunction : pluginFunctions) {
             do {
-                tmpCString = formatFunction(formattedCString->string);
+                tmpCString = processFunction(formattedCString->string);
                 if(tmpCString != nullptr && !equal(tmpCString, formattedCString)) {
                     free(formattedCString);
                     formattedCString = tmpCString;
                     updatedAnyTime = updated = true;
                 } else if(tmpCString != nullptr) {
                     free(tmpCString);
-                    break;
+                    break; // breaks if returned string is equal to passed string
                 }
-            } while(tmpCString != nullptr); // breaks if content is equal for two cycles or plugin returns nullptr
+            } while(tmpCString != nullptr); // breaks if plugin returns nullptr
         }
     } while(updated);
     return std::make_pair(updatedAnyTime, convert(formattedCString));
@@ -174,9 +185,9 @@ std::pair<bool, std::string> afl::detail::invokeCppProcessStringPluginFunctions(
     bool updatedAnyTime = false, updated;
     do {
         updated = false;
-        for(const CppApiProcessStringPluginFunction formatFunction : pluginFunctions) {
+        for(const CppApiProcessStringPluginFunction processFunction : pluginFunctions) {
             do {
-                tmp = formatFunction(function);
+                tmp = processFunction(function);
                 if (tmp.empty() || tmp == function) {
                     break;
                 } else {

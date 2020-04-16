@@ -8,7 +8,6 @@
 #include <memory>
 
 #include "APluginLibrary/pluginmanagerobserver.h"
-#include "APluginSDK/pluginapi.h"
 
 #include "resourcemanager.h"
 
@@ -23,12 +22,10 @@ namespace afl
         {
         public:
             explicit FunctionFormatter(std::shared_ptr<ResourceManager> resourceManager);
-            FunctionFormatter(const FunctionFormatter& other) = default;
-            FunctionFormatter(FunctionFormatter&& other) noexcept = default;
+            FunctionFormatter(const FunctionFormatter& other);
             virtual ~FunctionFormatter();
 
-            FunctionFormatter& operator=(const FunctionFormatter& other) = default;
-            FunctionFormatter& operator=(FunctionFormatter&& other) noexcept = default;
+            FunctionFormatter& operator=(const FunctionFormatter& other);
 
             std::string replaceAliases(std::string function);
             std::string formatWithPlugins(std::string function);
@@ -36,6 +33,7 @@ namespace afl
 
             void pluginLoaded(apl::PluginManager* pluginManager, apl::Plugin* plugin) override;
             void pluginUnloaded(apl::PluginManager* pluginManager, apl::Plugin* plugin) override;
+            void reloadPluginFunctions();
 
         protected:
             std::shared_ptr<ResourceManager> m_resourceManager;

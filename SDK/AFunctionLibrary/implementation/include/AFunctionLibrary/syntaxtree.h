@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_SYNTAXTREE_H
-#define AFUNCTIONLIBRARY_SYNTAXTREE_H
+#ifndef AFUNCTIONLIBRARYSDK_SYNTAXTREE_H
+#define AFUNCTIONLIBRARYSDK_SYNTAXTREE_H
 
 #include "implementation/exports.h"
 
@@ -84,4 +84,4 @@ namespace afl
 
 #include "implementation/syntaxtree.tpp"
 
-#endif //AFUNCTIONLIBRARY_SYNTAXTREE_H
+#endif //AFUNCTIONLIBRARYSDK_SYNTAXTREE_H

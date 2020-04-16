@@ -17,8 +17,8 @@ GTEST_TEST(Test_FunctionFormatter, replaceAliases)
 GTEST_TEST(Test_FunctionFormatter, formatWithPlugins_c_api)
 {
     auto resourceManager = std::make_shared<afl::detail::ResourceManager>();
-    afl::detail::FunctionFormatter formatter(resourceManager);
     resourceManager->load("res/plugins/c_api/c_api_plugin", afl::detail::ResourceType::Plugin);
+    afl::detail::FunctionFormatter formatter(resourceManager);
     resourceManager->load("../extensions/tokens", afl::detail::ResourceType::Extension);
     ASSERT_EQ(formatter.formatWithPlugins("UPPERCASE_TOKEN+UPPERCASE_TOKEN"), "lowercase_token+lowercase_token");
     ASSERT_EQ(formatter.formatWithPlugins("4+2*UPPERCASE_TOKEN+UPPERCASE_TOKEN"), "4+2*lowercase_token+lowercase_token");
@@ -31,8 +31,8 @@ GTEST_TEST(Test_FunctionFormatter, formatWithPlugins_c_api)
 GTEST_TEST(Test_FunctionFormatter, formatWithPlugins_cpp_api)
 {
     auto resourceManager = std::make_shared<afl::detail::ResourceManager>();
-    afl::detail::FunctionFormatter formatter(resourceManager);
     resourceManager->load("res/plugins/cpp_api/cpp_api_plugin", afl::detail::ResourceType::Plugin);
+    afl::detail::FunctionFormatter formatter(resourceManager);
     resourceManager->load("../extensions/tokens", afl::detail::ResourceType::Extension);
     ASSERT_EQ(formatter.formatWithPlugins("hello+hello"), "hi+hi");
     ASSERT_EQ(formatter.formatWithPlugins("4+2*hello+hello"), "4+2*hi+hi");

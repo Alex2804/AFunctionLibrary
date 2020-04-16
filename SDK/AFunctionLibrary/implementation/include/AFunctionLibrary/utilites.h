@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_UTILITES_H
-#define AFUNCTIONLIBRARY_UTILITES_H
+#ifndef AFUNCTIONLIBRARYSDK_UTILITES_H
+#define AFUNCTIONLIBRARYSDK_UTILITES_H
 
 #include "implementation/exports.h"
 
@@ -25,4 +25,4 @@ namespace afl
 
 #include "implementation/utilities.ipp"
 
-#endif //AFUNCTIONLIBRARY_UTILITES_H
+#endif //AFUNCTIONLIBRARYSDK_UTILITES_H

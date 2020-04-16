@@ -1,5 +1,5 @@
-#ifndef AFUNCTIONLIBRARY_CSTRINGTOKEN_HPP
-#define AFUNCTIONLIBRARY_CSTRINGTOKEN_HPP
+#ifndef AFUNCTIONLIBRARYSDK_CSTRINGTOKEN_HPP
+#define AFUNCTIONLIBRARYSDK_CSTRINGTOKEN_HPP
 
 #include "cstring.hpp"
 #include "include/AFunctionLibrary/token.h"
@@ -215,4 +215,4 @@ afl::TokenGroup<std::string> afl::convert(CStringTokenGroup* cTokenGroup, std::s
     return tokenGroup;
 }
 
-#endif //AFUNCTIONLIBRARY_CSTRINGTOKEN_HPP
+#endif //AFUNCTIONLIBRARYSDK_CSTRINGTOKEN_HPP

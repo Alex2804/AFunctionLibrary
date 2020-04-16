@@ -19,9 +19,10 @@ file(COPY res/extensions DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/res)
 set(SOURCES
         src/test_resourceparser.cpp
         src/test_resourcemanager.cpp
-        src/test_functionformatter.cpp
         src/test_tokenmanager.cpp
-        src/test_tokenextras.cpp)
+        src/test_tokenextras.cpp
+        src/test_functionformatter.cpp
+        )
 
 add_executable(AFunctionLibraryTest ${SOURCES})
 target_link_libraries(AFunctionLibraryTest AFunctionLibrary gtest_main)

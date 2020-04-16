@@ -1,9 +1,10 @@
-#ifndef AFUNCTIONLIBRARY_TOKEN_H
-#define AFUNCTIONLIBRARY_TOKEN_H
+#ifndef AFUNCTIONLIBRARYSDK_TOKEN_H
+#define AFUNCTIONLIBRARYSDK_TOKEN_H
 
 #include "implementation/exports.h"
 
 #include <algorithm>
+#include <iterator>
 #include <vector>
 #include <memory>
 
@@ -114,4 +115,4 @@ namespace afl
 
 #include "implementation/token.tpp"
 
-#endif //AFUNCTIONLIBRARY_TOKEN_H
+#endif //AFUNCTIONLIBRARYSDK_TOKEN_H
