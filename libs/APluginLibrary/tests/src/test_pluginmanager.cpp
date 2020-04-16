@@ -13,10 +13,43 @@
 #include "../plugins/interface.h"
 #include "../plugins/otherinterface.h"
 
-GTEST_TEST(Test_PluginManager, load_unload_single)
+GTEST_TEST(Test_PluginManager, load_unload_single_extern)
 {
     apl::PluginManager manager = apl::PluginManager();
     std::string path = "plugins/first/first_plugin";
+
+    // test with specific unloading
+    ASSERT_NE(manager.load(path), nullptr);
+    ASSERT_EQ(apl::detail::PluginManagerPrivate::allPlugins.size(), 1);
+    ASSERT_EQ(manager.getLoadedPluginCount(), 1);
+
+    apl::Plugin* plugin = manager.getLoadedPlugins().front();
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_TRUE(plugin->isLoaded());
+    ASSERT_EQ(plugin->getPath(), path);
+
+    manager.unload(plugin);
+    ASSERT_EQ(manager.getLoadedPluginCount(), 0);
+    ASSERT_EQ(apl::detail::PluginManagerPrivate::allPlugins.size(), 0);
+
+    // test with unloadAll
+    ASSERT_NE(manager.load(path), nullptr);
+    ASSERT_EQ(manager.getLoadedPluginCount(), 1);
+
+    plugin = manager.getLoadedPlugins().front();
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_TRUE(plugin->isLoaded());
+    ASSERT_EQ(plugin->getPath(), path);
+
+    manager.unloadAll();
+    ASSERT_EQ(manager.getLoadedPluginCount(), 0);
+    ASSERT_EQ(apl::detail::PluginManagerPrivate::allPlugins.size(), 0);
+}
+
+GTEST_TEST(Test_PluginManager, load_unload_single_integrated)
+{
+    apl::PluginManager manager = apl::PluginManager();
+    std::string path = "";
 
     // test with specific unloading
     ASSERT_NE(manager.load(path), nullptr);
@@ -283,12 +316,12 @@ GTEST_TEST(Test_PluginManager, getPluginInfo_unfiltered)
     ASSERT_EQ(info1->apiVersionPatch, apl::A_PLUGIN_API_VERSION_PATCH);
     ASSERT_NE(info1->allocateMemory, nullptr);
     ASSERT_NE(info1->freeMemory, nullptr);
-    ASSERT_NE(info1->getPluginFeatureCount, nullptr);
-    ASSERT_NE(info1->getPluginFeatureInfo, nullptr);
-    ASSERT_NE(info1->getPluginFeatureInfos, nullptr);
-    ASSERT_NE(info1->getPluginClassCount, nullptr);
-    ASSERT_NE(info1->getPluginClassInfo, nullptr);
-    ASSERT_NE(info1->getPluginClassInfos, nullptr);
+    ASSERT_NE(info1->getFeatureCount, nullptr);
+    ASSERT_NE(info1->getFeatureInfo, nullptr);
+    ASSERT_NE(info1->getFeatureInfos, nullptr);
+    ASSERT_NE(info1->getClassCount, nullptr);
+    ASSERT_NE(info1->getClassInfo, nullptr);
+    ASSERT_NE(info1->getClassInfos, nullptr);
 
     const apl::PluginInfo* info2 = infos.back();
     ASSERT_NE(info2, nullptr);
@@ -302,12 +335,12 @@ GTEST_TEST(Test_PluginManager, getPluginInfo_unfiltered)
     ASSERT_EQ(info2->apiVersionPatch, apl::A_PLUGIN_API_VERSION_PATCH);
     ASSERT_NE(info2->allocateMemory, nullptr);
     ASSERT_NE(info2->freeMemory, nullptr);
-    ASSERT_NE(info2->getPluginFeatureCount, nullptr);
-    ASSERT_NE(info2->getPluginFeatureInfo, nullptr);
-    ASSERT_NE(info2->getPluginFeatureInfos, nullptr);
-    ASSERT_NE(info2->getPluginClassCount, nullptr);
-    ASSERT_NE(info2->getPluginClassInfo, nullptr);
-    ASSERT_NE(info2->getPluginClassInfos, nullptr);
+    ASSERT_NE(info2->getFeatureCount, nullptr);
+    ASSERT_NE(info2->getFeatureInfo, nullptr);
+    ASSERT_NE(info2->getFeatureInfos, nullptr);
+    ASSERT_NE(info2->getClassCount, nullptr);
+    ASSERT_NE(info2->getClassInfo, nullptr);
+    ASSERT_NE(info2->getClassInfos, nullptr);
 }
 
 GTEST_TEST(Test_PluginManager, getPluginInfo_filtered)
@@ -334,12 +367,12 @@ GTEST_TEST(Test_PluginManager, getPluginInfo_filtered)
     ASSERT_EQ(info1->apiVersionPatch, apl::A_PLUGIN_API_VERSION_PATCH);
     ASSERT_NE(info1->allocateMemory, nullptr);
     ASSERT_NE(info1->freeMemory, nullptr);
-    ASSERT_NE(info1->getPluginFeatureCount, nullptr);
-    ASSERT_NE(info1->getPluginFeatureInfo, nullptr);
-    ASSERT_NE(info1->getPluginFeatureInfos, nullptr);
-    ASSERT_NE(info1->getPluginClassCount, nullptr);
-    ASSERT_NE(info1->getPluginClassInfo, nullptr);
-    ASSERT_NE(info1->getPluginClassInfos, nullptr);
+    ASSERT_NE(info1->getFeatureCount, nullptr);
+    ASSERT_NE(info1->getFeatureInfo, nullptr);
+    ASSERT_NE(info1->getFeatureInfos, nullptr);
+    ASSERT_NE(info1->getClassCount, nullptr);
+    ASSERT_NE(info1->getClassInfo, nullptr);
+    ASSERT_NE(info1->getClassInfos, nullptr);
 
     infos = manager.getPluginInfos("3.5.12", apl::PluginInfoFilter::PluginVersion);
     ASSERT_EQ(infos.size(), 1);
@@ -355,12 +388,12 @@ GTEST_TEST(Test_PluginManager, getPluginInfo_filtered)
     ASSERT_EQ(info2->apiVersionPatch, apl::A_PLUGIN_API_VERSION_PATCH);
     ASSERT_NE(info2->allocateMemory, nullptr);
     ASSERT_NE(info2->freeMemory, nullptr);
-    ASSERT_NE(info2->getPluginFeatureCount, nullptr);
-    ASSERT_NE(info2->getPluginFeatureInfo, nullptr);
-    ASSERT_NE(info2->getPluginFeatureInfos, nullptr);
-    ASSERT_NE(info2->getPluginClassCount, nullptr);
-    ASSERT_NE(info2->getPluginClassInfo, nullptr);
-    ASSERT_NE(info2->getPluginClassInfos, nullptr);
+    ASSERT_NE(info2->getFeatureCount, nullptr);
+    ASSERT_NE(info2->getFeatureInfo, nullptr);
+    ASSERT_NE(info2->getFeatureInfos, nullptr);
+    ASSERT_NE(info2->getClassCount, nullptr);
+    ASSERT_NE(info2->getClassInfo, nullptr);
+    ASSERT_NE(info2->getClassInfos, nullptr);
 
     // test name filter
     infos = manager.getPluginInfos("first_plugin", apl::PluginInfoFilter::PluginName);
@@ -410,7 +443,7 @@ GTEST_TEST(Test_PluginManager, getPluginProperties)
     ASSERT_EQ(properties, expectedProperties);
 
     properties = manager.getPluginProperties(apl::PluginInfoFilter::ApiVersion);
-    expectedProperties = {"1.0.0"};
+    expectedProperties = {"2.0.0"};
     std::sort(properties.begin(), properties.end(), std::greater<std::string>());
     std::sort(expectedProperties.begin(), expectedProperties.end(), std::greater<std::string>());
     ASSERT_EQ(properties.size(), expectedProperties.size());
@@ -443,16 +476,16 @@ GTEST_TEST(Test_PluginManager, getFeatures_unfiltered)
     const char* parameterLists[] = {"int x1, int x2",
                                    "int x1, int x2", "int x1, int x2", "int x1, int x2", "int x1, int x2",
                                    "int x", "int x",
-                                   "int x1, int x2"};
+                                   ""};
     const char* parameterTypes[] = {"int, int",
                                     "int, int", "int, int", "int, int", "int, int",
                                     "int", "int",
-                                    "int, int"};
+                                    ""};
     const char* parameterNames[] = {"x1, x2",
                                     "x1, x2", "x1, x2", "x1, x2", "x1, x2",
                                     "x", "x",
-                                    "x1, x2"};
-    int results[] = {27, 12, 6, 27, 3, 49, 343, 27};
+                                    ""};
+    int results[] = {27, 12, 6, 27, 3, 49, 343, 6};
     const apl::PluginFeatureInfo* info;
     for(size_t i = 0; i < features.size(); i++) {
         info = features.at(i);
@@ -465,8 +498,10 @@ GTEST_TEST(Test_PluginManager, getFeatures_unfiltered)
         ASSERT_STREQ(info->parameterNames, parameterNames[i]);
         if(std::string(info->parameterList) == "int x")
             ASSERT_EQ(reinterpret_cast<int(*)(int)>(info->functionPointer)(7), results[i]);
-        else
+        else if(std::string(info->parameterList) == "int x1, int x2")
             ASSERT_EQ(reinterpret_cast<int(*)(int, int)>(info->functionPointer)(9, 3), results[i]);
+        else
+            ASSERT_EQ(reinterpret_cast<int(*)()>(info->functionPointer)(), results[i]);
     }
 
     manager.unloadAll();
@@ -515,10 +550,10 @@ GTEST_TEST(Test_PluginManager, getFeatures_filtered)
     ASSERT_EQ(features.size(), 2);
     featureGroups = {"first_group1", "fifth_group1"};
     returnTypes = {"int", "int"};
-    parameterLists = {"int x1, int x2", "int x1, int x2"};
-    parameterTypes = {"int, int", "int, int"};
-    parameterNames = {"x1, x2", "x1, x2"};
-    results = {27, 27};
+    parameterLists = {"int x1, int x2", ""};
+    parameterTypes = {"int, int", ""};
+    parameterNames = {"x1, x2", ""};
+    results = {27, 6};
     for(size_t i = 0; i < features.size(); i++) {
         info = features.at(i);
         ASSERT_NE(info, nullptr);
@@ -528,7 +563,10 @@ GTEST_TEST(Test_PluginManager, getFeatures_filtered)
         ASSERT_STREQ(info->parameterList, parameterLists[i]);
         ASSERT_STREQ(info->parameterTypes, parameterTypes[i]);
         ASSERT_STREQ(info->parameterNames, parameterNames[i]);
-        ASSERT_EQ(reinterpret_cast<int(*)(int, int)>(info->functionPointer)(9, 3), results[i]);
+        if(std::string(info->parameterTypes) == "int, int")
+            ASSERT_EQ(reinterpret_cast<int(*)(int, int)>(info->functionPointer)(9, 3), results[i]);
+        else
+            ASSERT_EQ(reinterpret_cast<int(*)()>(info->functionPointer)(), results[i]);
     }
 
     // filter return types
@@ -651,21 +689,21 @@ GTEST_TEST(Test_PluginManager, getFeatureProperties)
 
     properties = manager.getFeatureProperties(apl::PluginFeatureFilter::ParameterList);
     std::sort(properties.begin(), properties.end(), std::greater<std::string>());
-    result = {"int x1, int x2", "int x"};
+    result = {"int x1, int x2", "int x", ""};
     std::sort(result.begin(), result.end(), std::greater<std::string>());
     ASSERT_EQ(properties.size(), result.size());
     ASSERT_EQ(properties, result);
 
     properties = manager.getFeatureProperties(apl::PluginFeatureFilter::ParameterTypes);
     std::sort(properties.begin(), properties.end(), std::greater<std::string>());
-    result = {"int, int", "int"};
+    result = {"int, int", "int", ""};
     std::sort(result.begin(), result.end(), std::greater<std::string>());
     ASSERT_EQ(properties.size(), result.size());
     ASSERT_EQ(properties, result);
 
     properties = manager.getFeatureProperties(apl::PluginFeatureFilter::ParameterNames);
     std::sort(properties.begin(), properties.end(), std::greater<std::string>());
-    result = {"x1, x2", "x"};
+    result = {"x1, x2", "x", ""};
     std::sort(result.begin(), result.end(), std::greater<std::string>());
     ASSERT_EQ(properties.size(), result.size());
     ASSERT_EQ(properties, result);
@@ -794,7 +832,7 @@ GTEST_TEST(Test_PluginManager, getClasses_filtered)
             OtherInterface* otherInterface = createInstance();
             ASSERT_NE(otherInterface, nullptr);
 
-            ASSERT_EQ(otherInterface->otherFunction1(3, 12, 7), 8); // issue under macos with gcc (see README.md)
+            ASSERT_EQ(otherInterface->otherFunction1(3, 12, 7), 8);
             ASSERT_STREQ(otherInterface->otherFunction2(), "This is for testing!");
             ASSERT_EQ(otherInterface->otherFunction3(4.2), 4);
 

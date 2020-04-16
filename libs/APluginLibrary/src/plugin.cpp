@@ -1,6 +1,8 @@
 #include "APluginLibrary/plugin.h"
 #include "private/pluginprivate.h"
 
+#include "APluginSDK/pluginapi.h"
+
 /**
  * @class apl::Plugin
  *
@@ -14,13 +16,17 @@
 apl::Plugin::Plugin(std::string path, library_handle handle)
     : d_ptr(new detail::PluginPrivate())
 {
-    if(handle) {
-        d_ptr->libraryPath = std::move(path);
-        d_ptr->libraryHandle = handle;
+    if(handle == nullptr && !path.empty())
+        return;
+    d_ptr->libraryPath = std::move(path);
+    d_ptr->libraryHandle = handle;
 
-        auto getPluginInfo = LibraryLoader::getSymbol<detail::getPluginInfoFunction>(d_ptr->libraryHandle, "getPluginInfo");
+    if(handle != nullptr) {
+        auto getPluginInfo = LibraryLoader::getSymbol<const apl::PluginInfo*(*)()>(d_ptr->libraryHandle, "getPluginInfo");
         if(getPluginInfo != nullptr)
             d_ptr->pluginInfo = getPluginInfo();
+    } else {
+        d_ptr->pluginInfo = detail::getPluginInfo();
     }
 }
 /**
@@ -43,9 +49,12 @@ apl::Plugin::~Plugin()
  */
 apl::Plugin* apl::Plugin::load(std::string path)
 {
-    library_handle handle = LibraryLoader::load(path);
-    if (handle == nullptr)
-        return nullptr;
+    library_handle handle = nullptr;
+    if(!path.empty()) {
+        handle = LibraryLoader::load(path);
+        if (handle == nullptr)
+            return nullptr;
+    }
     auto plugin = new Plugin(std::move(path), handle);
     if(plugin->d_ptr->pluginInfo == nullptr) {
         delete plugin;
@@ -68,7 +77,7 @@ void apl::Plugin::unload()
  */
 bool apl::Plugin::isLoaded() const
 {
-    return d_ptr != nullptr && d_ptr->libraryHandle != nullptr && d_ptr->pluginInfo != nullptr;
+    return d_ptr != nullptr && d_ptr->pluginInfo != nullptr;
 }
 
 /**
@@ -125,17 +134,20 @@ bool apl::Plugin::freeMemory(void *ptr) const
  */
 size_t apl::Plugin::getFeatureCount() const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginFeatureCount() : 0;
+    return isLoaded() ? d_ptr->pluginInfo->getFeatureCount() : 0;
 }
 /**
  * @param index The index of the PluginFeatureInfo
- * @return The PluginFeatureInfo or nullptr if @p is no valid index
+ * @return The PluginFeatureInfo or nullptr if @p is no valid index.
  *
  * @see getFeatureCount()
  */
 const apl::PluginFeatureInfo *apl::Plugin::getFeatureInfo(size_t index) const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginFeatureInfo(index) : nullptr;
+    size_t featureCount = getFeatureCount();
+    if(featureCount == 0 || index > featureCount - 1)
+        return nullptr;
+    return d_ptr->pluginInfo->getFeatureInfo(index);
 }
 /**
  * @return A PluginFeatureInfo array, with all PluginFeatureInfo's of the plugin.
@@ -144,7 +156,7 @@ const apl::PluginFeatureInfo *apl::Plugin::getFeatureInfo(size_t index) const
  */
 const apl::PluginFeatureInfo* const* apl::Plugin::getFeatureInfos() const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginFeatureInfos() : nullptr;
+    return isLoaded() ? d_ptr->pluginInfo->getFeatureInfos() : nullptr;
 }
 
 /**
@@ -152,17 +164,20 @@ const apl::PluginFeatureInfo* const* apl::Plugin::getFeatureInfos() const
  */
 size_t apl::Plugin::getClassCount() const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginClassCount() : 0;
+    return isLoaded() ? d_ptr->pluginInfo->getClassCount() : 0;
 }
 /**
  * @param index The index of the PluginClassInfo
- * @return The PluginClassInfo or nullptr if @p is no valid index
+ * @return The PluginClassInfo or nullptr if @p is no valid index.
  *
  * @see getClassCount()
  */
 const apl::PluginClassInfo *apl::Plugin::getClassInfo(size_t index) const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginClassInfo(index) : nullptr;
+    size_t classCount = getClassCount();
+    if(classCount == 0 || index > classCount - 1)
+        return nullptr;
+    return d_ptr->pluginInfo->getClassInfo(index);
 }
 /**
  * @return A PluginClassInfo array, with all PluginClassInfo's of the plugin.
@@ -171,5 +186,5 @@ const apl::PluginClassInfo *apl::Plugin::getClassInfo(size_t index) const
  */
 const apl::PluginClassInfo *const *apl::Plugin::getClassInfos() const
 {
-    return isLoaded() ? d_ptr->pluginInfo->getPluginClassInfos() : nullptr;
+    return isLoaded() ? d_ptr->pluginInfo->getClassInfos() : nullptr;
 }
