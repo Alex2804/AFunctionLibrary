@@ -53,6 +53,16 @@ GTEST_TEST(Test_utilities_h, stringify_ostreamOperator)
     ASSERT_EQ(afl::stringify<afl::test::Point>({6, 6}), "(6, 6)");
     ASSERT_EQ(afl::stringify<afl::test::Point>({3, 6}), "(3, 6)");
 }
+GTEST_TEST(Test_utilities_h, stringify_iterators)
+{
+    std::vector<double> intVector = {4.123, 5.294, 502.34561, 0.402};
+    ASSERT_EQ(afl::stringify(intVector.begin(), intVector.end(), "; "), "4.123; 5.294; 502.34561; 0.402");
+    ASSERT_EQ(afl::stringify(intVector.begin(), intVector.end(), " --- "), "4.123 --- 5.294 --- 502.34561 --- 0.402");
+
+    std::vector<afl::test::Point> pointVector = {{18, 3}, {234, 41}, {0, 3}};
+    ASSERT_EQ(afl::stringify(pointVector.begin(), pointVector.end(), ":"), "(18, 3):(234, 41):(0, 3)");
+    ASSERT_EQ(afl::stringify(pointVector.begin(), pointVector.end(), " test "), "(18, 3) test (234, 41) test (0, 3)");
+}
 
 GTEST_TEST(Test_utilities_h, splitAtSpaces)
 {

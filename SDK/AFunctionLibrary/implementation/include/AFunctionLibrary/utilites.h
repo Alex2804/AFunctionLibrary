@@ -14,6 +14,8 @@ namespace afl
 {
     template<typename T>
     inline AFUNCTIONLIBRARY_EXPORT std::string stringify(T t);
+    template<typename Iter>
+    inline AFUNCTIONLIBRARY_EXPORT std::string stringify(Iter begin, Iter end, std::string delimiter);
 
     inline AFUNCTIONLIBRARY_EXPORT std::vector<std::string> splitAtSpaces(std::string string);
     inline AFUNCTIONLIBRARY_EXPORT std::string trimString(std::string string);

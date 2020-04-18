@@ -54,6 +54,9 @@ namespace afl
             static bool isUnique(const afl::Token<std::string>* token);
             static bool isNotUnique(const afl::Token<std::string>* token);
 
+            std::vector<std::shared_ptr<const Token<std::string>>> stringToTokens(std::string string);
+            std::vector<std::shared_ptr<const Token<std::string>>> tokenGroupsToTokens(std::vector<TokenGroup<std::string>> tokenGroups);
+
         public:
             // unique tokens are operators and can never be part of variables
             std::unordered_map<std::string, std::pair<std::shared_ptr<TokenPtrBundle<std::string>>, size_t>> m_uniqueTokens, m_notUniqueTokens;
@@ -61,8 +64,8 @@ namespace afl
             std::vector<std::tuple<const apl::Plugin*, std::vector<cApiCreateTokenPluginFunction>, std::vector<cApiCreateTokenAliasesPluginFunction>, std::vector<cppApiCreateTokenPluginFunction>, std::vector<cppApiCreateTokenAliasesPluginFunction>>> m_pluginFunctions;
         };
 
-        AFUNCTIONLIBRARY_NO_EXPORT std::vector<std::shared_ptr<const Token<std::string>>> stringToTokens(TokenManager* tokenManager, std::string string);
-        AFUNCTIONLIBRARY_NO_EXPORT std::string toFunctionString(TokenManager* tokenManager, std::vector<TokenGroup<std::string>> tokenGroups);
+        template<typename T>
+        AFUNCTIONLIBRARY_NO_EXPORT std::vector<TokenGroup<T>> toGroupVector(const std::vector<std::shared_ptr<const Token<T>>>& tokens);
     }
 }
 

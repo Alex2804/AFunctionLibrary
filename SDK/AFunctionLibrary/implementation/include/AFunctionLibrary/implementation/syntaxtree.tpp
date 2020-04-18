@@ -258,6 +258,22 @@ bool afl::Node<T>::operator!=(const afl::Node<T>& other) const
 }
 
 template<typename T>
+std::vector<std::reference_wrapper<const afl::Node<T>>> afl::Node<T>::subtree() const
+{
+    std::forward_list<std::reference_wrapper<const afl::Node<T>>> nodes;
+    std::stack<std::reference_wrapper<const afl::Node<T>>> stack;
+    stack.push(*this);
+    while(!stack.empty()) {
+        const Node<T>& node = stack.top();
+        stack.pop();
+        for(const Node<T>& child : node.m_children)
+            stack.push(child);
+        nodes.push_front(node);
+    }
+    return std::vector<std::reference_wrapper<const afl::Node<T>>>(nodes.begin(), nodes.end());
+}
+
+template<typename T>
 std::string afl::Node<T>::toString() const
 {
     const char* connectors[] = {"\u007c", "\342\224\234", "\342\224\214", "\342\224\200", "\342\224\274", "\342\224\254", "\342\224\244", "\342\224\220", "\342\224\264"};

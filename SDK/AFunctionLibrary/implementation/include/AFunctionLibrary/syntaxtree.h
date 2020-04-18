@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 #include <stack>
+#include <functional>
+#include <forward_list>
 
 #include "utilites.h"
 #include "token.h"
@@ -71,6 +73,8 @@ namespace afl
 
         bool operator==(const Node<T>& other) const;
         bool operator!=(const Node<T>& other) const;
+
+        std::vector<std::reference_wrapper<const Node<T>>> subtree() const;
 
         std::string toString() const;
 

@@ -18,4 +18,23 @@ std::vector<std::shared_ptr<const afl::detail::TokenPtrBundle<std::string>>> afl
     return filtered;
 }
 
+template<typename T>
+std::vector<afl::TokenGroup<T>> afl::detail::toGroupVector(const std::vector<std::shared_ptr<const Token<T>>>& tokens)
+{
+    std::vector<TokenGroup<std::string>> tokenGroups;
+    std::vector<size_t> tmpGroupID = {0};
+    for(const std::shared_ptr<const Token<std::string>>& token : tokens) {
+        if(token->getType() == TokenType::BracketClose || token->getType() == TokenType::ArgumentDelimiter) {
+            tmpGroupID.pop_back();
+            ++tmpGroupID.back();
+        }
+        tokenGroups.emplace_back(token, tmpGroupID);
+        ++tmpGroupID.back();
+        if(token->getType() == TokenType::BracketOpen || token->getType() == TokenType::ArgumentDelimiter) {
+            tmpGroupID.push_back(0);
+        }
+    }
+    return tokenGroups;
+}
+
 #endif //AFUNCTIONLIBRARY_TOKENMANAGER_TPP

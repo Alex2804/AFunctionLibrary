@@ -86,7 +86,29 @@ inline std::string afl::detail::stringifyFloatingPointNumber(T number)
  */
 template<typename T>
 std::string afl::stringify(T t){
-    return afl::detail::stringify(t, detail::has_to_string<T>{}, detail::is_dereferenceable<T>{});
+    return detail::stringify(t, detail::has_to_string<T>{}, detail::is_dereferenceable<T>{});
+}
+/**
+ * Converts all elements from @p begin to @p end to strings with afl::stringify() and concatenates them (comma
+ * seperated).
+ * @tparam Iter The type of the iterator.
+ * @param begin The iterator pointing to the first element (inclusive).
+ * @param end The iterator pointing to the last element (exclusive).
+ * @return The concatenated elements.
+ * @sa afl::stringify()
+ */
+template<typename Iter>
+std::string afl::stringify(Iter begin, Iter end, std::string delimiter)
+{
+    std::string string;
+    bool first = true;
+    for(; begin != end; ++begin) {
+        if(!first)
+            string += delimiter;
+        string += stringify(*begin);
+        first = false;
+    }
+    return string;
 }
 
 

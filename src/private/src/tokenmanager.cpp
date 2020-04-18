@@ -198,40 +198,41 @@ bool afl::detail::TokenManager::isNotUnique(const afl::Token<std::string>* token
     return token != nullptr && !isUnique(token);
 }
 
-std::vector<std::shared_ptr<const afl::Token<std::string>>> afl::detail::stringToTokens(TokenManager* tokenManager, std::string string)
+std::vector<std::shared_ptr<const afl::Token<std::string>>> afl::detail::TokenManager::stringToTokens(std::string string)
 {
     string.erase(std::remove_if(string.begin(), string.end(), ::isspace), string.end()); // remove spaces
-    for(const auto& pair : tokenManager->m_uniqueTokens)
+    for(const auto& pair : m_uniqueTokens)
         string = replaceString(std::move(string), pair.second.first->token->value, " " + pair.second.first->token->value + " ");
     std::vector<std::string> stringTokens = splitAtSpaces(std::move(string));
     std::vector<std::shared_ptr<const Token<std::string>>> tokens;
     tokens.reserve(stringTokens.size());
     std::shared_ptr<const TokenPtrBundle<std::string>> tokenPtrBundle;
     for(const std::string& stringToken : stringTokens) {
-        tokenPtrBundle = tokenManager->getToken(stringToken, true);
+        tokenPtrBundle = getToken(stringToken, true);
         if(tokenPtrBundle == nullptr)
-            throw std::runtime_error("No existing token with for string " + stringToken);
+            throw std::runtime_error("No existing token for string " + stringToken);
         tokens.push_back(tokenPtrBundle->token);
     }
     return tokens;
 }
-std::string afl::detail::toFunctionString(TokenManager* tokenManager, std::vector<TokenGroup<std::string>> tokenGroups)
+
+std::vector<std::shared_ptr<const afl::Token<std::string>>> afl::detail::TokenManager::tokenGroupsToTokens(std::vector<TokenGroup<std::string>> tokenGroups)
 {
     std::shared_ptr<const TokenPtrBundle<std::string>> bracketOpen, bracketClose, argumentDelimiter;
-    if((bracketOpen = tokenManager->getToken("(")) == nullptr) {
-        auto tmp = tokenManager->filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::BracketOpen; });
+    if((bracketOpen = getToken("(", true)) == nullptr) {
+        auto tmp = filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::BracketOpen; });
         if(tmp.empty())
             throw std::runtime_error("TokenManager does not contain any Token of type BracketOpen!");
         bracketOpen = tmp.front();
     }
-    if((bracketClose = tokenManager->getToken(")")) == nullptr) {
-        auto tmp = tokenManager->filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::BracketClose; });
+    if((bracketClose = getToken(")", true)) == nullptr) {
+        auto tmp = filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::BracketClose; });
         if(tmp.empty())
             throw std::runtime_error("TokenManager does not contain any Token of type BracketClose!");
         bracketClose = tmp.front();
     }
-    if((argumentDelimiter = tokenManager->getToken(";")) == nullptr) {
-        auto tmp = tokenManager->filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::ArgumentDelimiter; });
+    if((argumentDelimiter = getToken(";", true)) == nullptr) {
+        auto tmp = filterTokens([](const Token<std::string> *token) { return token->type == afl::TokenType::ArgumentDelimiter; });
         if(tmp.empty())
             throw std::runtime_error("TokenManager does not contain any Token of type ArgumentDelimiter!");
         argumentDelimiter = tmp.front();
@@ -239,11 +240,9 @@ std::string afl::detail::toFunctionString(TokenManager* tokenManager, std::vecto
 
     auto predicate = [](const TokenGroup<std::string>& tokenGroup){ return !tokenGroup.isToken(); };
     tokenGroups.erase(std::remove_if(tokenGroups.begin(), tokenGroups.end(), predicate), tokenGroups.end()); // remove non token tokenGroups
-    if(tokenGroups.empty())
-        return "";
 
-    auto comparator = [](const TokenGroup<std::string>& first, const TokenGroup<std::string>& second){
-        return first.groupID < second.groupID;
+    auto comparator = [](const TokenGroup<std::string>& g1, const TokenGroup<std::string>& g2){
+        return g1.groupID < g2.groupID;
     };
     std::sort<decltype(tokenGroups.begin()), decltype(comparator)>(tokenGroups.begin(), tokenGroups.end(), comparator); // sort after groupIDs
 
@@ -329,14 +328,6 @@ std::string afl::detail::toFunctionString(TokenManager* tokenManager, std::vecto
 
         oldGroup = tokenGroup;
     }
-
-    std::string functionString;
-    size_t functionStringSize = 0;
-    for(const std::shared_ptr<const Token<std::string>>& token : tokens)
-        functionStringSize += token->value.size();
-    functionString.reserve(functionStringSize);
-    for(const std::shared_ptr<const Token<std::string>>& token : tokens)
-        functionString.append(token->value);
-
-    return functionString;
+    tokens.pop_back();
+    return tokens;
 }

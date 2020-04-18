@@ -640,7 +640,7 @@ GTEST_TEST(Test_TokenManager, filterTokens)
     ASSERT_EQ(expected, tokens);
 }
 
-GTEST_TEST(Test_tokenmanager_h, stringToTokens)
+GTEST_TEST(Test_TokenManager, stringToTokens)
 {
     afl::detail::TokenManager tokenManager;
     tokenManager.addToken(allTokens.at("+"), "custom_tokens.atokens");
@@ -660,10 +660,10 @@ GTEST_TEST(Test_tokenmanager_h, stringToTokens)
     std::vector<std::shared_ptr<const afl::Token<std::string>>> tokens =
             {token3, allTokens.at("+")->token, token5, allTokens.at("*")->token, allTokens.at("abs")->token,
              tokenBracketOpen, tokenab, tokenBracketClose};
-    ASSERT_EQ(afl::detail::stringToTokens(&tokenManager, "3+5*abs(ab)"), tokens);
+    ASSERT_EQ(tokenManager.stringToTokens("3+5*abs(ab)"), tokens);
 }
 
-GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
+GTEST_TEST(Test_TokenManager, tokenGroupsToTokens_with_brackets_and_semicolons)
 {
     afl::detail::TokenManager tokenManager;
     auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
@@ -676,6 +676,14 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
     std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
 
     // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
+    std::vector<std::shared_ptr<const afl::Token<std::string>>> expected = {
+        afl::test::token3, afl::test::tokenPlus, afl::test::token5, afl::test::tokenMultiply, afl::test::tokenAbs,
+        afl::test::tokenBracketOpen, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenPower,
+        afl::test::token3, afl::test::tokenMultiply, afl::test::tokenPow, afl::test::tokenBracketOpen,
+        afl::test::token3, afl::test::tokenPower, afl::test::token5, afl::test::tokenSemicolon, afl::test::tokenAbs,
+        afl::test::tokenBracketOpen, afl::test::token3, afl::test::tokenPlus, afl::test::tokenAb,
+        afl::test::tokenBracketClose, afl::test::tokenBracketClose
+    };
     std::vector<afl::TokenGroup<std::string>> tokenGroups;
     tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
@@ -707,10 +715,18 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
     tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({16}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs(ab)^3*pow(3^5;abs(3+ab))");
+    auto tmp = tokenManager.tokenGroupsToTokens(tokenGroups);
+    ASSERT_EQ(tmp, expected);
 
+    // pow(abs(3);abs(ab);abs(5))+5
+    expected = {
+        afl::test::tokenPow, afl::test::tokenBracketOpen, afl::test::tokenAbs, afl::test::tokenBracketOpen,
+        afl::test::token3, afl::test::tokenBracketClose, afl::test::tokenSemicolon, afl::test::tokenAbs,
+        afl::test::tokenBracketOpen, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenSemicolon,
+        afl::test::tokenAbs, afl::test::tokenBracketOpen, afl::test::token5, afl::test::tokenBracketClose,
+        afl::test::tokenBracketClose, afl::test::tokenPlus, afl::test::token5
+    };
     tokenGroups.clear();
-    // pow(abs(3);abs(ab);abs(5))
     tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({1}));
     tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 0}));
@@ -728,11 +744,26 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
     tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({6, 2, 0}));
     tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({6, 3}));
     tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({7}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({9}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow(abs(3);abs(ab);abs(5))");
+    ASSERT_EQ(tokenManager.tokenGroupsToTokens(tokenGroups), expected);
 
     // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    expected = {
+        afl::test::token3, afl::test::tokenPlus, afl::test::token5, afl::test::tokenMultiply, afl::test::tokenAbs,
+        afl::test::tokenBracketOpen, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenPower,
+        afl::test::token3, afl::test::tokenMultiply, afl::test::tokenPow, afl::test::tokenBracketOpen,
+        afl::test::tokenPow, afl::test::tokenBracketOpen, afl::test::tokenPow, afl::test::tokenBracketOpen,
+        afl::test::tokenAbs, afl::test::tokenBracketOpen, afl::test::token3, afl::test::tokenBracketClose,
+        afl::test::tokenSemicolon, afl::test::tokenAbs, afl::test::tokenBracketOpen, afl::test::tokenAb,
+        afl::test::tokenBracketClose, afl::test::tokenBracketClose, afl::test::tokenSemicolon, afl::test::tokenPow,
+        afl::test::tokenBracketOpen, afl::test::token3, afl::test::tokenPlus, afl::test::token5,
+        afl::test::tokenSemicolon, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenBracketClose,
+        afl::test::tokenSemicolon, afl::test::tokenAbs, afl::test::tokenBracketOpen, afl::test::token3,
+        afl::test::tokenPlus, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenBracketClose
+    };
     tokenGroups.clear();
     tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
@@ -799,10 +830,10 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_with_brackets_and_semicolons)
     tokenGroups.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({16}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))");
+    ASSERT_EQ(tokenManager.tokenGroupsToTokens(tokenGroups), expected);
 }
 
-GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons)
+GTEST_TEST(Test_TokenManager, tokenGroupsToTokens_without_brackets_and_semicolons)
 {
     afl::detail::TokenManager tokenManager;
     auto bracketOpen = std::make_shared<afl::Token<std::string>>("[", afl::TokenType::BracketOpen, 0, 0, afl::TokenAssociativity::None);
@@ -815,6 +846,13 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons
     std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
 
     // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
+    std::vector<std::shared_ptr<const afl::Token<std::string>>> expected = {
+            afl::test::token3, afl::test::tokenPlus, afl::test::token5, afl::test::tokenMultiply, afl::test::tokenAbs,
+            bracketOpen, afl::test::tokenAb, bracketClose, afl::test::tokenPower, afl::test::token3,
+            afl::test::tokenMultiply, afl::test::tokenPow, bracketOpen, afl::test::token3, afl::test::tokenPower,
+            afl::test::token5, argumentDelimiter, afl::test::tokenAbs, bracketOpen, afl::test::token3,
+            afl::test::tokenPlus, afl::test::tokenAb, bracketClose, bracketClose
+    };
     std::vector<afl::TokenGroup<std::string>> tokenGroups;
     tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
@@ -839,10 +877,16 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons
     tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs[ab]^3*pow[3^5#abs[3+ab]]");
+    ASSERT_EQ(tokenManager.tokenGroupsToTokens(tokenGroups), expected);
 
+    // pow(abs(3);abs(ab);abs(5))+5
+    expected = {
+            afl::test::tokenPow, bracketOpen, afl::test::tokenAbs, bracketOpen, afl::test::token3, bracketClose,
+            argumentDelimiter, afl::test::tokenAbs, bracketOpen, afl::test::tokenAb, bracketClose, argumentDelimiter,
+            afl::test::tokenAbs, bracketOpen, afl::test::token5, bracketClose, bracketClose, afl::test::tokenPlus,
+            afl::test::token5
+    };
     tokenGroups.clear();
-    // pow(abs(3);abs(ab);abs(5))
     tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 0}));
     tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({2, 2, 0}));
@@ -850,34 +894,24 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons
     tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({4, 2, 0}));
     tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({6, 0}));
     tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({6, 2, 0}));
+    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({8}));
+    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({9}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow[abs[3]#abs[ab]#abs[5]]");
-
-    tokenGroups.clear();
-    // pow(pow(abs(3);abs(ab));pow(3+5;ab))
-    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({0}));
-    // pow(   pow(abs(3);abs(ab))   ;pow(3+5;ab))
-    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({2, 0}));
-    // pow(pow(   abs(3)   ;abs(ab));pow(3+5;ab))
-    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 2, 0}));
-    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({2, 2, 2, 0}));
-    // pow(pow(abs(3);   abs(ab)   );pow(3+5;ab))
-    tokenGroups.emplace_back(afl::test::tokenAbs, std::vector<size_t>({2, 4, 0}));
-    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({2, 4, 2, 0}));
-    // pow(pow(abs(3);abs(ab));   pow(3+5;ab)   )
-    tokenGroups.emplace_back(afl::test::tokenPow, std::vector<size_t>({4, 0}));
-    // pow(pow(abs(3);abs(ab));pow(   3+5   ;ab))
-    tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({4, 2, 0}));
-    tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({4, 2, 1}));
-    tokenGroups.emplace_back(afl::test::token5, std::vector<size_t>({4, 2, 2}));
-    // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;   ab   ))
-    tokenGroups.emplace_back(afl::test::tokenAb, std::vector<size_t>({4, 4, 0}));
-
-    std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "pow[pow[abs[3]#abs[ab]]#pow[3+5#ab]]");
+    ASSERT_EQ(tokenManager.tokenGroupsToTokens(tokenGroups), expected);
 
     // 3+5*abs(ab)^3*pow(pow(pow(abs(3);abs(ab));pow(3+5;ab));abs(3+ab))
+    expected = {
+            afl::test::token3, afl::test::tokenPlus, afl::test::token5, afl::test::tokenMultiply, afl::test::tokenAbs,
+            bracketOpen, afl::test::tokenAb, bracketClose, afl::test::tokenPower, afl::test::token3,
+            afl::test::tokenMultiply, afl::test::tokenPow, bracketOpen, afl::test::tokenPow, bracketOpen,
+            afl::test::tokenPow, bracketOpen, afl::test::tokenAbs, bracketOpen, afl::test::token3, bracketClose,
+            argumentDelimiter, afl::test::tokenAbs, bracketOpen, afl::test::tokenAb, bracketClose, bracketClose,
+            argumentDelimiter, afl::test::tokenPow, bracketOpen, afl::test::token3, afl::test::tokenPlus,
+            afl::test::token5, argumentDelimiter, afl::test::tokenAb, bracketClose, bracketClose, argumentDelimiter,
+            afl::test::tokenAbs, bracketOpen, afl::test::token3, afl::test::tokenPlus, afl::test::tokenAb, bracketClose,
+            bracketClose
+    };
     tokenGroups.clear();
     tokenGroups.emplace_back(afl::test::token3, std::vector<size_t>({0}));
     tokenGroups.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
@@ -920,5 +954,46 @@ GTEST_TEST(Test_tokenmanager_h, toFunctionString_without_brackets_and_semicolons
     tokenGroups.emplace_back(std::vector<size_t>({15, 3, 0}));
 
     std::shuffle(tokenGroups.begin(), tokenGroups.end(), rng);
-    ASSERT_EQ(afl::detail::toFunctionString(&tokenManager, tokenGroups), "3+5*abs[ab]^3*pow[pow[pow[abs[3]#abs[ab]]#pow[3+5#ab]]#abs[3+ab]]");
+    ASSERT_EQ(tokenManager.tokenGroupsToTokens(tokenGroups), expected);
+}
+
+GTEST_TEST(Test_tokenmanager_h, toGroupVector)
+{
+    // 3+5*abs(ab)^3*pow(3^5;abs(3+ab))
+    std::vector<std::shared_ptr<const afl::Token<std::string>>> tokens = {
+            afl::test::token3, afl::test::tokenPlus, afl::test::token5, afl::test::tokenMultiply, afl::test::tokenAbs,
+            afl::test::tokenBracketOpen, afl::test::tokenAb, afl::test::tokenBracketClose, afl::test::tokenPower,
+            afl::test::token3, afl::test::tokenMultiply, afl::test::tokenPow, afl::test::tokenBracketOpen,
+            afl::test::token3, afl::test::tokenPower, afl::test::token5, afl::test::tokenSemicolon, afl::test::tokenAbs,
+            afl::test::tokenBracketOpen, afl::test::token3, afl::test::tokenPlus, afl::test::tokenAb,
+            afl::test::tokenBracketClose, afl::test::tokenBracketClose
+    };
+
+    std::vector<afl::TokenGroup<std::string>> expected, tokenGroups = afl::detail::toGroupVector(tokens);
+    expected.emplace_back(afl::test::token3, std::vector<size_t>({0}));
+    expected.emplace_back(afl::test::tokenPlus, std::vector<size_t>({1}));
+    expected.emplace_back(afl::test::token5, std::vector<size_t>({2}));
+    expected.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({3}));
+    expected.emplace_back(afl::test::tokenAbs, std::vector<size_t>({4}));
+    expected.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({5}));
+    expected.emplace_back(afl::test::tokenAb, std::vector<size_t>({6, 0}));
+    expected.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({7}));
+    expected.emplace_back(afl::test::tokenPower, std::vector<size_t>({8}));
+    expected.emplace_back(afl::test::token3, std::vector<size_t>({9}));
+    expected.emplace_back(afl::test::tokenMultiply, std::vector<size_t>({10}));
+    expected.emplace_back(afl::test::tokenPow, std::vector<size_t>({11}));
+    expected.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({12}));
+    expected.emplace_back(afl::test::token3, std::vector<size_t>({13, 0}));
+    expected.emplace_back(afl::test::tokenPower, std::vector<size_t>({13, 1}));
+    expected.emplace_back(afl::test::token5, std::vector<size_t>({13, 2}));
+    expected.emplace_back(afl::test::tokenSemicolon, std::vector<size_t>({14}));
+    expected.emplace_back(afl::test::tokenAbs, std::vector<size_t>({15, 0}));
+    expected.emplace_back(afl::test::tokenBracketOpen, std::vector<size_t>({15, 1}));
+    expected.emplace_back(afl::test::token3, std::vector<size_t>({15, 2, 0}));
+    expected.emplace_back(afl::test::tokenPlus, std::vector<size_t>({15, 2, 1}));
+    expected.emplace_back(afl::test::tokenAb, std::vector<size_t>({15, 2, 2}));
+    expected.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({15, 3}));
+    expected.emplace_back(afl::test::tokenBracketClose, std::vector<size_t>({16}));
+
+    ASSERT_EQ(tokenGroups, expected);
 }

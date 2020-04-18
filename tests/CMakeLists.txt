@@ -20,7 +20,6 @@ set(SOURCES
         src/test_resourceparser.cpp
         src/test_resourcemanager.cpp
         src/test_tokenmanager.cpp
-        src/test_tokenextras.cpp
         src/test_functionformatter.cpp
         )
 

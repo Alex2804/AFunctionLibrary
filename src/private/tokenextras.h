@@ -37,10 +37,6 @@ namespace afl
             std::shared_ptr<const Token<T>> token;
             std::vector<TokenAliases<T>> aliases;
         };
-
-        AFUNCTIONLIBRARY_NO_EXPORT std::string tokensToString(const std::vector<std::shared_ptr<const Token<std::string>>>& tokens);
-
-        AFUNCTIONLIBRARY_NO_EXPORT std::vector<TokenGroup<std::string>> toGroupVector(const std::vector<std::shared_ptr<const Token<std::string>>>& tokens);
     }
 }
 
