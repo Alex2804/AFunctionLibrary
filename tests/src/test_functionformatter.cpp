@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 
 #include "../src/private/functionformatter.h"
-#include "../src/private/resourcemanager.h"
 
 GTEST_TEST(Test_FunctionFormatter, replaceAliases)
 {

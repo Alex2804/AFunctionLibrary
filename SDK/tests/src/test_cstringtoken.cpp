@@ -318,7 +318,7 @@ GTEST_TEST(Test_CStringTokenAliases, convert)
 
     cAliases = afl::convert(aliases);
     for(size_t i = 0; i < cAliases->aliasesCount; ++i)
-    afl::free(cAliases->aliases[i]);
+        afl::free(cAliases->aliases[i]);
     apl::freeMemory(cAliases->aliases);
     cAliases->aliases = nullptr;
     tmpAliases = afl::convert(cAliases);

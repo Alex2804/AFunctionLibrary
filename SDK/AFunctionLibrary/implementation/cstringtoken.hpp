@@ -53,12 +53,15 @@ namespace afl
 
     inline AFUNCTIONLIBRARY_NO_EXPORT CStringToken* convert(const Token<std::string>& token);
     inline AFUNCTIONLIBRARY_NO_EXPORT std::shared_ptr<Token<std::string>> convert(CStringToken* cToken, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
+    inline AFUNCTIONLIBRARY_NO_EXPORT std::shared_ptr<Token<std::string>> convert(const CStringToken* cToken, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
 
     inline AFUNCTIONLIBRARY_NO_EXPORT CStringTokenAliases* convert(const TokenAliases<std::string>& tokenAliases);
     inline AFUNCTIONLIBRARY_NO_EXPORT TokenAliases<std::string> convert(CStringTokenAliases* cTokenAliases);
+    inline AFUNCTIONLIBRARY_NO_EXPORT TokenAliases<std::string> convert(const CStringTokenAliases* cTokenAliases);
 
     inline AFUNCTIONLIBRARY_NO_EXPORT CStringTokenGroup* convert(const TokenGroup<std::string>& tokenGroup);
     inline AFUNCTIONLIBRARY_NO_EXPORT TokenGroup<std::string> convert(CStringTokenGroup* cTokenGroup, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
+    inline AFUNCTIONLIBRARY_NO_EXPORT TokenGroup<std::string> convert(const CStringTokenGroup* cTokenGroup, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&)=nullptr);
 }
 
 
@@ -131,8 +134,10 @@ void afl::free(afl::CStringTokenAliases* cTokenAliases)
 {
     if(cTokenAliases == nullptr)
         return;
-    for(size_t i = 0; i < cTokenAliases->aliasesCount; ++i)
-        free(cTokenAliases->aliases[i]);
+    if(cTokenAliases->aliases != nullptr) {
+        for(size_t i = 0; i < cTokenAliases->aliasesCount; ++i)
+            free(cTokenAliases->aliases[i]);
+    }
     cTokenAliases->freeFunction(cTokenAliases->aliases);
     cTokenAliases->freeFunction(cTokenAliases);
 }
@@ -154,18 +159,20 @@ afl::CStringToken* afl::convert(const Token<std::string>& token)
 }
 std::shared_ptr<afl::Token<std::string>> afl::convert(CStringToken* cToken, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
 {
+    std::shared_ptr<Token<std::string>> token = convert(const_cast<const CStringToken*>(cToken), getTokenFunction);
+    free(cToken);
+    return token;
+}
+std::shared_ptr<afl::Token<std::string>> afl::convert(const CStringToken* cToken, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
+{
     if(cToken == nullptr)
         return std::shared_ptr<Token<std::string>>();
     std::shared_ptr<Token<std::string>> token;
-    if(cToken->string == nullptr)
-        cToken->string = convert("");
+    const char* tokenCString = (cToken->string == nullptr) ? "" : cToken->string->string;
     if(getTokenFunction != nullptr)
-        token = getTokenFunction(cToken->string->string);
-    if(token == nullptr) {
-        token = std::make_shared<Token<std::string>>(convert(cToken->string), cToken->type, cToken->precedence, cToken->parameterCount, cToken->associativity);
-        cToken->string = nullptr;
-    }
-    free(cToken);
+        token = getTokenFunction(tokenCString);
+    if(token == nullptr)
+        token = std::make_shared<Token<std::string>>(tokenCString, cToken->type, cToken->precedence, cToken->parameterCount, cToken->associativity);
     return token;
 }
 
@@ -181,16 +188,21 @@ afl::CStringTokenAliases* afl::convert(const TokenAliases<std::string>& tokenAli
 }
 afl::TokenAliases<std::string> afl::convert(CStringTokenAliases* cTokenAliases)
 {
+    TokenAliases<std::string> aliases = convert(const_cast<const CStringTokenAliases*>(cTokenAliases));
+    free(cTokenAliases);
+    return aliases;
+}
+afl::TokenAliases<std::string> afl::convert(const CStringTokenAliases* cTokenAliases)
+{
     TokenAliases<std::string> aliases(TokenAliasType::String);
     if(cTokenAliases == nullptr)
         return aliases;
     aliases.type = cTokenAliases->type;
-    if(cTokenAliases->aliases == nullptr)
-        cTokenAliases->aliasesCount = 0;
-    aliases.aliases.reserve(cTokenAliases->aliasesCount);
-    for(size_t i = 0; i < cTokenAliases->aliasesCount; ++i)
-        aliases.append(cTokenAliases->aliases[i]->string);
-    free(cTokenAliases);
+    if(cTokenAliases->aliases != nullptr) {
+        aliases.aliases.reserve(cTokenAliases->aliasesCount);
+        for(size_t i = 0; i < cTokenAliases->aliasesCount; ++i)
+            aliases.append(cTokenAliases->aliases[i]->string);
+    }
     return aliases;
 }
 
@@ -205,14 +217,16 @@ afl::CStringTokenGroup* afl::convert(const TokenGroup<std::string>& tokenGroup)
 }
 afl::TokenGroup<std::string> afl::convert(CStringTokenGroup* cTokenGroup, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
 {
-    if(cTokenGroup == nullptr)
-        return TokenGroup<std::string>(convert(static_cast<CStringToken*>(nullptr)));
-    if(cTokenGroup->groupID == nullptr)
-        cTokenGroup->groupIDSize = 0;
-    TokenGroup<std::string> tokenGroup(convert(cTokenGroup->token, getTokenFunction), std::vector<size_t>(cTokenGroup->groupID, cTokenGroup->groupID + cTokenGroup->groupIDSize));
-    cTokenGroup->token = nullptr;
+    TokenGroup<std::string> tokenGroup = convert(const_cast<const CStringTokenGroup*>(cTokenGroup), getTokenFunction);
     free(cTokenGroup);
     return tokenGroup;
+}
+afl::TokenGroup<std::string> afl::convert(const CStringTokenGroup* cTokenGroup, std::shared_ptr<Token<std::string>>(*getTokenFunction)(const std::string&))
+{
+    if(cTokenGroup == nullptr)
+        return TokenGroup<std::string>(convert(static_cast<const CStringToken*>(nullptr)));
+    size_t groupIDSize = (cTokenGroup->groupID == nullptr) ? 0 : cTokenGroup->groupIDSize;
+    return TokenGroup<std::string>(convert(const_cast<const CStringToken*>(cTokenGroup->token), getTokenFunction), std::vector<size_t>(cTokenGroup->groupID, cTokenGroup->groupID + groupIDSize));
 }
 
 #endif //AFUNCTIONLIBRARYSDK_CSTRINGTOKEN_HPP

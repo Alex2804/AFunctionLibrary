@@ -18,7 +18,7 @@ AFL_CPP_API_REGISTER_CREATE_TOKEN_ALIASES_FEATURE(just_for_testing, value)
     return aliases;
 }
 
-AFL_CPP_REGISTER_FORMAT_FUNCTION_STRING_FEATURE(just_for_testing, function)
+AFL_CPP_API_REGISTER_FORMAT_FUNCTION_STRING_FEATURE(just_for_testing, function)
 {
     std::string toReplace = "hello";
     if(function.find(toReplace) != std::string::npos)

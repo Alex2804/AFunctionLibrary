@@ -74,7 +74,7 @@ namespace afl
         bool operator==(const Node<T>& other) const;
         bool operator!=(const Node<T>& other) const;
 
-        std::vector<std::reference_wrapper<const Node<T>>> subtree() const;
+        std::vector<T> subtreeValues() const;
 
         std::string toString() const;
 

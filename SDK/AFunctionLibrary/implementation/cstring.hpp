@@ -28,6 +28,7 @@ namespace afl
 
     inline AFUNCTIONLIBRARY_NO_EXPORT CString* convert(const std::string& string);
     inline AFUNCTIONLIBRARY_NO_EXPORT std::string convert(CString* cString);
+    inline AFUNCTIONLIBRARY_NO_EXPORT std::string convert(const CString* cString);
 }
 
 
@@ -66,9 +67,13 @@ afl::CString* afl::convert(const std::string& string)
 }
 std::string afl::convert(CString* cString)
 {
-    std::string string = (cString == nullptr || cString->string == nullptr) ? "" : cString->string;
+    std::string string = convert(const_cast<const CString*>(cString));
     free(cString);
     return string;
+}
+std::string afl::convert(const CString* cString)
+{
+    return (cString == nullptr || cString->string == nullptr) ? "" : cString->string;
 }
 
 #endif //AFUNCTIONLIBRARYSDK_CSTRING_HPP
