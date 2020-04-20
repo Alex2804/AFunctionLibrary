@@ -29,6 +29,8 @@ namespace afl
         static std::shared_ptr<afl::Token<std::string>> tokenMultiply = std::make_shared<afl::Token<std::string>>("*", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Left);
         static std::shared_ptr<afl::Token<std::string>> tokenPower = std::make_shared<afl::Token<std::string>>("^", afl::TokenType::Operator, 2, 0, afl::TokenAssociativity::Right);
         static std::shared_ptr<afl::Token<std::string>> tokenAbs = std::make_shared<afl::Token<std::string>>("abs", afl::TokenType::Function, std::numeric_limits<size_t>::max(), 1, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> token0 = std::make_shared<afl::Token<std::string>>("0", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
+        static std::shared_ptr<afl::Token<std::string>> token1 = std::make_shared<afl::Token<std::string>>("1", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
         static std::shared_ptr<afl::Token<std::string>> token3 = std::make_shared<afl::Token<std::string>>("3", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
         static std::shared_ptr<afl::Token<std::string>> token5 = std::make_shared<afl::Token<std::string>>("5", afl::TokenType::Number, 0, 0, afl::TokenAssociativity::None);
         static std::shared_ptr<afl::Token<std::string>> tokenAb = std::make_shared<afl::Token<std::string>>("ab", afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None);

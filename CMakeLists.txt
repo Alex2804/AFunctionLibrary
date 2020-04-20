@@ -13,6 +13,7 @@ set(HEADERS
         src/private/tokenmanager.h
         src/private/tokenextras.h
         src/private/functionformatter.h
+        src/private/functionoptimizer.h
         )
 set(SOURCES
         src/function.cpp src/private/src/functionprivate.cpp
@@ -20,6 +21,7 @@ set(SOURCES
         src/private/src/resourcemanager.cpp
         src/private/src/tokenmanager.cpp
         src/private/src/functionformatter.cpp
+        src/private/src/functionoptimizer.cpp
         )
 
 set(SDK_HEADERS

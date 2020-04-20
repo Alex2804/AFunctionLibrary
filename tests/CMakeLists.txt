@@ -21,6 +21,7 @@ set(SOURCES
         src/test_resourcemanager.cpp
         src/test_tokenmanager.cpp
         src/test_functionformatter.cpp
+        src/test_functionoptimizer.cpp
         )
 
 add_executable(AFunctionLibraryTest ${SOURCES})
