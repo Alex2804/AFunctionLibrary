@@ -14,7 +14,7 @@
 namespace afl
 {
     template<typename T>
-    class AFUNCTIONLIBRARY_EXPORT Token
+    class Token
     {
     public:
         Token();
@@ -48,11 +48,11 @@ namespace afl
     };
 
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::ostream& operator<<(std::ostream& os, const Token<T>& token);
+    std::ostream& operator<<(std::ostream& os, const Token<T>& token);
 
 
     template<typename T>
-    class AFUNCTIONLIBRARY_EXPORT TokenAliases
+    class TokenAliases
     {
     public:
         TokenAliases();
@@ -79,7 +79,7 @@ namespace afl
 
 
     template<typename T>
-    class AFUNCTIONLIBRARY_NO_EXPORT TokenGroup
+    class TokenGroup
     {
     public:
         TokenGroup();
@@ -111,7 +111,7 @@ namespace afl
     };
 
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::ostream& operator<<(std::ostream& os, const TokenGroup<T>& tokenGroup);
+    std::ostream& operator<<(std::ostream& os, const TokenGroup<T>& tokenGroup);
 }
 
 #include "implementation/token.tpp"

@@ -8,7 +8,7 @@ namespace afl
 {
     extern "C"
     {
-        struct CStringTokenGroupNode
+        struct AFUNCTIONLIBRARY_NO_EXPORT CStringTokenGroupNode
         {
             const FreeMemoryFunction freeFunction;
             CStringTokenGroup* token;
@@ -17,11 +17,11 @@ namespace afl
         };
     }
 
-    inline AFUNCTIONLIBRARY_EXPORT bool operator==(const CStringTokenGroupNode& n1, const CStringTokenGroupNode& n2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool operator==(const CStringTokenGroupNode& n1, const CStringTokenGroupNode& n2);
 
-    inline AFUNCTIONLIBRARY_EXPORT bool operator!=(const CStringTokenGroupNode& n1, const CStringTokenGroupNode& n2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool operator!=(const CStringTokenGroupNode& n1, const CStringTokenGroupNode& n2);
 
-    inline AFUNCTIONLIBRARY_EXPORT bool equal(const CStringTokenGroupNode* n1, const CStringTokenGroupNode* n2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool equal(const CStringTokenGroupNode* n1, const CStringTokenGroupNode* n2);
 
     inline AFUNCTIONLIBRARY_NO_EXPORT void free(CStringTokenGroupNode* cNode);
 

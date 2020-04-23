@@ -9,20 +9,22 @@
 
 namespace afl
 {
-    typedef decltype(apl::PluginInfo::allocateMemory) AllocateMemoryFunction;
     typedef decltype(apl::PluginInfo::freeMemory) FreeMemoryFunction;
 
-    struct CString
+    extern "C"
     {
-        const FreeMemoryFunction freeFunction;
-        char* string;
-    };
+        struct AFUNCTIONLIBRARY_NO_EXPORT CString
+        {
+            const FreeMemoryFunction freeFunction;
+            char* string;
+        };
+    }
 
-    inline AFUNCTIONLIBRARY_EXPORT bool operator==(const CString& s1, const CString& s2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool operator==(const CString& s1, const CString& s2);
 
-    inline AFUNCTIONLIBRARY_EXPORT bool operator!=(const CString& s1, const CString& s2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool operator!=(const CString& s1, const CString& s2);
 
-    inline AFUNCTIONLIBRARY_EXPORT bool equal(const CString* s1, const CString* s2);
+    inline AFUNCTIONLIBRARY_NO_EXPORT bool equal(const CString* s1, const CString* s2);
 
     inline AFUNCTIONLIBRARY_NO_EXPORT void free(CString* cString);
 
@@ -59,10 +61,15 @@ void afl::free(CString* cString)
 
 afl::CString* afl::convert(const std::string& string)
 {
-    CString tmpCString = {apl::freeMemory, static_cast<char*>(apl::allocateMemory(sizeof(char) * (string.size() + 1)))};
-    std::strcpy(tmpCString.string, string.c_str());
+    size_t stringLength = string.size() + 1;
+    CString tmpCString = {apl::freeMemory, static_cast<char*>(apl::allocateMemory(sizeof(char) * stringLength))};
+    if(tmpCString.string == nullptr)
+        return nullptr;
+    std::memcpy(tmpCString.string, string.c_str(), stringLength);
     auto cString = static_cast<CString*>(apl::allocateMemory(sizeof(CString)));
-    memcpy(cString, &tmpCString, sizeof(CString));
+    if(cString == nullptr)
+        return nullptr;
+    std::memcpy(cString, &tmpCString, sizeof(CString));
     return cString;
 }
 std::string afl::convert(CString* cString)

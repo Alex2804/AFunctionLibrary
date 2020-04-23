@@ -1,7 +1,7 @@
 #ifndef AFUNCTIONLIBRARYSDK_OPTIMIZEFUNCTIONAPI_PRIVATE_HPP
 #define AFUNCTIONLIBRARYSDK_OPTIMIZEFUNCTIONAPI_PRIVATE_HPP
 
-#include "../../APluginSDK/pluginapi.h"
+#include "../../libs/APluginSDK/pluginapi.h"
 
 #include "optimizefunctionapi_definitions.hpp"
 #include "../cstring.hpp"

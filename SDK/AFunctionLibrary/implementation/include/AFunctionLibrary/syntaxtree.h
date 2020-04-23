@@ -16,10 +16,10 @@
 namespace afl
 {
     template<typename T>
-    class AFUNCTIONLIBRARY_EXPORT Node;
+    class Node;
 
     template<typename T>
-    class AFUNCTIONLIBRARY_EXPORT SyntaxTree
+    class SyntaxTree
     {
     public:
         SyntaxTree();
@@ -50,16 +50,16 @@ namespace afl
     };
 
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& tree);
+    std::ostream& operator<<(std::ostream& os, const SyntaxTree<T>& tree);
 
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::vector<T> shuntingYard(const std::vector<T>& infixTokens);
+    std::vector<T> shuntingYard(const std::vector<T>& infixTokens);
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT SyntaxTree<T> generateSyntaxTree(const std::vector<T>& infixTokens);
+    SyntaxTree<T> generateSyntaxTree(const std::vector<T>& infixTokens);
 
 
     template<typename T>
-    class AFUNCTIONLIBRARY_EXPORT Node
+    class Node
     {
     public:
         explicit Node(T value);
@@ -83,7 +83,7 @@ namespace afl
     };
 
     template<typename T>
-    AFUNCTIONLIBRARY_EXPORT std::ostream& operator<<(std::ostream& os, const Node<T>& node);
+    std::ostream& operator<<(std::ostream& os, const Node<T>& node);
 }
 
 #include "implementation/syntaxtree.tpp"

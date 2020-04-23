@@ -1,7 +1,7 @@
 #ifndef AFUNCTIONLIBRARYSDK_FORMATFUNCTIONAPI_PRIVATE_HPP
 #define AFUNCTIONLIBRARYSDK_FORMATFUNCTIONAPI_PRIVATE_HPP
 
-#include "../../APluginSDK/pluginapi.h"
+#include "../../libs/APluginSDK/pluginapi.h"
 
 #include "formatfunctionapi_definitions.hpp"
 #include "../cstring.hpp"
