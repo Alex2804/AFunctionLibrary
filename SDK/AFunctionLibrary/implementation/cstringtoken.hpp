@@ -152,10 +152,10 @@ void afl::free(afl::CStringTokenGroup* cTokenGroup)
 
 afl::CStringToken* afl::convert(const Token<std::string>& token)
 {
-    CStringToken tmpCToken = {apl::freeMemory, convert(token.value), token.type, token.precedence, token.parameterCount, token.associativity};
+    CStringToken tmpCToken = {apl::APluginSDK_free, convert(token.value), token.type, token.precedence, token.parameterCount, token.associativity};
     if(tmpCToken.string == nullptr)
         return nullptr;
-    auto cToken = static_cast<CStringToken*>(apl::allocateMemory(sizeof(CStringToken)));
+    auto cToken = static_cast<CStringToken*>(apl::APluginSDK_malloc(sizeof(CStringToken)));
     if(cToken != nullptr)
         std::memcpy(cToken, &tmpCToken, sizeof(CStringToken));
     return cToken;
@@ -181,10 +181,10 @@ std::shared_ptr<afl::Token<std::string>> afl::convert(const CStringToken* cToken
 
 afl::CStringTokenAliases* afl::convert(const TokenAliases<std::string>& tokenAliases)
 {
-    CStringTokenAliases tmpCAliases = {apl::freeMemory, tokenAliases.type, tokenAliases.aliases.size(), static_cast<CString**>(apl::allocateMemory(sizeof(void*) * tokenAliases.aliases.size()))};
+    CStringTokenAliases tmpCAliases = {apl::APluginSDK_free, tokenAliases.type, tokenAliases.aliases.size(), static_cast<CString**>(apl::APluginSDK_malloc(sizeof(void*) * tokenAliases.aliases.size()))};
     if(tmpCAliases.aliases == nullptr)
         return nullptr;
-    auto cAliases = static_cast<CStringTokenAliases *>(apl::allocateMemory(sizeof(CStringTokenAliases)));
+    auto cAliases = static_cast<CStringTokenAliases *>(apl::APluginSDK_malloc(sizeof(CStringTokenAliases)));
     if(cAliases != nullptr) {
         memcpy(cAliases, &tmpCAliases, sizeof(CStringTokenAliases));
         size_t index = 0;
@@ -221,10 +221,10 @@ afl::TokenAliases<std::string> afl::convert(const CStringTokenAliases* cTokenAli
 
 afl::CStringTokenGroup* afl::convert(const TokenGroup<std::string>& tokenGroup)
 {
-    CStringTokenGroup tmpCTokenGroup = {apl::freeMemory, tokenGroup.isToken() ? convert(*tokenGroup.token) : nullptr, tokenGroup.groupID.size(), static_cast<size_t*>(apl::allocateMemory(sizeof(size_t) * tokenGroup.groupID.size()))};
+    CStringTokenGroup tmpCTokenGroup = {apl::APluginSDK_free, tokenGroup.isToken() ? convert(*tokenGroup.token) : nullptr, tokenGroup.groupID.size(), static_cast<size_t*>(apl::APluginSDK_malloc(sizeof(size_t) * tokenGroup.groupID.size()))};
     if(tmpCTokenGroup.groupID == nullptr && tmpCTokenGroup.groupIDSize > 0)
         return nullptr;
-    auto cTokenGroup = static_cast<CStringTokenGroup*>(apl::allocateMemory(sizeof(CStringTokenGroup)));
+    auto cTokenGroup = static_cast<CStringTokenGroup*>(apl::APluginSDK_malloc(sizeof(CStringTokenGroup)));
     if(cTokenGroup != nullptr) {
         memcpy(cTokenGroup, &tmpCTokenGroup, sizeof(tmpCTokenGroup));
         for (size_t i = 0; i < cTokenGroup->groupIDSize; ++i)

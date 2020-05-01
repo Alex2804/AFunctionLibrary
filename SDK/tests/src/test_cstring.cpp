@@ -39,44 +39,18 @@ GTEST_TEST(Test_CString, equal_operator)
     std::free(cString3);
 }
 
-GTEST_TEST(Test_CString, free)
-{
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
-    afl::free(static_cast<afl::CString*>(nullptr));
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    afl::CString tmpCString = {apl::freeMemory, static_cast<char*>(apl::allocateMemory(101))};
-    auto cString = static_cast<afl::CString*>(apl::allocateMemory(sizeof(afl::CString)));
-    memcpy(cString, &tmpCString, sizeof(afl::CString));
-    afl::free(cString);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    tmpCString.string = nullptr;
-    cString = static_cast<afl::CString*>(apl::allocateMemory(sizeof(afl::CString)));
-    memcpy(cString, &tmpCString, sizeof(afl::CString));
-    afl::free(cString);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-}
-
 GTEST_TEST(Test_CString, convert)
 {
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
     ASSERT_EQ(afl::convert(static_cast<afl::CString*>(nullptr)), "");
 
     afl::CString* cString = afl::convert("This is a test String!");
     ASSERT_STREQ(cString->string, "This is a test String!");
     std::string string = afl::convert(cString);
     ASSERT_EQ(string, "This is a test String!");
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cString = afl::convert("This is a test String!");
     cString->freeFunction(cString->string);
     cString->string = nullptr;
     string = afl::convert(cString);
     ASSERT_EQ(string, "");
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 }

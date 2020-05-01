@@ -21,7 +21,7 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 set(SOURCES
-        ../AFunctionLibrary/libs/APluginSDK/implementation/pluginapi.cpp
+        ../AFunctionLibrary/libs/APluginSDK/src/cpp/pluginapi.cpp
         src/test_utilities.cpp
         src/test_node.cpp
         src/test_syntaxtree.cpp
@@ -32,5 +32,5 @@ set(SOURCES
 
 add_executable(AFunctionLibrarySDKTest ${SOURCES})
 target_link_libraries(AFunctionLibrarySDKTest gtest_main)
-target_compile_definitions(AFunctionLibrarySDKTest PUBLIC A_PLUGIN_SDK_DEBUG A_PLUGIN_SDK_EXCLUDE_IMPLEMENTATION)
+target_compile_definitions(AFunctionLibrarySDKTest PUBLIC APLUGINSDK_EXCLUDE_IMPLEMENTATION)
 add_test(NAME AFunctionLibrarySDKTest COMMAND AFunctionLibrarySDKTest)

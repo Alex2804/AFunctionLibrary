@@ -69,10 +69,10 @@ void afl::free(CStringTokenGroupNode* cNode)
 
 afl::CStringTokenGroupNode* afl::convert(const Node<TokenGroup<std::string>>& node)
 {
-    CStringTokenGroupNode tmpCNode = {apl::freeMemory, convert(node.m_value), node.m_children.size(), nullptr};
-    auto cNode = static_cast<CStringTokenGroupNode*>(apl::allocateMemory(sizeof(CStringTokenGroupNode)));
+    CStringTokenGroupNode tmpCNode = {apl::APluginSDK_free, convert(node.m_value), node.m_children.size(), nullptr};
+    auto cNode = static_cast<CStringTokenGroupNode*>(apl::APluginSDK_malloc(sizeof(CStringTokenGroupNode)));
     memcpy(cNode, &tmpCNode, sizeof(CStringTokenGroupNode));
-    cNode->children = static_cast<CStringTokenGroupNode**>(apl::allocateMemory(sizeof(void*) * cNode->childrenCount));
+    cNode->children = static_cast<CStringTokenGroupNode**>(apl::APluginSDK_malloc(sizeof(void*) * cNode->childrenCount));
     for(size_t i = 0; i < cNode->childrenCount; ++i)
         cNode->children[i] = convert(node.m_children[i]);
     return cNode;

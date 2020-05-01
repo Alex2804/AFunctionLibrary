@@ -104,27 +104,6 @@ GTEST_TEST(Test_CStringToken, equal_operator)
     std::free(cStringToken2);
 }
 
-GTEST_TEST(Test_CStringToken, free)
-{
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
-    afl::free(static_cast<afl::CStringToken*>(nullptr));
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    afl::CStringToken tmpCToken = {apl::freeMemory, afl::convert("Test value!"), afl::TokenType::Constant, 0, 0, afl::TokenAssociativity::None};
-    auto cToken = static_cast<afl::CStringToken*>(apl::allocateMemory(sizeof(afl::CStringToken)));
-    memcpy(cToken, &tmpCToken, sizeof(afl::CStringToken));
-    afl::free(cToken);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    tmpCToken.string = nullptr;
-    cToken = static_cast<afl::CStringToken*>(apl::allocateMemory(sizeof(afl::CStringToken)));
-    memcpy(cToken, &tmpCToken, sizeof(afl::CStringToken));
-    afl::free(cToken);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-}
-
 namespace afl
 {
     namespace test
@@ -144,14 +123,11 @@ namespace afl
 
 GTEST_TEST(Test_CStringToken, convert)
 {
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
     afl::test::retrievedTokenCount = 0;
 
     auto token = afl::Token<std::string>("Test value!", afl::TokenType::Constant, 42, 13, afl::TokenAssociativity::None);
 
     ASSERT_EQ(afl::convert(static_cast<afl::CStringToken*>(nullptr)), nullptr);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     afl::CStringToken* cStringToken = afl::convert(token);
     ASSERT_STREQ(cStringToken->string->string, "Test value!");
@@ -161,7 +137,6 @@ GTEST_TEST(Test_CStringToken, convert)
     ASSERT_EQ(cStringToken->associativity, afl::TokenAssociativity::None);
     std::shared_ptr<afl::Token<std::string>> tmpToken = afl::convert(cStringToken);
     ASSERT_EQ(*tmpToken, token);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cStringToken = afl::convert(token);
     afl::free(cStringToken->string);
@@ -170,12 +145,10 @@ GTEST_TEST(Test_CStringToken, convert)
     token.value = "";
     ASSERT_EQ(*tmpToken, token);
     token.value = "Test value!";
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cStringToken = afl::convert(token);
     tmpToken = afl::convert(cStringToken, afl::test::getTokenTestFunction);
     ASSERT_EQ(*tmpToken, token);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
     ASSERT_EQ(afl::test::retrievedTokenCount, 0);
 
     token.value = "Retrieve value!";
@@ -186,7 +159,6 @@ GTEST_TEST(Test_CStringToken, convert)
     ASSERT_EQ(tmpToken->precedence, 128);
     ASSERT_EQ(tmpToken->parameterCount, 512);
     ASSERT_EQ(tmpToken->associativity, afl::TokenAssociativity::Right);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
     ASSERT_EQ(afl::test::retrievedTokenCount, 1);
 }
 
@@ -273,39 +245,11 @@ GTEST_TEST(Test_CStringTokenAliases, equal_operator)
     std::free(cStringTokenAliases2);
 }
 
-GTEST_TEST(Test_CStringTokenAliases, free)
-{
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
-    afl::free(static_cast<afl::CStringTokenAliases*>(nullptr));
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    afl::CStringTokenAliases tmpCAliases = {apl::freeMemory, afl::TokenAliasType::String, 2, static_cast<afl::CString**>(apl::allocateMemory(sizeof(void*) * 2))};
-    auto cAliases = static_cast<afl::CStringTokenAliases*>(apl::allocateMemory(sizeof(afl::CStringTokenAliases)));
-    memcpy(cAliases, &tmpCAliases, sizeof(afl::CStringTokenAliases));
-    cAliases->aliases[0] = afl::convert("Test string 1!");
-    cAliases->aliases[1] = afl::convert("Test string 2!");
-    afl::free(cAliases);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    tmpCAliases.aliasesCount = 0;
-    tmpCAliases.aliases = nullptr;
-    cAliases = static_cast<afl::CStringTokenAliases*>(apl::allocateMemory(sizeof(afl::CStringTokenAliases)));
-    memcpy(cAliases, &tmpCAliases, sizeof(afl::CStringTokenAliases));
-    afl::free(cAliases);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-}
-
 GTEST_TEST(Test_CStringTokenAliases, convert)
 {
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
     auto aliases = afl::TokenAliases<std::string>(afl::TokenAliasType::String, {"alias1", "alias2"});
 
     ASSERT_EQ(afl::convert(static_cast<afl::CStringTokenAliases*>(nullptr)), afl::TokenAliases<std::string>(afl::TokenAliasType::String));
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     afl::CStringTokenAliases* cAliases = afl::convert(aliases);
     ASSERT_EQ(cAliases->type, aliases.type);
@@ -314,17 +258,15 @@ GTEST_TEST(Test_CStringTokenAliases, convert)
     ASSERT_STREQ(cAliases->aliases[1]->string, "alias2");
     afl::TokenAliases<std::string> tmpAliases = afl::convert(cAliases);
     ASSERT_EQ(tmpAliases, aliases);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cAliases = afl::convert(aliases);
     for(size_t i = 0; i < cAliases->aliasesCount; ++i)
         afl::free(cAliases->aliases[i]);
-    apl::freeMemory(cAliases->aliases);
+    apl::APluginSDK_free(cAliases->aliases);
     cAliases->aliases = nullptr;
     tmpAliases = afl::convert(cAliases);
     aliases.aliases.clear();
     ASSERT_EQ(tmpAliases, aliases);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 }
 
 
@@ -405,54 +347,12 @@ GTEST_TEST(Test_CStringTokenGroup, equal_operator)
     std::free(cStringTokenGroup2);
 }
 
-GTEST_TEST(Test_CStringTokenGroup, free)
-{
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
-    afl::free(static_cast<afl::CStringTokenGroup*>(nullptr));
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    afl::CStringTokenGroup tmpCTokenGroup = {apl::freeMemory};
-    auto cTokenGroup = static_cast<afl::CStringTokenGroup*>(apl::allocateMemory(sizeof(afl::CStringTokenGroup)));
-    memcpy(cTokenGroup, &tmpCTokenGroup, sizeof(afl::CStringTokenAliases));
-    cTokenGroup->token = afl::convert(afl::Token<std::string>("Test value!", afl::TokenType::Constant, 42, 13, afl::TokenAssociativity::None));
-    cTokenGroup->groupIDSize = 2;
-    cTokenGroup->groupID = static_cast<size_t*>(apl::allocateMemory(sizeof(void*) * cTokenGroup->groupIDSize));
-    cTokenGroup->groupID[0] = 42;
-    cTokenGroup->groupID[1] = 7;
-    afl::free(cTokenGroup);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    cTokenGroup = static_cast<afl::CStringTokenGroup*>(apl::allocateMemory(sizeof(afl::CStringTokenGroup)));
-    memcpy(cTokenGroup, &tmpCTokenGroup, sizeof(afl::CStringTokenAliases));
-    cTokenGroup->token = afl::convert(afl::Token<std::string>("Test value!", afl::TokenType::Constant, 42, 13, afl::TokenAssociativity::None));
-    cTokenGroup->groupIDSize = 2;
-    cTokenGroup->groupID = nullptr;
-    afl::free(cTokenGroup);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-
-    cTokenGroup = static_cast<afl::CStringTokenGroup*>(apl::allocateMemory(sizeof(afl::CStringTokenGroup)));
-    memcpy(cTokenGroup, &tmpCTokenGroup, sizeof(afl::CStringTokenAliases));
-    cTokenGroup->token = nullptr;
-    cTokenGroup->groupIDSize = 2;
-    cTokenGroup->groupID = static_cast<size_t*>(apl::allocateMemory(sizeof(void*) * cTokenGroup->groupIDSize));
-    cTokenGroup->groupID[0] = 42;
-    cTokenGroup->groupID[1] = 7;
-    afl::free(cTokenGroup);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
-}
-
 GTEST_TEST(Test_CStringTokenGroup, convert)
 {
-    apl::debug::allocationCount = 0;
-    apl::debug::freeCount = 0;
-
     afl::Token<std::string> token("Test token!", afl::TokenType::Constant, 42, 13, afl::TokenAssociativity::None);
     afl::TokenGroup<std::string> tokenGroup(std::make_shared<afl::Token<std::string>>(token), {128, 256, 512});
 
     ASSERT_EQ(afl::convert(static_cast<afl::CStringTokenGroup*>(nullptr)), afl::TokenGroup<std::string>());
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     afl::CStringTokenGroup* cTokenGroup = afl::convert(tokenGroup);
     afl::CStringToken* cToken = afl::convert(token);
@@ -464,7 +364,6 @@ GTEST_TEST(Test_CStringTokenGroup, convert)
     ASSERT_EQ(cTokenGroup->groupID[2], 512);
     afl::TokenGroup<std::string> tmpTokenGroup = afl::convert(cTokenGroup);
     ASSERT_EQ(tmpTokenGroup, tokenGroup);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cTokenGroup = afl::convert(tokenGroup);
     afl::free(cTokenGroup->token);
@@ -473,13 +372,11 @@ GTEST_TEST(Test_CStringTokenGroup, convert)
     tokenGroup.token = nullptr;
     ASSERT_EQ(tmpTokenGroup, tokenGroup);
     tokenGroup.token = std::make_shared<afl::Token<std::string>>(token);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 
     cTokenGroup = afl::convert(tokenGroup);
-    apl::freeMemory(cTokenGroup->groupID);
+    apl::APluginSDK_free(cTokenGroup->groupID);
     cTokenGroup->groupID = nullptr;
     tmpTokenGroup = afl::convert(cTokenGroup);
     tokenGroup.groupID.clear();
     ASSERT_EQ(tmpTokenGroup, tokenGroup);
-    ASSERT_EQ(apl::debug::freeCount, apl::debug::allocationCount);
 }

@@ -3,13 +3,14 @@
 
 #include "include/AFunctionLibrary/implementation/exports.h"
 
+#include <string>
 #include <cstring>
 
 #include "../libs/APluginSDK/pluginapi.h"
 
 namespace afl
 {
-    typedef decltype(apl::PluginInfo::freeMemory) FreeMemoryFunction;
+    typedef void(*FreeMemoryFunction)(void*);
 
     extern "C"
     {
@@ -62,11 +63,11 @@ void afl::free(CString* cString)
 afl::CString* afl::convert(const std::string& string)
 {
     size_t stringLength = string.size() + 1;
-    CString tmpCString = {apl::freeMemory, static_cast<char*>(apl::allocateMemory(sizeof(char) * stringLength))};
+    CString tmpCString = {apl::APluginSDK_free, static_cast<char*>(apl::APluginSDK_malloc(sizeof(char) * stringLength))};
     if(tmpCString.string == nullptr)
         return nullptr;
     std::memcpy(tmpCString.string, string.c_str(), stringLength);
-    auto cString = static_cast<CString*>(apl::allocateMemory(sizeof(CString)));
+    auto cString = static_cast<CString*>(apl::APluginSDK_malloc(sizeof(CString)));
     if(cString == nullptr)
         return nullptr;
     std::memcpy(cString, &tmpCString, sizeof(CString));
