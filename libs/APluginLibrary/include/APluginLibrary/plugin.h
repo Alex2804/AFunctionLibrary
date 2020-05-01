@@ -10,9 +10,13 @@
 
 namespace apl
 {
+    typedef APluginInfo PluginInfo;
+    typedef APluginFeatureInfo PluginFeatureInfo;
+    typedef APluginClassInfo PluginClassInfo;
+
     namespace detail
     {
-        struct PluginPrivate;
+        class PluginPrivate;
     }
 
     class APLUGINLIBRARY_EXPORT Plugin
