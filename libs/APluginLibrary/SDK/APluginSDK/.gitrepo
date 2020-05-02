@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/Alex2804/APluginSDK
 	branch = master
-	commit = f14eeebdf74a7a15126e4fe08c3bc7cf92509e9a
-	parent = 6392c4c8d1d3ed72f804fff0ca32c04349432ac7
+	commit = 50e95e9b048297175d20fd9b507c09eeabbf9225
+	parent = c36d73def7c684c29d3a71ed64b8533b56274901
 	method = merge
 	cmdver = 0.4.1
