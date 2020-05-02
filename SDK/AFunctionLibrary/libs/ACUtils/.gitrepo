@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://www.github.com/Alex2804/ACUtils.git
+	branch = master
+	commit = b880d7d55c8ad9bef1e473565e2117640f32c7c5
+	parent = 94bead7c5e93bf3470a37040d3b24a2c478defdd
+	method = merge
+	cmdver = 0.4.1
