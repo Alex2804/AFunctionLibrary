@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://www.github.com/Alex2804/ACUtils.git
 	branch = master
-	commit = b880d7d55c8ad9bef1e473565e2117640f32c7c5
-	parent = 94bead7c5e93bf3470a37040d3b24a2c478defdd
+	commit = 34b8859c7c12a177362e678dc814b08fe736f560
+	parent = 46d2261dd672c93f07912ff55c68beaa1aaa8c45
 	method = merge
 	cmdver = 0.4.1
