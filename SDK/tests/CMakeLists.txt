@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 enable_language(CXX)
 set(CMAKE_CXX_STANDARD 11)
+enable_language(C)
 
 # Prevent overriding the parent project's compiler/linker
 # settings on Windows
@@ -20,6 +21,8 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include")
 endif()
 
+add_subdirectory(libs/check)
+
 set(SOURCES
         ../AFunctionLibrary/libs/APluginSDK/src/cpp/pluginapi.cpp
         src/test_utilities.cpp
@@ -28,9 +31,17 @@ set(SOURCES
         src/test_token.cpp
         src/test_cstring.cpp
         src/test_cstringtoken.cpp
+
+        src/testrunner.c
+        ../AFunctionLibrarySDK/libs/ACUtils/src/astring.c
+        ../AFunctionLibrarySDK/private/src/atoken.c
+        ../AFunctionLibrarySDK/private/src/astringaliases.c
+        src/test_atoken.c
+        src/test_atokengroup.c
+        src/test_astringaliases.cpp
         )
 
 add_executable(AFunctionLibrarySDKTest ${SOURCES})
-target_link_libraries(AFunctionLibrarySDKTest gtest_main)
+target_link_libraries(AFunctionLibrarySDKTest gtest_main check)
 target_compile_definitions(AFunctionLibrarySDKTest PUBLIC APLUGINSDK_EXCLUDE_IMPLEMENTATION)
 add_test(NAME AFunctionLibrarySDKTest COMMAND AFunctionLibrarySDKTest)
