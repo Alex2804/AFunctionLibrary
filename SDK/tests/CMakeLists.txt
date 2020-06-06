@@ -35,10 +35,11 @@ set(SOURCES
         src/testrunner.c
         ../AFunctionLibrarySDK/libs/ACUtils/src/astring.c
         ../AFunctionLibrarySDK/private/src/atoken.c
+        ../AFunctionLibrarySDK/private/src/atokengroup.c
         ../AFunctionLibrarySDK/private/src/astringaliases.c
         src/test_atoken.c
         src/test_atokengroup.c
-        src/test_astringaliases.cpp
+        src/test_astringaliases.c
         )
 
 add_executable(AFunctionLibrarySDKTest ${SOURCES})

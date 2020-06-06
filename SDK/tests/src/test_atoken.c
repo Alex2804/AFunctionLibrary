@@ -1,21 +1,15 @@
 #include "../../AFunctionLibrarySDK/libs/ACUtils/tests/include/ACUtilsTest/acheck.h"
-#include "../../AFunctionLibrarySDK/libs/ACUtils/include/ACUtils/macros.h"
 
 #include "../../AFunctionLibrarySDK/include/AFunctionLibrarySDK/atoken.h"
 
 PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
-    struct ATokenPrivate
-    {
-        size_t refCount;
-    };
-
     START_TEST(test_AToken_construct_destruct)
     {
         struct AToken *token = AToken_construct("token value", DELIMITER, RIGHT, 666, 42);
         ACUTILSTEST_ASSERT_PTR_NONNULL(token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(token->private);
-        ACUTILSTEST_ASSERT_UINT_EQ(token->private->refCount, 1);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(token->dptr);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(token), 1);
         ACUTILSTEST_ASSERT(AString_equalsCString(token->value, "token value"));
         ACUTILSTEST_ASSERT_INT_EQ(token->type, DELIMITER);
         ACUTILSTEST_ASSERT_INT_EQ(token->associativity, RIGHT);
@@ -28,8 +22,8 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     {
         struct AToken *token = AToken_construct("token value", DELIMITER, RIGHT, 666, 42);
         ACUTILSTEST_ASSERT_PTR_NONNULL(token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(token->private);
-        ACUTILSTEST_ASSERT_UINT_EQ(token->private->refCount, 1);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(token->dptr);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(token), 1);
         ACUTILSTEST_ASSERT(AString_equalsCString(token->value, "token value"));
         ACUTILSTEST_ASSERT_INT_EQ(token->type, DELIMITER);
         ACUTILSTEST_ASSERT_INT_EQ(token->associativity, RIGHT);
@@ -37,8 +31,8 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(token->parameterCount, 42);
         ACUTILSTEST_ASSERT_UINT_EQ(AToken_incrementRefCount(token), 2);
         ACUTILSTEST_ASSERT_PTR_NONNULL(token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(token->private);
-        ACUTILSTEST_ASSERT_UINT_EQ(token->private->refCount, 2);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(token->dptr);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(token), 2);
         ACUTILSTEST_ASSERT(AString_equalsCString(token->value, "token value"));
         ACUTILSTEST_ASSERT_INT_EQ(token->type, DELIMITER);
         ACUTILSTEST_ASSERT_INT_EQ(token->associativity, RIGHT);
@@ -46,8 +40,8 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(token->parameterCount, 42);
         ACUTILSTEST_ASSERT_UINT_EQ(AToken_decrementRefCount(token), 1);
         ACUTILSTEST_ASSERT_PTR_NONNULL(token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(token->private);
-        ACUTILSTEST_ASSERT_UINT_EQ(token->private->refCount, 1);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(token->dptr);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(token), 1);
         ACUTILSTEST_ASSERT(AString_equalsCString(token->value, "token value"));
         ACUTILSTEST_ASSERT_INT_EQ(token->type, DELIMITER);
         ACUTILSTEST_ASSERT_INT_EQ(token->associativity, RIGHT);
