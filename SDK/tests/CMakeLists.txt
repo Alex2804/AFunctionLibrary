@@ -37,9 +37,11 @@ set(SOURCES
         ../AFunctionLibrarySDK/private/src/atoken.c
         ../AFunctionLibrarySDK/private/src/atokengroup.c
         ../AFunctionLibrarySDK/private/src/astringaliases.c
+        ../AFunctionLibrarySDK/private/src/atokennode.c
         src/test_atoken.c
         src/test_atokengroup.c
         src/test_astringaliases.c
+        src/test_atokennode.c
         )
 
 add_executable(AFunctionLibrarySDKTest ${SOURCES})

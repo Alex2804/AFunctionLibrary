@@ -11,7 +11,10 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
     struct AToken* AToken_construct(const char *str, enum ATokenType type, enum ATokenAssociativity associativity, size_t precedence, size_t parameterCount)
     {
-        struct AString *string = AString_construct();
+        struct AString *string;
+        if(str == nullptr)
+            return nullptr;
+        string = AString_construct();
         if(string != nullptr && AString_appendCString(string, str, strlen(str))) {
             struct AToken *token = (struct AToken*) AString_reallocator(string)(nullptr, sizeof(struct AToken));
             struct ATokenPrivate *dptr = (struct ATokenPrivate*) AString_reallocator(string)(nullptr, sizeof(struct ATokenPrivate));
@@ -48,7 +51,9 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     }
     size_t AToken_decrementRefCount(struct AToken *token)
     {
-        if(token == nullptr || --token->dptr->refCount == 0) {
+        if(token == nullptr) {
+            return 0;
+        } else if(--token->dptr->refCount == 0) {
             AToken_destruct(token);
             return 0;
         } else {

@@ -52,7 +52,9 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     }
     size_t AStringAliases_decrementRefCount(struct AStringAliases *aliases)
     {
-        if(aliases == nullptr || --aliases->dptr->refCount == 0) {
+        if(aliases == nullptr) {
+            return 0;
+        } else if(--aliases->dptr->refCount == 0) {
             AStringAliases_destruct(aliases);
             return 0;
         } else {

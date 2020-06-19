@@ -4,7 +4,7 @@
 
 PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
-    START_TEST(test_ATokenGroup_construct_destruct_valid)
+    START_TEST(test_ATokenGroup_construct_destruct)
     {
         struct AToken *token = AToken_construct("token value", DELIMITER, RIGHT, 666, 42);
         ACUTILSTEST_ASSERT_PTR_NONNULL(token);
@@ -43,18 +43,21 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(token->precedence, 666);
         ACUTILSTEST_ASSERT_UINT_EQ(token->parameterCount, 42);
         ATokenGroup_destruct(tokenGroup);
+        ATokenGroup_destruct(nullptr);
     }
     END_TEST
-    START_TEST(test_ATokenGroup_construct_destruct_invalid)
+    START_TEST(test_ATokenGroup_construct_destruct_nullptr)
     {
         ACUTILSTEST_ASSERT_PTR_NULL(ATokenGroup_construct(nullptr, true));
         ACUTILSTEST_ASSERT_PTR_NULL(ATokenGroup_construct(nullptr, false));
+        ATokenGroup_destruct(nullptr);
     }
     END_TEST
 
     START_TEST(test_ATokenGroup_equals)
     {
         size_t a1[] = {3, 4};
+        size_t v1, v2;
         struct ATokenGroup *t1 = ATokenGroup_construct(AToken_construct("token value", DELIMITER, RIGHT, 666, 42), true);
         struct ATokenGroup *t2 = ATokenGroup_construct(AToken_construct("token value", DELIMITER, RIGHT, 666, 42), true);
         struct ATokenGroup *t3 = ATokenGroup_construct(AToken_construct("token value", DELIMITER, NONE, 666, 42), true);
@@ -67,15 +70,23 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT(ATokenGroup_equals(t1, t1));
         ACUTILSTEST_ASSERT(ATokenGroup_equals(t2, t2));
         ACUTILSTEST_ASSERT(ATokenGroup_equals(t3, t3));
-        ADynArray_appendArray(t1->groupID, &a1, 1);
+        ADynArray_appendArray(t1->groupID, &a1, 2);
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t1, t2));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t2, t3));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t1, t3));
-        ADynArray_appendArray(t2->groupID, &a1, 1);
+        ADynArray_appendArray(t2->groupID, &a1, 2);
         ACUTILSTEST_ASSERT(ATokenGroup_equals(t1, t2));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t2, t3));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t1, t3));
-        ADynArray_appendArray(t3->groupID, &a1, 1);
+        ADynArray_appendArray(t3->groupID, &a1, 2);
+        ACUTILSTEST_ASSERT(ATokenGroup_equals(t1, t2));
+        ACUTILSTEST_ASSERT(!ATokenGroup_equals(t2, t3));
+        ACUTILSTEST_ASSERT(!ATokenGroup_equals(t1, t3));
+        v1 = 0;
+        ADynArray_append(t1->groupID, v1);
+        ADynArray_append(t2->groupID, v1);
+        v2 = 1;
+        ADynArray_append(t3->groupID, v2);
         ACUTILSTEST_ASSERT(ATokenGroup_equals(t1, t2));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t2, t3));
         ACUTILSTEST_ASSERT(!ATokenGroup_equals(t1, t3));
@@ -93,8 +104,8 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         s = suite_create("ATokenGroup Test Suite");
 
         test_case_ATokenGroup_construct_destruct = tcase_create("ATokenGroup Test Case: ATokenGroup_construct / ATokenGroup_destruct");
-        tcase_add_test(test_case_ATokenGroup_construct_destruct, test_ATokenGroup_construct_destruct_valid);
-        tcase_add_test(test_case_ATokenGroup_construct_destruct, test_ATokenGroup_construct_destruct_invalid);
+        tcase_add_test(test_case_ATokenGroup_construct_destruct, test_ATokenGroup_construct_destruct);
+        tcase_add_test(test_case_ATokenGroup_construct_destruct, test_ATokenGroup_construct_destruct_nullptr);
         suite_add_tcase(s, test_case_ATokenGroup_construct_destruct);
 
         test_case_ATokenGroup_equals = tcase_create("ATokenGroup Test Case: ATokenGroup_equals");

@@ -50,6 +50,15 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(AToken_decrementRefCount(token), 0);
     }
     END_TEST
+    START_TEST(test_AToken_construct_refCount_increment_decrement_destruct_nullptr)
+    {
+        ACUTILSTEST_ASSERT_PTR_NULL(AToken_construct(nullptr, CONSTANT, NONE, 0, 0));
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(nullptr), 0);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_incrementRefCount(nullptr), 0);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_decrementRefCount(nullptr), 0);
+        AToken_destruct(nullptr);
+    }
+    END_TEST
 
     START_TEST(test_AToken_equals)
     {
@@ -90,6 +99,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         test_case_AToken_construct_increment_decrement_destruct = tcase_create("AToken Test Case: AToken_construct / AToken_incrementRefCount / AToken_decrementRefCount / AToken_destruct");
         tcase_add_test(test_case_AToken_construct_increment_decrement_destruct, test_AToken_construct_destruct);
         tcase_add_test(test_case_AToken_construct_increment_decrement_destruct, test_AToken_construct_increment_decrementAndDestruct);
+        tcase_add_test(test_case_AToken_construct_increment_decrement_destruct, test_AToken_construct_refCount_increment_decrement_destruct_nullptr);
         suite_add_tcase(s, test_case_AToken_construct_increment_decrement_destruct);
 
         test_case_AToken_equals = tcase_create("AToken Test Case: AToken_equals");

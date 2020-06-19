@@ -16,6 +16,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     ACUTILS_EXTERN_C Suite* private_AFunctionLibrarySDKTest_AToken_getTestSuite(void);
     ACUTILS_EXTERN_C Suite* private_AFunctionLibrarySDKTest_ATokenGroup_getTestSuite(void);
     ACUTILS_EXTERN_C Suite* private_AFunctionLibrarySDKTest_AStringAliases_getTestSuite(void);
+    ACUTILS_EXTERN_C Suite* private_AFunctionLibrarySDKTest_ATokenNode_getTestSuite(void);
 
     int main(void)
     {
@@ -35,6 +36,12 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         srunner_free(runner);
 
         runner = srunner_create(private_AFunctionLibrarySDKTest_AStringAliases_getTestSuite());
+        srunner_set_fork_status(runner, CK_NOFORK);
+        srunner_run_all(runner, CK_NORMAL);
+        numberFailed += srunner_ntests_failed(runner);
+        srunner_free(runner);
+
+        runner = srunner_create(private_AFunctionLibrarySDKTest_ATokenNode_getTestSuite());
         srunner_set_fork_status(runner, CK_NOFORK);
         srunner_run_all(runner, CK_NORMAL);
         numberFailed += srunner_ntests_failed(runner);
