@@ -6,11 +6,12 @@
 
 PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
-    struct ATokenNode* ATokenNode_construct(struct AToken *token, bool transferOwnership)
+    struct ATokenNode* ATokenNode_construct(struct ATokenGroup *tokenGroup)
     {
-        struct ATokenNode tmpNode = {token, ADynArray_construct(struct ADynTokenNodeArray)};
+        struct ATokenNode tmpNode = {tokenGroup, ADynArray_construct(struct ADynTokenNodeArray)};
         struct ATokenNode *node;
-        if(tmpNode.token == nullptr || tmpNode.children == nullptr) {
+        if(tmpNode.tokenGroup == nullptr || tmpNode.children == nullptr) {
+            ATokenGroup_destruct(tokenGroup);
             ADynArray_destruct(tmpNode.children);
             return nullptr;
         }
@@ -20,8 +21,6 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
             return nullptr;
         }
         memcpy(node, &tmpNode, sizeof(struct ATokenNode));
-        if(!transferOwnership)
-            AToken_incrementRefCount(node->token);
         return node;
     }
     void ATokenNode_destruct(struct ATokenNode *node)
@@ -30,7 +29,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         struct ADynTokenNodeArray *children;
         if(node == nullptr)
             return;
-        AToken_decrementRefCount(node->token);
+        ATokenGroup_destruct(node->tokenGroup);
         children = node->children;
         for(i = 0; i < ADynArray_size(children); ++i)
             ATokenNode_destruct(ADynArray_get(children, i));
@@ -40,7 +39,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
     bool ATokenNode_equals(const struct ATokenNode *n1, const struct ATokenNode *n2)
     {
-        size_t stackIndex = 0, i, childrenCount;
+        size_t stackIndex = 0, childrenCount;
         struct ADynTokenNodeArray *n1Stack, *n2Stack;
         if(n1 == n2 || n1 == nullptr || n2 == nullptr)
             return n1 == n2;
@@ -54,7 +53,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
             n2 = ADynArray_get(n2Stack, stackIndex);
             ADynArray_remove(n2Stack, stackIndex, 1);
             childrenCount = ADynArray_size(n1->children);
-            if(!AToken_equals(n1->token, n2->token) || childrenCount != ADynArray_size(n2->children)) {
+            if(!ATokenGroup_equals(n1->tokenGroup, n2->tokenGroup) || childrenCount != ADynArray_size(n2->children)) {
                 ADynArray_destruct(n1Stack);
                 ADynArray_destruct(n2Stack);
                 return false;
@@ -75,10 +74,10 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         size_t stackSize;
         if(node == NULL)
             return NULL;
-        clone = ATokenNode_construct(node->token, false);
+        clone = ATokenNode_construct(ATokenGroup_clone(node->tokenGroup));
         nodeStack = ADynArray_construct(struct ADynTokenNodeArray);
         cloneStack = ADynArray_construct(struct ADynTokenNodeArray);
-        if(clone == NULL || nodeStack == NULL || cloneStack == NULL || !ADynArray_append(nodeStack, node)  || !ADynArray_append(cloneStack, clone))
+        if(clone == nullptr || nodeStack == nullptr || cloneStack == nullptr || !ADynArray_append(nodeStack, node)  || !ADynArray_append(cloneStack, clone))
             goto RETURN_FAILURE;
         while((stackSize = ADynArray_size(nodeStack)) > 0) {
             size_t i, childrenCount, lastStackIndex = stackSize - 1;
@@ -90,8 +89,8 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
             ADynArray_reserve(currentClone->children, childrenCount);
             for(i = 0; i < childrenCount; ++i) {
                 struct ATokenNode *nodeChild = ADynArray_get(currentNode->children, i);
-                struct ATokenNode *cloneChild = ATokenNode_construct(nodeChild->token, false);
-                if(cloneChild == NULL || (ADynArray_size(nodeChild->children) > 0
+                struct ATokenNode *cloneChild = ATokenNode_construct(ATokenGroup_clone(nodeChild->tokenGroup));
+                if(cloneChild == nullptr || (ADynArray_size(nodeChild->children) > 0
                     && (!ADynArray_append(nodeStack, nodeChild) || !ADynArray_append(cloneStack, cloneChild))))
                 {
                     ATokenNode_destruct(cloneChild);

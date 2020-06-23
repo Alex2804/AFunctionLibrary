@@ -96,10 +96,37 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     }
     END_TEST
 
+    START_TEST(test_ATokenGroup_clone)
+    {
+        size_t a1[] = {3, 4};
+        struct ATokenGroup *clone, *tokenGroup = ATokenGroup_construct(AToken_construct("token value", DELIMITER, RIGHT, 666, 42), true);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(tokenGroup);
+        ACUTILSTEST_ASSERT(ADynArray_appendArray(tokenGroup->groupID, &a1, 2));
+        clone = ATokenGroup_clone(tokenGroup);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(clone);
+        ACUTILSTEST_ASSERT(AToken_equals(tokenGroup->token, clone->token));
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(tokenGroup->token), 2);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(clone->token), 2);
+        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(clone->groupID), 2);
+        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_get(clone->groupID, 0), 3);
+        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_get(clone->groupID, 1), 4);
+        ATokenGroup_destruct(tokenGroup);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(clone->token), 1);
+        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_get(clone->groupID, 0), 3);
+        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_get(clone->groupID, 1), 4);
+        ATokenGroup_destruct(clone);
+    }
+    END_TEST
+    START_TEST(test_ATokenGroup_clone_nullptr)
+    {
+        ACUTILSTEST_ASSERT_PTR_NULL(ATokenGroup_clone(nullptr));
+    }
+    END_TEST
+
     ACUTILS_EXTERN_C Suite* private_AFunctionLibrarySDKTest_ATokenGroup_getTestSuite(void)
     {
         Suite *s;
-        TCase *test_case_ATokenGroup_construct_destruct, *test_case_ATokenGroup_equals;
+        TCase *test_case_ATokenGroup_construct_destruct, *test_case_ATokenGroup_equals, *test_case_ATokenGroup_clone;
 
         s = suite_create("ATokenGroup Test Suite");
 
@@ -111,6 +138,11 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         test_case_ATokenGroup_equals = tcase_create("ATokenGroup Test Case: ATokenGroup_equals");
         tcase_add_test(test_case_ATokenGroup_equals, test_ATokenGroup_equals);
         suite_add_tcase(s, test_case_ATokenGroup_equals);
+
+        test_case_ATokenGroup_clone = tcase_create("ATokenGroup Test Case: ATokenGroup_clone");
+        tcase_add_test(test_case_ATokenGroup_clone, test_ATokenGroup_clone);
+        tcase_add_test(test_case_ATokenGroup_clone, test_ATokenGroup_clone_nullptr);
+        suite_add_tcase(s, test_case_ATokenGroup_clone);
 
         return s;
     }

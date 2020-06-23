@@ -48,4 +48,19 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         return AToken_equals(g1->token, g2->token);
     }
 
+    struct ATokenGroup *ATokenGroup_clone(const struct ATokenGroup *tokenGroup)
+    {
+        struct ATokenGroup *clone;
+        if(tokenGroup == nullptr)
+            return nullptr;
+        clone = ATokenGroup_construct(tokenGroup->token, false);
+        if(clone == nullptr)
+            return nullptr;
+        if(!ADynArray_appendADynArray(clone->groupID, tokenGroup->groupID)) {
+            ATokenGroup_destruct(clone);
+            return nullptr;
+        }
+        return clone;
+    }
+
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE

@@ -8,17 +8,17 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     {
         struct ATokenNode *plusNode, *mulNode, *oneNode, *twoNode, *threeNode;
         struct AToken *threeToken;
-        plusNode = ATokenNode_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true);
+        plusNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode);
-        mulNode = ATokenNode_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true);
+        mulNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode);
-        oneNode = ATokenNode_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true);
+        oneNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode);
-        twoNode = ATokenNode_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true);
+        twoNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode);
         threeToken = AToken_construct("3", NUMBER, NONE, 0, 0);
         ACUTILSTEST_ASSERT_PTR_NONNULL(threeToken);
-        threeNode = ATokenNode_construct(threeToken, false);
+        threeNode = ATokenNode_construct(ATokenGroup_construct(threeToken, false));
         ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode);
         ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode->children);
         ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode->children);
@@ -34,55 +34,56 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(oneNode->children), 0);
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(twoNode->children), 0);
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(threeNode->children), 0);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode->token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode->token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode->token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode->token);
-        ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode->token);
-        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(plusNode->token), 1);
-        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(mulNode->token), 1);
-        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(oneNode->token), 1);
-        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(twoNode->token), 1);
-        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(threeNode->token), 2);
-        AToken_decrementRefCount(threeToken);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode->tokenGroup);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode->tokenGroup);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode->tokenGroup);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode->tokenGroup);
+        ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode->tokenGroup);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(plusNode->tokenGroup->token), 1);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(mulNode->tokenGroup->token), 1);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(oneNode->tokenGroup->token), 1);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(twoNode->tokenGroup->token), 1);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(threeNode->tokenGroup->token), 2);
         ATokenNode_destruct(plusNode);
+        ACUTILSTEST_ASSERT_UINT_EQ(AToken_refCount(threeToken), 1);
+        AToken_decrementRefCount(threeToken);
     }
     END_TEST
     START_TEST(test_ATokenNode_construct_destruct_nullptr)
     {
-        ACUTILSTEST_ASSERT_PTR_NULL(ATokenNode_construct(nullptr, true));
-        ACUTILSTEST_ASSERT_PTR_NULL(ATokenNode_construct(nullptr, false));
+        ACUTILSTEST_ASSERT_PTR_NULL(ATokenNode_construct(nullptr));
         ATokenNode_destruct(nullptr);
     }
     END_TEST
 
     START_TEST(test_ATokenNode_equals)
     {
+        size_t i;
         struct ATokenNode *plusNode1, *mulNode1, *oneNode1, *twoNode1, *threeNode1;
         struct ATokenNode *plusNode2, *mulNode2, *oneNode2, *twoNode2, *threeNode2;
-        plusNode1 = ATokenNode_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true);
+        plusNode1 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode1);
-        mulNode1 = ATokenNode_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true);
+        mulNode1 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode1);
-        oneNode1 = ATokenNode_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true);
+        oneNode1 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode1);
-        twoNode1 = ATokenNode_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true);
+        twoNode1 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode1);
-        threeNode1 = ATokenNode_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true);
+        threeNode1 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode1);
         ACUTILSTEST_ASSERT(ADynArray_append(plusNode1->children, mulNode1));
         ACUTILSTEST_ASSERT(ADynArray_append(mulNode1->children, oneNode1));
         ACUTILSTEST_ASSERT(ADynArray_append(mulNode1->children, twoNode1));
         ACUTILSTEST_ASSERT(ADynArray_append(plusNode1->children, threeNode1));
-        plusNode2 = ATokenNode_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true);
+        plusNode2 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode1);
-        mulNode2 = ATokenNode_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true);
+        mulNode2 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode1);
-        oneNode2 = ATokenNode_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true);
+        oneNode2 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode1);
-        twoNode2 = ATokenNode_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true);
+        twoNode2 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode1);
-        threeNode2 = ATokenNode_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true);
+        threeNode2 = ATokenNode_construct(ATokenGroup_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode1);
         ACUTILSTEST_ASSERT(ATokenNode_equals(nullptr, nullptr));
         ACUTILSTEST_ASSERT(!ATokenNode_equals(nullptr, plusNode2));
@@ -95,9 +96,14 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT(!ATokenNode_equals(plusNode1, plusNode2));
         ACUTILSTEST_ASSERT(ADynArray_append(plusNode2->children, threeNode2));
         ACUTILSTEST_ASSERT(ATokenNode_equals(plusNode1, plusNode2));
-        AString_clear(oneNode1->token->value);
+        AString_clear(oneNode1->tokenGroup->token->value);
         ACUTILSTEST_ASSERT(!ATokenNode_equals(plusNode1, plusNode2));
-        AString_appendCString(oneNode1->token->value, "1", 1);
+        AString_appendCString(oneNode1->tokenGroup->token->value, "1", 1);
+        ACUTILSTEST_ASSERT(ATokenNode_equals(plusNode1, plusNode2));
+        i = 3;
+        ADynArray_append(oneNode1->tokenGroup->groupID, i);
+        ACUTILSTEST_ASSERT(!ATokenNode_equals(plusNode1, plusNode2));
+        ADynArray_append(oneNode2->tokenGroup->groupID, i);
         ACUTILSTEST_ASSERT(ATokenNode_equals(plusNode1, plusNode2));
         ATokenNode_destruct(plusNode1);
         ATokenNode_destruct(plusNode2);
@@ -107,15 +113,15 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     START_TEST(test_ATokenNode_clone)
     {
         struct ATokenNode *clonedNode, *plusNode, *mulNode, *oneNode, *twoNode, *threeNode;
-        plusNode = ATokenNode_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true);
+        plusNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("+", OPERATOR, LEFT, 1, 2), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(plusNode);
-        mulNode = ATokenNode_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true);
+        mulNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("*", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(mulNode);
-        oneNode = ATokenNode_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true);
+        oneNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("1", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(oneNode);
-        twoNode = ATokenNode_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true);
+        twoNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("2", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(twoNode);
-        threeNode = ATokenNode_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true);
+        threeNode = ATokenNode_construct(ATokenGroup_construct(AToken_construct("3", NUMBER, NONE, 0, 0), true));
         ACUTILSTEST_ASSERT_PTR_NONNULL(threeNode);
         ACUTILSTEST_ASSERT(ADynArray_append(plusNode->children, mulNode));
         ACUTILSTEST_ASSERT(ADynArray_append(mulNode->children, oneNode));
@@ -123,13 +129,13 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT(ADynArray_append(plusNode->children, threeNode));
         clonedNode = ATokenNode_clone(plusNode);
         ACUTILSTEST_ASSERT_PTR_NONNULL(clonedNode);
-        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(clonedNode->token->value), "+");
+        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(clonedNode->tokenGroup->token->value), "+");
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(clonedNode->children), 2);
-        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(clonedNode->children, 0)->token->value), "*");
-        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(clonedNode->children, 1)->token->value), "3");
+        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(clonedNode->children, 0)->tokenGroup->token->value), "*");
+        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(clonedNode->children, 1)->tokenGroup->token->value), "3");
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(ADynArray_get(clonedNode->children, 0)->children), 2);
-        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(ADynArray_get(clonedNode->children, 0)->children, 0)->token->value), "1");
-        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(ADynArray_get(clonedNode->children, 0)->children, 1)->token->value), "2");
+        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(ADynArray_get(clonedNode->children, 0)->children, 0)->tokenGroup->token->value), "1");
+        ACUTILSTEST_ASSERT_STR_EQ(AString_buffer(ADynArray_get(ADynArray_get(clonedNode->children, 0)->children, 1)->tokenGroup->token->value), "2");
         ATokenNode_destruct(plusNode);
         ATokenNode_destruct(clonedNode);
     }
