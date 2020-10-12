@@ -23,13 +23,13 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     void AStringAliases_destruct(struct AStringAliases *aliases);
 
     size_t AStringAliases_refCount(const struct AStringAliases *aliases);
-    size_t AStringAliases_incrementRefCount(struct AStringAliases *token);
+    size_t AStringAliases_incrementRefCount(const struct AStringAliases *token);
     size_t AStringAliases_decrementRefCount(struct AStringAliases *token);
 
     bool AStringAliases_equals(const struct AStringAliases *a1, const struct AStringAliases *a2);
 
     bool AStringAliases_appendAString(struct AStringAliases *aliases, struct AString *string, bool transferOwnership);
-    void AStringAliases_appendADynStringArray(struct AStringAliases *aliases, struct ADynStringArray *strings, bool transferOwnership);
+    bool AStringAliases_appendADynStringArray(struct AStringAliases *aliases, struct ADynStringArray *strings, bool transferOwnership);
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE
 

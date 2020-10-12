@@ -41,7 +41,7 @@ PRIVATE_AFUNCTIONLIBRARYSDK_OPEN_EXTERN_C
     void AToken_destruct(struct AToken *token);
 
     size_t AToken_refCount(const struct AToken *token);
-    size_t AToken_incrementRefCount(struct AToken *token);
+    size_t AToken_incrementRefCount(const struct AToken *token);
     size_t AToken_decrementRefCount(struct AToken *token);
 
     bool AToken_equals(const struct AToken *t1, const struct AToken *t2);

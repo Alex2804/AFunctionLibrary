@@ -17,9 +17,9 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     struct ATokenNode* ATokenNode_construct(struct ATokenGroup *tokenGroup);
     void ATokenNode_destruct(struct ATokenNode *node);
 
-    bool ATokenNode_equals(const struct ATokenNode *n1, const struct ATokenNode *n2);
-
     struct ATokenNode* ATokenNode_clone(const struct ATokenNode *node);
+
+    bool ATokenNode_equals(const struct ATokenNode *n1, const struct ATokenNode *n2);
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE
 

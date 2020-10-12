@@ -45,7 +45,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     {
         return token == nullptr ? 0 : token->dptr->refCount;
     }
-    size_t AToken_incrementRefCount(struct AToken *token)
+    size_t AToken_incrementRefCount(const struct AToken *token)
     {
         return token == nullptr ? 0 : ++token->dptr->refCount;
     }

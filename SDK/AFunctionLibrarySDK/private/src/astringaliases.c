@@ -9,7 +9,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         size_t refCount;
     };
 
-    struct AStringAliases *AStringAliases_construct(enum AStringAliasesType type)
+    struct AStringAliases* AStringAliases_construct(enum AStringAliasesType type)
     {
         struct ADynStringArray *strings = ADynArray_construct(struct ADynStringArray);
         if(strings != nullptr) {
@@ -46,7 +46,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     {
         return aliases == nullptr ? 0 : aliases->dptr->refCount;
     }
-    size_t AStringAliases_incrementRefCount(struct AStringAliases *aliases)
+    size_t AStringAliases_incrementRefCount(const struct AStringAliases *aliases)
     {
         return aliases == nullptr ? 0 : ++aliases->dptr->refCount;
     }
@@ -64,20 +64,20 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
 
     bool AStringAliases_equals(const struct AStringAliases *a1, const struct AStringAliases *a2)
     {
-        size_t i, j, a1Count, a2Count;
+        size_t i, j, a1Count;
         if(a1 == a2 || a1 == nullptr || a2 == nullptr)
             return a1 == a2;
-        else if(a1->type != a2->type || (a1Count = ADynArray_size(a1->strings)) != (a2Count = ADynArray_size(a2->strings)))
+        else if(a1->type != a2->type || (a1Count = ADynArray_size(a1->strings)) != ADynArray_size(a2->strings))
             return false;
         for(i = 0; i < a1Count; ++i) {
-            struct AString *string = ADynArray_get(a1->strings, i);
-            for(j = 0; j < a2Count; ++j) {
-                if(AString_equals(string, ADynArray_get(a2->strings, j))) {
-                    string = nullptr;
+            struct AString *a1String = ADynArray_get(a1->strings, i);
+            for(j = 0; j < a1Count; ++j) {
+                if(AString_equals(a1String, ADynArray_get(a2->strings, j))) {
+                    a1String = nullptr;
                     break;
                 }
             }
-            if(string != nullptr)
+            if(a1String != nullptr)
                 return false;
         }
         return true;
@@ -86,38 +86,43 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     bool AStringAliases_appendAString(struct AStringAliases *aliases, struct AString *string, bool transferOwnership)
     {
         size_t i, count;
-        if(aliases == nullptr || string == nullptr)
-            goto ReturnFalse;
+        if(aliases == nullptr || string == nullptr) {
+            if(transferOwnership)
+                AString_destruct(string);
+            return false;
+        }
         count = ADynArray_size(aliases->strings);
         for(i = 0; i < count; ++i) {
-            if(AString_equals(string, ADynArray_get(aliases->strings, i)))
-                goto ReturnFalse;
+            if(AString_equals(string, ADynArray_get(aliases->strings, i))) {
+                if(transferOwnership)
+                    AString_destruct(string);
+                return true;
+            }
         }
         if(!transferOwnership)
             string = AString_clone(string);
         return ADynArray_append(aliases->strings, string);
-    ReturnFalse:
-        if(transferOwnership)
-            AString_destruct(string);
-        return false;
     }
-    void AStringAliases_appendADynStringArray(struct AStringAliases *aliases, struct ADynStringArray *strings, bool transferOwnership)
+    bool AStringAliases_appendADynStringArray(struct AStringAliases *aliases, struct ADynStringArray *strings, bool transferOwnership)
     {
         size_t i, count = ADynArray_size(strings);
-        if(aliases == nullptr) {
+        bool result;
+        if(aliases == nullptr || strings == nullptr) {
             if(transferOwnership) {
                 for(i = 0; i < count; ++i)
                     AString_destruct(ADynArray_get(strings, i));
                 ADynArray_destruct(strings);
             }
-            return;
+            return false;
         }
+        result = true;
         for(i = 0; i < count; ++i) {
-            struct AString *string = ADynArray_get(strings, i);
-            AStringAliases_appendAString(aliases, string, transferOwnership);
+            if(AStringAliases_appendAString(aliases, ADynArray_get(strings, i), transferOwnership) == false)
+                result = false;
         }
         if(transferOwnership)
             ADynArray_destruct(strings);
+        return result;
     }
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE

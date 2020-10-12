@@ -37,6 +37,48 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ADynArray_destruct(children);
     }
 
+    struct ATokenNode* ATokenNode_clone(const struct ATokenNode *node)
+    {
+        struct ATokenNode *clone;
+        struct ADynTokenNodeArray *nodeStack, *cloneStack;
+        size_t stackSize;
+        if(node == nullptr)
+            return nullptr;
+        clone = ATokenNode_construct(ATokenGroup_clone(node->tokenGroup));
+        nodeStack = ADynArray_construct(struct ADynTokenNodeArray);
+        cloneStack = ADynArray_construct(struct ADynTokenNodeArray);
+        if(clone == nullptr || nodeStack == nullptr || cloneStack == nullptr || !ADynArray_append(nodeStack, node)  || !ADynArray_append(cloneStack, clone))
+            goto RETURN_FAILURE;
+        while((stackSize = ADynArray_size(nodeStack)) > 0) {
+            size_t i, childrenCount, lastStackIndex = stackSize - 1;
+            struct ATokenNode *currentNode = ADynArray_get(nodeStack, lastStackIndex);
+            ADynArray_remove(nodeStack, lastStackIndex, 1);
+            struct ATokenNode *currentClone = ADynArray_get(cloneStack, lastStackIndex);
+            ADynArray_remove(cloneStack, lastStackIndex, 1);
+            childrenCount = ADynArray_size(currentNode->children);
+            ADynArray_reserve(currentClone->children, childrenCount);
+            for(i = 0; i < childrenCount; ++i) {
+                struct ATokenNode *nodeChild = ADynArray_get(currentNode->children, i);
+                struct ATokenNode *cloneChild = ATokenNode_construct(ATokenGroup_clone(nodeChild->tokenGroup));
+                if(cloneChild == nullptr || (ADynArray_size(nodeChild->children) > 0
+                                             && (!ADynArray_append(nodeStack, nodeChild) || !ADynArray_append(cloneStack, cloneChild))))
+                {
+                    ATokenNode_destruct(cloneChild);
+                    goto RETURN_FAILURE;
+                }
+                ADynArray_append(currentClone->children, cloneChild);
+            }
+        }
+        ADynArray_destruct(nodeStack);
+        ADynArray_destruct(cloneStack);
+        return clone;
+    RETURN_FAILURE:
+        ATokenNode_destruct(clone);
+        ADynArray_destruct(nodeStack);
+        ADynArray_destruct(cloneStack);
+        return nullptr;
+    }
+
     bool ATokenNode_equals(const struct ATokenNode *n1, const struct ATokenNode *n2)
     {
         size_t stackIndex = 0, childrenCount;
@@ -65,48 +107,6 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ADynArray_destruct(n1Stack);
         ADynArray_destruct(n2Stack);
         return true;
-    }
-
-    struct ATokenNode* ATokenNode_clone(const struct ATokenNode *node)
-    {
-        struct ATokenNode *clone;
-        struct ADynTokenNodeArray *nodeStack, *cloneStack;
-        size_t stackSize;
-        if(node == NULL)
-            return NULL;
-        clone = ATokenNode_construct(ATokenGroup_clone(node->tokenGroup));
-        nodeStack = ADynArray_construct(struct ADynTokenNodeArray);
-        cloneStack = ADynArray_construct(struct ADynTokenNodeArray);
-        if(clone == nullptr || nodeStack == nullptr || cloneStack == nullptr || !ADynArray_append(nodeStack, node)  || !ADynArray_append(cloneStack, clone))
-            goto RETURN_FAILURE;
-        while((stackSize = ADynArray_size(nodeStack)) > 0) {
-            size_t i, childrenCount, lastStackIndex = stackSize - 1;
-            struct ATokenNode *currentNode = ADynArray_get(nodeStack, lastStackIndex);
-            ADynArray_remove(nodeStack, lastStackIndex, 1);
-            struct ATokenNode *currentClone = ADynArray_get(cloneStack, lastStackIndex);
-            ADynArray_remove(cloneStack, lastStackIndex, 1);
-            childrenCount = ADynArray_size(currentNode->children);
-            ADynArray_reserve(currentClone->children, childrenCount);
-            for(i = 0; i < childrenCount; ++i) {
-                struct ATokenNode *nodeChild = ADynArray_get(currentNode->children, i);
-                struct ATokenNode *cloneChild = ATokenNode_construct(ATokenGroup_clone(nodeChild->tokenGroup));
-                if(cloneChild == nullptr || (ADynArray_size(nodeChild->children) > 0
-                    && (!ADynArray_append(nodeStack, nodeChild) || !ADynArray_append(cloneStack, cloneChild))))
-                {
-                    ATokenNode_destruct(cloneChild);
-                    goto RETURN_FAILURE;
-                }
-                ADynArray_append(currentClone->children, cloneChild);
-            }
-        }
-        ADynArray_destruct(nodeStack);
-        ADynArray_destruct(cloneStack);
-        return clone;
-    RETURN_FAILURE:
-        ATokenNode_destruct(clone);
-        ADynArray_destruct(nodeStack);
-        ADynArray_destruct(cloneStack);
-        return NULL;
     }
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE

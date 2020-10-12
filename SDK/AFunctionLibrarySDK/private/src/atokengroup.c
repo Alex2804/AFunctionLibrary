@@ -33,21 +33,6 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ADynArray_destruct(groupID);
     }
 
-    bool ATokenGroup_equals(const struct ATokenGroup *g1, const struct ATokenGroup *g2)
-    {
-        size_t i, groupIDSize;
-        if(g1 == g2 || g1 == nullptr || g2 == nullptr)
-            return g1 == g2;
-        groupIDSize = ADynArray_size(g1->groupID);
-        if(groupIDSize != ADynArray_size(g2->groupID))
-            return false;
-        for(i = 0; i < groupIDSize; ++i) {
-            if(ADynArray_get(g1->groupID, i) != ADynArray_get(g2->groupID, i))
-                return false;
-        }
-        return AToken_equals(g1->token, g2->token);
-    }
-
     struct ATokenGroup *ATokenGroup_clone(const struct ATokenGroup *tokenGroup)
     {
         struct ATokenGroup *clone;
@@ -61,6 +46,21 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
             return nullptr;
         }
         return clone;
+    }
+
+    bool ATokenGroup_equals(const struct ATokenGroup *g1, const struct ATokenGroup *g2)
+    {
+        size_t i, groupIDSize;
+        if(g1 == g2 || g1 == nullptr || g2 == nullptr)
+            return g1 == g2;
+        groupIDSize = ADynArray_size(g1->groupID);
+        if(groupIDSize != ADynArray_size(g2->groupID))
+            return false;
+        for(i = 0; i < groupIDSize; ++i) {
+            if(ADynArray_get(g1->groupID, i) != ADynArray_get(g2->groupID, i))
+                return false;
+        }
+        return AToken_equals(g1->token, g2->token);
     }
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE

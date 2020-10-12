@@ -98,7 +98,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 0);
         ACUTILSTEST_ASSERT(AStringAliases_appendAString(aliases, str, false));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 1);
-        ACUTILSTEST_ASSERT(!AStringAliases_appendAString(aliases, str, true));
+        ACUTILSTEST_ASSERT(AStringAliases_appendAString(aliases, str, true));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 1);
         str = AString_construct();
         ACUTILSTEST_ASSERT(AString_appendCString(str, "test2", 5));
@@ -135,21 +135,9 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         ACUTILSTEST_ASSERT(AString_appendCString(str, "test2", 5));
         ACUTILSTEST_ASSERT(ADynArray_append(dynArray, str));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 0);
-        AStringAliases_appendADynStringArray(nullptr, dynArray, true);
-        dynArray = ADynArray_construct(struct ADynStringArray);
-        str = AString_construct();
-        ACUTILSTEST_ASSERT(AString_appendCString(str, "test1", 5));
-        ACUTILSTEST_ASSERT(ADynArray_append(dynArray, str));
-        str = AString_construct();
-        ACUTILSTEST_ASSERT(AString_appendCString(str, "test2", 5));
-        ACUTILSTEST_ASSERT(ADynArray_append(dynArray, str));
-        AStringAliases_appendADynStringArray(nullptr, dynArray, false);
-        AStringAliases_appendADynStringArray(aliases, nullptr, true);
-        AStringAliases_appendADynStringArray(aliases, nullptr, false);
-        ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 0);
-        AStringAliases_appendADynStringArray(aliases, dynArray, false);
+        ACUTILSTEST_ASSERT(AStringAliases_appendADynStringArray(aliases, dynArray, false));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 2);
-        AStringAliases_appendADynStringArray(aliases, dynArray, true);
+        ACUTILSTEST_ASSERT(AStringAliases_appendADynStringArray(aliases, dynArray, true));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 2);
         dynArray = ADynArray_construct(struct ADynStringArray);
         str = AString_construct();
@@ -158,7 +146,7 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
         str = AString_construct();
         ACUTILSTEST_ASSERT(AString_appendCString(str, "test3", 5));
         ACUTILSTEST_ASSERT(ADynArray_append(dynArray, str));
-        AStringAliases_appendADynStringArray(aliases, dynArray, false);
+        ACUTILSTEST_ASSERT(AStringAliases_appendADynStringArray(aliases, dynArray, false));
         ACUTILSTEST_ASSERT_UINT_EQ(ADynArray_size(aliases->strings), 3);
         AStringAliases_destruct(aliases);
         for(i = 0; i < ADynArray_size(dynArray); ++i)
@@ -170,12 +158,12 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     {
         struct AStringAliases *aliases = AStringAliases_construct(STRING);
         struct ADynStringArray *dynArray = ADynArray_construct(struct ADynStringArray);
-        AStringAliases_appendADynStringArray(aliases, nullptr, true);
-        AStringAliases_appendADynStringArray(aliases, nullptr, false);
-        AStringAliases_appendADynStringArray(nullptr, dynArray, false);
-        AStringAliases_appendADynStringArray(nullptr, dynArray, true);
-        AStringAliases_appendADynStringArray(nullptr, nullptr, true);
-        AStringAliases_appendADynStringArray(nullptr, nullptr, false);
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(aliases, nullptr, true));
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(aliases, nullptr, false));
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(nullptr, dynArray, false));
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(nullptr, dynArray, true));
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(nullptr, nullptr, true));
+        ACUTILSTEST_ASSERT(!AStringAliases_appendADynStringArray(nullptr, nullptr, false));
         AStringAliases_destruct(aliases);
     }
     END_TEST

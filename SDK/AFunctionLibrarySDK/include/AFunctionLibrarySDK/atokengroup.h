@@ -16,9 +16,9 @@ PRIVATE_AFUNCTIONLIBRARY_OPEN_NAMESPACE
     struct ATokenGroup* ATokenGroup_construct(struct AToken *token, bool transferOwnership);
     void ATokenGroup_destruct(struct ATokenGroup *tokenGroup);
 
-    bool ATokenGroup_equals(const struct ATokenGroup *g1, const struct ATokenGroup *g2);
-
     struct ATokenGroup* ATokenGroup_clone(const struct ATokenGroup *tokenGroup);
+
+    bool ATokenGroup_equals(const struct ATokenGroup *g1, const struct ATokenGroup *g2);
 
 PRIVATE_AFUNCTIONLIBRARY_CLOSE_NAMESPACE
 
